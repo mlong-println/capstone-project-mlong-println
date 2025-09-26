@@ -6,50 +6,50 @@ use Illuminate\Database\Seeder;
 use App\Services\DatabaseService;
 
 /**
- * TestDataSeeder - Creates sample routes for development
- * Uses raw SQL through DatabaseService for all operations
+ * TestDataSeeder - Adds ratings to existing routes
+ * Preserves existing routes and runs data
+ * Links ratings to runner and route IDs
  */
 class TestDataSeeder extends Seeder
 {
     public function run()
     {
-        // Get database service instance for raw SQL operations
+        // Initialize database service
         $db = app(DatabaseService::class);
 
-        // Retrieve trainer's ID for creating routes
-        // Routes must be linked to a valid trainer
-        $trainer = $db->fetch("SELECT id FROM users WHERE email = ?", ['trainer@test.com']);
+        // Get existing runner ID for linking ratings
+        $runner = $db->fetch("SELECT id FROM users WHERE email = ?", ['runner@test.com']);
         
-        // SQL for creating sample routes with varying difficulties
-        // Each route is linked to the trainer via foreign key
-        $sql = "INSERT INTO routes (name, description, distance, difficulty, created_by) VALUES 
-            (?, ?, ?, ?, ?),
-            (?, ?, ?, ?, ?),
-            (?, ?, ?, ?, ?)";
+        // Get existing routes in difficulty order
+        // This ensures we rate easy->moderate->hard in order
+        $routes = $db->fetchAll("SELECT id, difficulty FROM routes ORDER BY difficulty");
         
-        // Execute query with route data
-        // Distance is in kilometers, difficulty is enum value
+        // SQL for creating all three ratings at once
+        // Uses single query for better performance
+        $sql = "INSERT INTO route_ratings (route_id, user_id, rating, comment, created_at) VALUES 
+            (?, ?, ?, ?, NOW()),  -- Easy route rating
+            (?, ?, ?, ?, NOW()),  -- Moderate route rating
+            (?, ?, ?, ?, NOW())"; // Hard route rating
+        
+        // Add ratings with detailed feedback
         $db->executeQuery($sql, [
-            // Beginner-friendly route
-            'Beginner Park Loop',      // name
-            'Easy loop around the central park, perfect for beginners', // description
-            2.5,                       // distance in km
-            'easy',                    // difficulty
-            $trainer['id'],           // created_by (trainer)
+            // 5-star rating for easy route
+            $routes[0]['id'],          // route_id (easy)
+            $runner['id'],             // user_id
+            5,                         // rating
+            'Perfect for beginners, well-marked path',
 
-            // Intermediate route
-            'Hill Challenge',          // name
-            'Moderate route with some elevation changes', // description
-            5.0,                       // distance in km
-            'moderate',                // difficulty
-            $trainer['id'],           // created_by (trainer)
+            // 3-star rating for moderate route
+            $routes[1]['id'],          // route_id (moderate)
+            $runner['id'],             // user_id
+            3,                         // rating
+            'Good challenge, but some unclear markers',
 
-            // Advanced route
-            'Marathon Training',       // name
-            'Long distance route for advanced runners', // description
-            10.0,                      // distance in km
-            'hard',                    // difficulty
-            $trainer['id']            // created_by (trainer)
+            // 4-star rating for hard route
+            $routes[2]['id'],          // route_id (hard)
+            $runner['id'],             // user_id
+            4,                         // rating
+            'Great training route, tough but rewarding'
         ]);
     }
 }
