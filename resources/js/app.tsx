@@ -2,6 +2,13 @@ import '../css/app.css';
 import './bootstrap';
 
 import { createInertiaApp } from '@inertiajs/react';
+
+// Make route helper available globally
+declare global {
+    interface Window {
+        route: any;
+    }
+}
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { createRoot } from 'react-dom/client';
 
