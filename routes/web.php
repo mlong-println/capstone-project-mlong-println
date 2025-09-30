@@ -11,7 +11,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Add the role middleware class import so we can reference it directly (Laravel 12 friendly)
+// Add the role middleware class import so I can reference it directly (Laravel 12 friendly)
 use App\Http\Middleware\CheckRole;
 
 /**
