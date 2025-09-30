@@ -68,13 +68,25 @@ export default function Navbar({ auth, canLogin = true, canRegister = true }: Na
             {/* Dropdown panel */}
             {open && (
               <div
-                className="absolute right-0 mt-2 w-48 rounded-md border border-gray-200 bg-white shadow-lg"
+                className="absolute right-0 mt-2 w-52 rounded-md border border-gray-200 bg-white shadow-lg"
                 role="menu"
                 aria-label="User menu"
               >
-                {/* Authenticated: show Dashboard + Logout */}
+                {/* Authenticated: show Profile, Dashboard, Logout */}
                 {auth.user ? (
                   <div className="py-1">
+                    {/* Optional: show a small header with user name if available */}
+                    {/* <div className="px-4 py-2 text-xs text-gray-500">Signed in as {auth.user?.name}</div>
+                    <div className="my-1 border-t border-gray-100" /> */}
+
+                    <Link
+                      href="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      role="menuitem"
+                      onClick={() => setOpen(false)}
+                    >
+                      Profile
+                    </Link>
                     <Link
                       href="/dashboard"
                       className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
@@ -83,6 +95,10 @@ export default function Navbar({ auth, canLogin = true, canRegister = true }: Na
                     >
                       Dashboard
                     </Link>
+
+                    {/* Separator for clarity */}
+                    <div className="my-1 border-t border-gray-100" />
+
                     <button
                       type="button"
                       className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"

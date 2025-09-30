@@ -11,6 +11,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+// Add the role middleware class import so we can reference it directly (Laravel 12 friendly)
+use App\Http\Middleware\CheckRole;
+
 /**
  * Public landing page
  * Accessible without authentication
@@ -18,11 +21,14 @@ use Inertia\Inertia;
  */
 Route::get('/', function () {
     return Inertia::render('Welcome', [
+        // Pass current user (null if not logged in)
         'auth' => [
-            'user' => auth()->user(),  // Pass current user (null if not logged in)
+            'user' => auth()->user(),
         ],
+        // Flags (kept true during debugging to ensure visibility)
         'canLogin' => true,
         'canRegister' => true,
+        // Version info (optional use on the page)
         'laravelVersion' => Application::VERSION,
         'phpVersion' => PHP_VERSION,
     ]);
@@ -37,6 +43,12 @@ Route::middleware(['auth'])->group(function () {
     // Main dashboard - redirects based on role
     Route::get('/dashboard', function () {
         $user = auth()->user();
+
+        // Safety: if somehow no user, send to login
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
         // Redirect to role-specific dashboard
         return redirect()->route(
             $user->role === 'runner' ? 'runner.dashboard' : 'trainer.dashboard'
@@ -44,14 +56,20 @@ Route::middleware(['auth'])->group(function () {
     })->name('dashboard');
 
     // Runner-specific dashboard
+    // IMPORTANT: Reference middleware by CLASS with parameter, avoids alias resolution issues.
     Route::get('/runner/dashboard', function () {
         return Inertia::render('RunnerDashboard');
-    })->middleware('role:runner')->name('runner.dashboard');
+    })
+        ->middleware(CheckRole::class . ':runner') // use class + parameter
+        ->name('runner.dashboard');
 
     // Trainer-specific dashboard
+    // IMPORTANT: Reference middleware by CLASS with parameter, avoids alias resolution issues.
     Route::get('/trainer/dashboard', function () {
         return Inertia::render('TrainerDashboard');
-    })->middleware('role:trainer')->name('trainer.dashboard');
+    })
+        ->middleware(CheckRole::class . ':trainer') // use class + parameter
+        ->name('trainer.dashboard');
 
     /**
      * User profile management routes
@@ -66,5 +84,5 @@ Route::middleware(['auth'])->group(function () {
         ->name('profile.destroy');
 });
 
-// Include Laravel's authentication routes
+// Include Laravel's authentication routes (login, register, etc.)
 require __DIR__.'/auth.php';
