@@ -5,11 +5,18 @@ import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 
+/**
+ * AuthenticatedLayout
+ * Layout wrapper for authenticated pages (dashboards, profile, etc.)
+ * Includes top navigation with user dropdown and responsive mobile menu
+ */
 export default function Authenticated({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const user = usePage().props.auth.user;
+    // Get the authenticated user from Inertia page props
+    // Non-null assertion (!) is safe here because this layout is only used on auth-protected routes
+    const user = usePage().props.auth.user!;
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);

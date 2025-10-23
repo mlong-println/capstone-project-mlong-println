@@ -1,41 +1,46 @@
 // resources/js/Pages/RunnerDashboard.tsx
 
 import { Head } from '@inertiajs/react';
+import { useTheme } from '@/Components/ThemeSelector';
 
 /**
  * RunnerDashboard
- * - Minimal role-specific dashboard for "runner" users.
- * - Includes placeholder sections to demonstrate distinct content.
+ * Role-specific dashboard for "runner" users.
+ * Includes placeholder sections to demonstrate distinct content.
+ * Uses theme gradient background for visual consistency.
  */
 export default function RunnerDashboard() {
+  // Get current theme configuration
+  const { themeConfig } = useTheme();
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${themeConfig.gradient}`}>
       {/* Page title */}
       <Head title="Runner Dashboard" />
 
       {/* Header */}
       <div className="max-w-6xl mx-auto py-10 px-6">
-        <h1 className="text-3xl font-bold text-gray-900">Runner Dashboard</h1>
-        <p className="mt-2 text-gray-600">
-          Welcome back. Here’s a snapshot of your running activity.
+        <h1 className={`text-3xl font-bold ${themeConfig.text}`}>Runner Dashboard</h1>
+        <p className={`mt-2 ${themeConfig.text} opacity-80`}>
+          Welcome back. Here's a snapshot of your running activity.
         </p>
       </div>
 
       {/* Content grid */}
       <div className="max-w-6xl mx-auto grid gap-6 px-6 pb-12 md:grid-cols-2">
         {/* Upcoming Runs */}
-        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <section className="rounded-lg border border-white/30 bg-white/90 backdrop-blur-sm p-5 shadow-lg">
           <h2 className="text-xl font-semibold text-gray-900">Upcoming Runs</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Placeholder content. Later, I’ll display scheduled runs.
+            Placeholder content. Later, I'll display scheduled runs.
           </p>
         </section>
 
         {/* Recent Activity */}
-        <section className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+        <section className="rounded-lg border border-white/30 bg-white/90 backdrop-blur-sm p-5 shadow-lg">
           <h2 className="text-xl font-semibold text-gray-900">Recent Activity</h2>
           <p className="mt-2 text-sm text-gray-600">
-            Placeholder content. Later, I’ll list your last completed runs.
+            Placeholder content. Later, I'll list your last completed runs.
           </p>
         </section>
       </div>

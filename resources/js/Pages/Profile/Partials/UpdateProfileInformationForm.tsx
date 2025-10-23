@@ -6,6 +6,11 @@ import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 
+/**
+ * UpdateProfileInformation
+ * Form component for updating user profile (name, email)
+ * Includes email verification prompt if needed
+ */
 export default function UpdateProfileInformation({
     mustVerifyEmail,
     status,
@@ -15,7 +20,9 @@ export default function UpdateProfileInformation({
     status?: string;
     className?: string;
 }) {
-    const user = usePage().props.auth.user;
+    // Get the authenticated user from Inertia page props
+    // Non-null assertion (!) is safe here because this component is only used on the profile page (auth-protected)
+    const user = usePage().props.auth.user!;
 
     const { data, setData, patch, errors, processing, recentlySuccessful } =
         useForm({

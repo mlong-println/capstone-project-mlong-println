@@ -1,77 +1,66 @@
 // resources/js/Pages/Welcome.tsx
 
-// Import required dependencies and types
 import { PageProps } from '@/types';
 import { Head } from '@inertiajs/react';
 import Navbar from '@/Components/Navbar';
+import ThemeSelector, { useTheme } from '@/Components/ThemeSelector';
 
 /**
  * Props interface for the Welcome component
- * Extends PageProps to include authentication and configuration flags.
- *
- * IMPORTANT:
- * - Ensure your global types allow `auth.user` to be `User | null` for guests.
- *   Update `resources/js/types/index.d.ts` to:
- *     user: User | null
  */
 interface Props extends PageProps {
   auth: {
-    user: any | null; // current user or null when not authenticated
+    user: any | null;
   };
-  canLogin: boolean;     // whether to show the "Log in" link
-  canRegister: boolean;  // whether to show the "Register" link
+  canLogin: boolean;
+  canRegister: boolean;
   laravelVersion?: string;
   phpVersion?: string;
 }
 
 /**
  * Welcome Page Component
- * - Renders a dropdown Navbar on the top-right
- * - Displays a centered logo with spacing at the top
- * - Shows a simple hero message
+ * Landing page with theme support, logo, and navbar
  */
 export default function Welcome({ auth, canLogin, canRegister }: Props) {
-  // Debug log to verify prop values during development (remove/disable for production)
-  console.log('Welcome props:', { auth, canLogin, canRegister });
+  // Theme state with localStorage persistence
+  const { theme, themeConfig, changeTheme } = useTheme();
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Set page title */}
+    <div className={`min-h-screen ${themeConfig.gradient}`}>
+      {/* Page title */}
       <Head title="Welcome" />
 
-      {/* Top navbar: right-aligned dropdown with Login/Register or Dashboard/Logout */}
-      {/* Navbar lives at: resources/js/Components/Navbar.tsx */}
-      <Navbar auth={auth} canLogin={canLogin} canRegister={canRegister} />
+      {/* Top bar with ThemeSelector (left) and Navbar (right) - uses reverse gradient */}
+      <div className={`w-full ${themeConfig.navGradient} shadow-lg`}>
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          {/* Theme selector on the left */}
+          <ThemeSelector currentTheme={theme} onThemeChange={changeTheme} />
 
-      {/* Logo block (centered with spacing from the top) */}
+          {/* Navbar on the right */}
+          <div className="flex-1 flex justify-end">
+            <Navbar auth={auth} canLogin={canLogin} canRegister={canRegister} themeTextClass={themeConfig.textLight} />
+          </div>
+        </div>
+      </div>
+
+      {/* Logo block (centered with spacing and polish) */}
       <div className="max-w-7xl mx-auto px-6">
-        {/* Provide top spacing for the logo area */}
-        <div className="pt-12 flex items-center justify-center">
-          {/* IMPORTANT:
-             - Web apps cannot load local Windows paths directly.
-             - Copy your image to: <project-root>/public/images/logo.png
-             - Then reference it below as: src="/images/logo.png"
-             - Original file you mentioned:
-               C:\Users\Michael\Pictures\Screenshots\Screenshot 2025-01-31 115530.png
-          */}
+        <div className="pt-16 flex items-center justify-center">
           <img
             src="/images/logo.png"
             alt="RunConnect Logo"
-            className="max-h-28 w-auto object-contain"
+            className="max-h-36 w-auto object-contain rounded-xl shadow-lg ring-2 ring-white/50"
           />
         </div>
       </div>
 
       {/* Main content area */}
-      <div className="flex items-center justify-center min-h-[calc(100vh-12rem)] px-6">
-        <h1 className="text-3xl font-bold text-gray-900">Welcome to RunConnect</h1>
+      <div className="flex items-center justify-center min-h-[calc(100vh-16rem)] px-6">
+        <h1 className={`text-4xl font-bold ${themeConfig.text}`}>
+          Welcome to RunConnect
+        </h1>
       </div>
-
-      {/* Optional on-screen debug (uncomment during development)
-      <div className="p-4 text-xs text-gray-600">
-        <pre>{JSON.stringify({ user: auth?.user, canLogin, canRegister }, null, 2)}</pre>
-      </div>
-      */}
     </div>
   );
 }

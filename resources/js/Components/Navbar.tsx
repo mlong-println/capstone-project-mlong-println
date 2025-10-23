@@ -7,11 +7,13 @@ import { Link, router } from '@inertiajs/react';
  * NavbarProps
  * - auth.user: current user (or null if guest)
  * - canLogin/canRegister: flags (helpful during debugging or controlled via backend)
+ * - themeTextClass: text color class from current theme (e.g., 'text-white')
  */
 type NavbarProps = {
   auth: { user: any | null };
   canLogin?: boolean;
   canRegister?: boolean;
+  themeTextClass?: string;
 };
 
 /**
@@ -20,7 +22,7 @@ type NavbarProps = {
  * - Provides a dropdown menu with options depending on authentication state
  * - Does not require any extra UI libraries
  */
-export default function Navbar({ auth, canLogin = true, canRegister = true }: NavbarProps) {
+export default function Navbar({ auth, canLogin = true, canRegister = true, themeTextClass = 'text-gray-700' }: NavbarProps) {
   // Local state to toggle the dropdown visibility
   const [open, setOpen] = useState(false);
 
@@ -40,23 +42,21 @@ export default function Navbar({ auth, canLogin = true, canRegister = true }: Na
   const handleLogout = () => router.post('/logout');
 
   return (
-    // Container positioned top-right
-    <div className="w-full bg-white shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 py-3">
-        <div className="flex items-center justify-end">
+    // Container positioned top-right (no background, uses parent's themed background)
+    <div className="flex items-center justify-end">
           {/* Menu button (avatar/icon substitute) */}
           <div className="relative" ref={menuRef}>
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
-              className="inline-flex items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-gray-700 hover:text-gray-900 hover:border-gray-300 transition"
+              className={`inline-flex items-center gap-2 rounded-md border border-white/30 px-3 py-2 ${themeTextClass} hover:bg-white/10 hover:border-white/50 transition backdrop-blur-sm`}
               aria-expanded={open}
               aria-haspopup="true"
             >
               {/* Simple icon substitute (three dots) */}
               <span className="font-medium">Menu</span>
               <svg
-                className="h-4 w-4 text-gray-500"
+                className="h-4 w-4"
                 viewBox="0 0 20 20"
                 fill="currentColor"
                 aria-hidden="true"
@@ -68,7 +68,7 @@ export default function Navbar({ auth, canLogin = true, canRegister = true }: Na
             {/* Dropdown panel */}
             {open && (
               <div
-                className="absolute right-0 mt-2 w-52 rounded-md border border-gray-200 bg-white shadow-lg"
+                className="absolute right-0 mt-2 w-52 rounded-md border border-white/30 bg-white shadow-lg"
                 role="menu"
                 aria-label="User menu"
               >
@@ -139,8 +139,6 @@ export default function Navbar({ auth, canLogin = true, canRegister = true }: Na
               </div>
             )}
           </div>
-        </div>
-      </div>
     </div>
   );
 }
