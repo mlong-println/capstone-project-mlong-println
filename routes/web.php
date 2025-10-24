@@ -8,6 +8,8 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TrainerDashboardController;
+use App\Http\Controllers\RunnerProfileController;
+use App\Http\Controllers\RunnerPlanController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -59,7 +61,20 @@ Route::middleware(['auth'])->group(function () {
     // Runner-specific dashboard
     // IMPORTANT: Reference middleware by CLASS with parameter, avoids alias resolution issues.
     Route::get('/runner/dashboard', function () {
-        return Inertia::render('RunnerDashboard');
+        $user = auth()->user();
+        $user->load('profile');
+        
+        return Inertia::render('RunnerDashboard', [
+            'auth' => ['user' => $user],
+            'user' => $user,
+            'profile' => $user->profile,
+            'activePlan' => $user->activePlanAssignment(),
+            'stats' => [
+                'total_runs' => $user->profile->total_runs ?? 0,
+                'total_distance' => $user->profile->total_distance ?? 0,
+                'current_weekly_mileage' => $user->profile->current_weekly_mileage ?? 0,
+            ],
+        ]);
     })
         ->middleware(CheckRole::class . ':runner') // use class + parameter
         ->name('runner.dashboard');
@@ -90,6 +105,40 @@ Route::middleware(['auth'])->group(function () {
         // View specific plan detail
         Route::get('/plans/{plan}', [TrainerDashboardController::class, 'viewPlan'])
             ->name('plans.show');
+    });
+
+    /**
+     * Runner-specific routes
+     * For profile management and training plan selection
+     */
+    Route::middleware(CheckRole::class . ':runner')->prefix('runner')->name('runner.')->group(function () {
+        // Profile management
+        Route::get('/profile/edit', [RunnerProfileController::class, 'edit'])
+            ->name('profile.edit');
+        Route::patch('/profile', [RunnerProfileController::class, 'update'])
+            ->name('profile.update');
+        Route::get('/profile', [RunnerProfileController::class, 'show'])
+            ->name('profile.show');
+        
+        // Training plan browsing and selection
+        Route::get('/plans', [RunnerPlanController::class, 'index'])
+            ->name('plans.index');
+        Route::get('/plans/{plan}', [RunnerPlanController::class, 'show'])
+            ->name('plans.show');
+        Route::post('/plans/{plan}/assign', [RunnerPlanController::class, 'assign'])
+            ->name('plans.assign');
+        
+        // Active plan management
+        Route::get('/my-plan', [RunnerPlanController::class, 'viewActive'])
+            ->name('plans.active');
+        Route::post('/my-plan/{assignment}/complete-workout', [RunnerPlanController::class, 'completeWorkout'])
+            ->name('plans.complete-workout');
+        Route::post('/my-plan/{assignment}/pause', [RunnerPlanController::class, 'pause'])
+            ->name('plans.pause');
+        Route::post('/my-plan/{assignment}/resume', [RunnerPlanController::class, 'resume'])
+            ->name('plans.resume');
+        Route::post('/my-plan/{assignment}/abandon', [RunnerPlanController::class, 'abandon'])
+            ->name('plans.abandon');
     });
 
     /**

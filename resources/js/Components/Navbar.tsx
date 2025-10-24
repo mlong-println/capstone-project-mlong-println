@@ -39,7 +39,12 @@ export default function Navbar({ auth, canLogin = true, canRegister = true, them
   }, []);
 
   // Logout handler (Breeze: POST /logout)
-  const handleLogout = () => router.post('/logout');
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setOpen(false);
+    router.post('/logout');
+  };
 
   return (
     // Container positioned top-right (no background, uses parent's themed background)
@@ -68,20 +73,16 @@ export default function Navbar({ auth, canLogin = true, canRegister = true, them
             {/* Dropdown panel */}
             {open && (
               <div
-                className="absolute right-0 mt-2 w-52 rounded-md border border-white/30 bg-white shadow-lg"
+                className="absolute right-0 mt-2 w-52 rounded-md border border-white/30 bg-white shadow-lg z-50"
                 role="menu"
                 aria-label="User menu"
               >
                 {/* Authenticated: show Profile, Dashboard, Logout */}
                 {auth.user ? (
                   <div className="py-1">
-                    {/* Optional: show a small header with user name if available */}
-                    {/* <div className="px-4 py-2 text-xs text-gray-500">Signed in as {auth.user?.name}</div>
-                    <div className="my-1 border-t border-gray-100" /> */}
-
                     <Link
                       href="/profile"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition cursor-pointer"
                       role="menuitem"
                       onClick={() => setOpen(false)}
                     >
@@ -89,7 +90,7 @@ export default function Navbar({ auth, canLogin = true, canRegister = true, them
                     </Link>
                     <Link
                       href="/dashboard"
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition cursor-pointer"
                       role="menuitem"
                       onClick={() => setOpen(false)}
                     >
@@ -101,11 +102,8 @@ export default function Navbar({ auth, canLogin = true, canRegister = true, them
 
                     <button
                       type="button"
-                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                      onClick={() => {
-                        setOpen(false);
-                        handleLogout();
-                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition cursor-pointer"
+                      onClick={handleLogout}
                       role="menuitem"
                     >
                       Logout
@@ -117,7 +115,7 @@ export default function Navbar({ auth, canLogin = true, canRegister = true, them
                     {canLogin && (
                       <Link
                         href="/login"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition cursor-pointer"
                         role="menuitem"
                         onClick={() => setOpen(false)}
                       >
@@ -127,7 +125,7 @@ export default function Navbar({ auth, canLogin = true, canRegister = true, them
                     {canRegister && (
                       <Link
                         href="/register"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition cursor-pointer"
                         role="menuitem"
                         onClick={() => setOpen(false)}
                       >
