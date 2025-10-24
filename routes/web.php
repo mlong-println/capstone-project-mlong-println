@@ -7,6 +7,7 @@
  */
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\TrainerDashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -65,11 +66,31 @@ Route::middleware(['auth'])->group(function () {
 
     // Trainer-specific dashboard
     // IMPORTANT: Reference middleware by CLASS with parameter, avoids alias resolution issues.
-    Route::get('/trainer/dashboard', function () {
-        return Inertia::render('TrainerDashboard');
-    })
+    Route::get('/trainer/dashboard', [TrainerDashboardController::class, 'index'])
         ->middleware(CheckRole::class . ':trainer') // use class + parameter
         ->name('trainer.dashboard');
+
+    /**
+     * Trainer-specific routes
+     * For viewing and managing runners and training plans
+     */
+    Route::middleware(CheckRole::class . ':trainer')->prefix('trainer')->name('trainer.')->group(function () {
+        // View all runners
+        Route::get('/runners', [TrainerDashboardController::class, 'viewRunners'])
+            ->name('runners');
+        
+        // View specific runner detail
+        Route::get('/runners/{runner}', [TrainerDashboardController::class, 'viewRunner'])
+            ->name('runners.show');
+        
+        // View all training plans
+        Route::get('/plans', [TrainerDashboardController::class, 'viewPlans'])
+            ->name('plans');
+        
+        // View specific plan detail
+        Route::get('/plans/{plan}', [TrainerDashboardController::class, 'viewPlan'])
+            ->name('plans.show');
+    });
 
     /**
      * User profile management routes
