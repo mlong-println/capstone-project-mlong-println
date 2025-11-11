@@ -2,6 +2,7 @@
 
 import { Head, Link } from '@inertiajs/react';
 import { useTheme } from '@/Components/ThemeSelector';
+import { useState, useMemo } from 'react';
 
 interface BrowsePlansProps {
   plans: Record<string, Array<{
@@ -22,6 +23,9 @@ interface BrowsePlansProps {
  */
 export default function BrowsePlans({ plans, userProfile, activePlan }: BrowsePlansProps) {
   const { themeConfig } = useTheme();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterDistance, setFilterDistance] = useState<string>('all');
+  const [filterLevel, setFilterLevel] = useState<string>('all');
 
   const distanceLabels: Record<string, string> = {
     '5k': '5K Plans',
@@ -30,6 +34,43 @@ export default function BrowsePlans({ plans, userProfile, activePlan }: BrowsePl
     'full_marathon': 'Full Marathon Plans',
     'ultra': 'Ultra Marathon Plans',
   };
+
+  // Flatten plans for filtering
+  const allPlans = useMemo(() => {
+    return Object.entries(plans).flatMap(([distanceType, distancePlans]) =>
+      distancePlans.map(plan => ({ ...plan, distance_type: distanceType }))
+    );
+  }, [plans]);
+
+  // Filter plans
+  const filteredPlans = useMemo(() => {
+    return allPlans.filter((plan) => {
+      // Search filter
+      const matchesSearch = searchQuery === '' ||
+        plan.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        plan.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+      // Distance filter
+      const matchesDistance = filterDistance === 'all' || plan.distance_type === filterDistance;
+
+      // Experience level filter
+      const matchesLevel = filterLevel === 'all' || plan.experience_level === filterLevel;
+
+      return matchesSearch && matchesDistance && matchesLevel;
+    });
+  }, [allPlans, searchQuery, filterDistance, filterLevel]);
+
+  // Group filtered plans by distance
+  const groupedFilteredPlans = useMemo(() => {
+    const grouped: Record<string, typeof filteredPlans> = {};
+    filteredPlans.forEach(plan => {
+      if (!grouped[plan.distance_type]) {
+        grouped[plan.distance_type] = [];
+      }
+      grouped[plan.distance_type].push(plan);
+    });
+    return grouped;
+  }, [filteredPlans]);
 
   return (
     <div className={`min-h-screen ${themeConfig.gradient}`}>
@@ -67,9 +108,87 @@ export default function BrowsePlans({ plans, userProfile, activePlan }: BrowsePl
           </div>
         )}
 
+        {/* Search and Filter Bar */}
+        <div className="rounded-lg border border-white/30 bg-white/90 backdrop-blur-sm p-4 shadow-lg mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Search Input */}
+            <div className="md:col-span-1">
+              <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+                Search
+              </label>
+              <input
+                type="text"
+                id="search"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Plan name or description..."
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Distance Filter */}
+            <div>
+              <label htmlFor="distance" className="block text-sm font-medium text-gray-700 mb-1">
+                Distance
+              </label>
+              <select
+                id="distance"
+                value={filterDistance}
+                onChange={(e) => setFilterDistance(e.target.value)}
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                <option value="all">All Distances</option>
+                <option value="5k">5K</option>
+                <option value="10k">10K</option>
+                <option value="half_marathon">Half Marathon</option>
+                <option value="full_marathon">Full Marathon</option>
+                <option value="ultra">Ultra Marathon</option>
+              </select>
+            </div>
+
+            {/* Experience Level Filter */}
+            <div>
+              <label htmlFor="level" className="block text-sm font-medium text-gray-700 mb-1">
+                Experience Level
+              </label>
+              <select
+                id="level"
+                value={filterLevel}
+                onChange={(e) => setFilterLevel(e.target.value)}
+                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              >
+                <option value="all">All Levels</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Results Count */}
+          <div className="mt-3 text-sm text-gray-600">
+            Showing {filteredPlans.length} of {allPlans.length} plans
+          </div>
+        </div>
+
         {/* Plans grouped by distance */}
-        <div className="space-y-8">
-          {Object.entries(plans).map(([distanceType, distancePlans]) => (
+        {filteredPlans.length === 0 ? (
+          <div className="rounded-lg border border-white/30 bg-white/90 backdrop-blur-sm p-8 shadow-lg text-center">
+            <p className="text-gray-600">No plans match your search criteria.</p>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setFilterDistance('all');
+                setFilterLevel('all');
+              }}
+              className="mt-3 text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              Clear filters
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-8">
+            {Object.entries(groupedFilteredPlans).map(([distanceType, distancePlans]) => (
             <div key={distanceType}>
               <h2 className={`text-2xl font-bold ${themeConfig.text} mb-4`}>
                 {distanceLabels[distanceType] || distanceType}
@@ -98,7 +217,8 @@ export default function BrowsePlans({ plans, userProfile, activePlan }: BrowsePl
               </div>
             </div>
           ))}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

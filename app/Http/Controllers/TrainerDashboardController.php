@@ -58,13 +58,13 @@ class TrainerDashboardController extends Controller
 
         // Dashboard stats
         $stats = [
-            'total_runners' => $runners->count(),
             'active_runners' => $runners->filter(fn($r) => $r['active_plan'])->count(),
             'total_plans' => $trainingPlans->count(),
             'total_active_assignments' => PlanAssignment::where('status', 'active')->count(),
         ];
 
         return Inertia::render('TrainerDashboard', [
+            'auth' => ['user' => $trainer],
             'runners' => $runners,
             'trainingPlans' => $trainingPlans,
             'stats' => $stats,
@@ -73,7 +73,7 @@ class TrainerDashboardController extends Controller
 
     /**
      * View all registered runners
-     */
+{{ ... }}
     public function viewRunners()
     {
         $runners = User::where('role', 'runner')

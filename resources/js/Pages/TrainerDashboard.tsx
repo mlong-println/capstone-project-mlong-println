@@ -2,12 +2,16 @@
 
 import { Head, Link } from '@inertiajs/react';
 import { useTheme } from '@/Components/ThemeSelector';
+import Navbar from '@/Components/Navbar';
 
 /**
  * TrainerDashboard Props
  * Data passed from TrainerDashboardController
  */
 interface TrainerDashboardProps {
+  auth: {
+    user: any;
+  };
   runners: Array<{
     id: number;
     name: string;
@@ -41,7 +45,7 @@ interface TrainerDashboardProps {
  * Shows overview of runners and training plans with quick stats.
  * Uses theme gradient background for visual consistency.
  */
-export default function TrainerDashboard({ runners, trainingPlans, stats }: TrainerDashboardProps) {
+export default function TrainerDashboard({ auth, runners, trainingPlans, stats }: TrainerDashboardProps) {
   // Get current theme configuration
   const { themeConfig } = useTheme();
 
@@ -49,6 +53,13 @@ export default function TrainerDashboard({ runners, trainingPlans, stats }: Trai
     <div className={`min-h-screen ${themeConfig.gradient}`}>
       {/* Page title */}
       <Head title="Trainer Dashboard" />
+
+      {/* Top navbar with logout */}
+      <div className={`w-full ${themeConfig.navGradient} shadow-lg`}>
+        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-end">
+          <Navbar auth={auth} themeTextClass={themeConfig.textLight} />
+        </div>
+      </div>
 
       {/* Header */}
       <div className="max-w-6xl mx-auto py-10 px-6">
