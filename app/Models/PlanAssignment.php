@@ -89,6 +89,46 @@ class PlanAssignment extends Model
         $this->completed_workouts = $completed;
         $this->total_workouts_completed++;
         $this->updateCompletionPercentage();
+        
+        // Check if current week is complete and advance if needed
+        $this->checkAndAdvanceWeek();
+    }
+
+    /**
+     * Helper: Check if current week is complete and advance to next week
+     */
+    protected function checkAndAdvanceWeek(): void
+    {
+        // Get the training plan's weekly structure
+        $plan = $this->trainingPlan;
+        if (!$plan || !$plan->weekly_structure) {
+            return;
+        }
+        
+        $currentWeekKey = "week_{$this->current_week}";
+        $weekWorkouts = $plan->weekly_structure[$currentWeekKey] ?? [];
+        
+        if (empty($weekWorkouts)) {
+            return;
+        }
+        
+        // Count how many workouts are completed for current week
+        $completed = $this->completed_workouts ?? [];
+        $weekCompleted = $completed[$currentWeekKey] ?? [];
+        $completedCount = count(array_filter($weekCompleted));
+        
+        // If all workouts for the week are complete, advance to next week
+        if ($completedCount >= count($weekWorkouts) && $this->current_week < $plan->duration_weeks) {
+            $this->current_week++;
+            $this->save();
+        }
+        
+        // If we've completed the final week, mark plan as completed
+        if ($this->current_week >= $plan->duration_weeks && $this->completion_percentage >= 100) {
+            $this->status = 'completed';
+            $this->actual_end_date = Carbon::now();
+            $this->save();
+        }
     }
 
     /**
