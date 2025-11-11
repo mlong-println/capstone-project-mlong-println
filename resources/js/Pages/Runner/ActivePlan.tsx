@@ -3,6 +3,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { useTheme } from '@/Components/ThemeSelector';
 import { useState } from 'react';
+import ConfirmModal from '@/Components/ConfirmModal';
 
 interface Workout {
   day: string;
@@ -21,6 +22,21 @@ interface ActivePlanProps {
 export default function ActivePlan({ assignment, plan }: ActivePlanProps) {
   const { themeConfig } = useTheme();
   const [processing, setProcessing] = useState(false);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    action: () => void;
+    confirmText: string;
+    confirmColor: 'red' | 'yellow' | 'blue' | 'green';
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    action: () => {},
+    confirmText: 'Confirm',
+    confirmColor: 'blue',
+  });
 
   // Get current week's workouts from the plan's weekly_structure
   const currentWeekKey = `week_${assignment.current_week}`;
@@ -52,12 +68,19 @@ export default function ActivePlan({ assignment, plan }: ActivePlanProps) {
   // Pause plan
   const handlePause = () => {
     if (processing) return;
-    if (confirm('Are you sure you want to pause this training plan?')) {
-      setProcessing(true);
-      router.post(`/runner/my-plan/${assignment.id}/pause`, {}, {
-        onFinish: () => setProcessing(false),
-      });
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Pause Training Plan',
+      message: 'Are you sure you want to pause this training plan? You can resume it anytime.',
+      confirmText: 'Pause Plan',
+      confirmColor: 'yellow',
+      action: () => {
+        setProcessing(true);
+        router.post(`/runner/my-plan/${assignment.id}/pause`, {}, {
+          onFinish: () => setProcessing(false),
+        });
+      },
+    });
   };
 
   // Resume plan
@@ -72,12 +95,19 @@ export default function ActivePlan({ assignment, plan }: ActivePlanProps) {
   // Abandon plan
   const handleAbandon = () => {
     if (processing) return;
-    if (confirm('Are you sure you want to abandon this training plan? This cannot be undone.')) {
-      setProcessing(true);
-      router.post(`/runner/my-plan/${assignment.id}/abandon`, {}, {
-        onFinish: () => setProcessing(false),
-      });
-    }
+    setConfirmModal({
+      isOpen: true,
+      title: 'Abandon Training Plan',
+      message: 'Are you sure you want to abandon this training plan? This action cannot be undone and you will lose your progress.',
+      confirmText: 'Abandon Plan',
+      confirmColor: 'red',
+      action: () => {
+        setProcessing(true);
+        router.post(`/runner/my-plan/${assignment.id}/abandon`, {}, {
+          onFinish: () => setProcessing(false),
+        });
+      },
+    });
   };
 
   return (
@@ -235,6 +265,17 @@ export default function ActivePlan({ assignment, plan }: ActivePlanProps) {
           )}
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onConfirm={confirmModal.action}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        confirmText={confirmModal.confirmText}
+        confirmColor={confirmModal.confirmColor}
+      />
     </div>
   );
 }
