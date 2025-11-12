@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -12,6 +13,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Profile extends Model
 {
+    use HasFactory;
+
     /**
      * The attributes that are mass assignable.
      */
@@ -22,7 +25,7 @@ class Profile extends Model
         'profile_picture',
         'experience_level',
         'current_goal',
-        'current_weekly_mileage',
+        'current_weekly_distance',
         'total_runs',
         'total_distance',
         'total_time_minutes',
@@ -41,7 +44,6 @@ class Profile extends Model
      * The attributes that should be cast.
      */
     protected $casts = [
-        'current_weekly_mileage' => 'decimal:2',
         'total_distance' => 'decimal:2',
         'pr_5k_minutes' => 'decimal:2',
         'pr_10k_minutes' => 'decimal:2',

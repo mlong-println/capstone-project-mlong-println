@@ -33,7 +33,7 @@ class ProfileFactory extends Factory
                 'Complete my first marathon',
                 'Qualify for Boston Marathon',
             ]),
-            'current_weekly_mileage' => fake()->randomFloat(2, 10, 80),
+            'current_weekly_distance' => fake()->randomElement(['10-15', '15-20', '20-30', '30-40', '40-50', '50+']),
             'total_runs' => fake()->numberBetween(5, 500),
             'total_distance' => fake()->randomFloat(2, 50, 5000),
             'total_time_minutes' => fake()->numberBetween(300, 50000),
