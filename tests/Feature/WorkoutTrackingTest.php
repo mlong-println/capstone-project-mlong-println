@@ -20,7 +20,6 @@ class WorkoutTrackingTest extends TestCase
         $runner = User::factory()->create(['role' => 'runner']);
         $plan = TrainingPlan::factory()->create([
             'duration_weeks' => 8,
-            'total_workouts' => 56, // 8 weeks * 7 days
         ]);
         $assignment = PlanAssignment::factory()->create([
             'user_id' => $runner->id,
@@ -52,9 +51,7 @@ class WorkoutTrackingTest extends TestCase
     public function test_workout_completion_updates_progress(): void
     {
         $runner = User::factory()->create(['role' => 'runner']);
-        $plan = TrainingPlan::factory()->create([
-            'total_workouts' => 10,
-        ]);
+        $plan = TrainingPlan::factory()->create();
         $assignment = PlanAssignment::factory()->create([
             'user_id' => $runner->id,
             'training_plan_id' => $plan->id,
