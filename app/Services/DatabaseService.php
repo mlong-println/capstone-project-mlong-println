@@ -17,9 +17,24 @@ class DatabaseService
     /**
      * Constructor - Initializes database connection using environment variables
      * Sets up error handling and connection parameters
+     * Skips connection in testing environment
+     * 
+     * Testing Solution:
+     * - Problem: DatabaseService attempted MySQL connection even in test environment with SQLite
+     * - Solution: Check environment and skip PDO initialization during tests
+     * - Reference: Laravel Testing Documentation - Environment Detection
+     *   https://laravel.com/docs/10.x/helpers#method-app
+     * - This allows tests to use Laravel's built-in database handling (SQLite in-memory)
+     *   while production uses raw SQL through MySQL PDO connection
      */
     public function __construct()
     {
+        // Skip database connection in testing environment
+        // Tests will use Laravel's built-in database connections (SQLite)
+        if (app()->environment('testing')) {
+            return;
+        }
+
         try {
             // Get database credentials from .env file
             $host = env('DB_HOST');        // Database host (localhost)

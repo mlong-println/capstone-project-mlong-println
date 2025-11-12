@@ -17,10 +17,12 @@ class DatabaseServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        // Register DatabaseService as a singleton
-        // This ensures only one database connection exists throughout the app
-        $this->app->singleton(DatabaseService::class, function ($app) {
-            return new DatabaseService();
-        });
+        // Only register DatabaseService in non-testing environments
+        // Tests use Laravel's built-in database connections
+        if (!$this->app->environment('testing')) {
+            $this->app->singleton(DatabaseService::class, function ($app) {
+                return new DatabaseService();
+            });
+        }
     }
 }

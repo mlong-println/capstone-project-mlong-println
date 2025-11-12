@@ -1,53 +1,37 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use App\Services\DatabaseService;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Migration for creating the routes table
  * Stores running routes with distance and difficulty info
  * Links to users table for route creators
+ * 
+ * Note: Converted from raw SQL (DatabaseService) to Laravel Schema Builder
+ * to support both MySQL (production) and SQLite (testing) databases.
+ * Reference: Laravel Migrations Documentation
+ * https://laravel.com/docs/10.x/migrations#creating-tables
  */
 class CreateRoutesTable extends Migration
 {
     /**
      * Run the migrations - creates routes table
-     * Uses raw SQL through DatabaseService
      */
     public function up()
     {
-        $db = app(DatabaseService::class);
-        
-        // SQL to create routes table with required fields
-        // Includes foreign key to users table
-        $sql = "CREATE TABLE routes (
-            -- Primary identifier for routes
-            id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+        Schema::create('routes', function (Blueprint $table) {
+            $table->id();
+            $table->string('name', 100);
+            $table->text('description')->nullable();
+            $table->decimal('distance', 5, 2);
+            $table->enum('difficulty', ['easy', 'moderate', 'hard']);
+            $table->unsignedBigInteger('created_by')->nullable();
+            $table->timestamp('created_at')->useCurrent();
             
-            -- Route name with reasonable length
-            name VARCHAR(100) NOT NULL,
-            
-            -- Detailed route description
-            description TEXT,
-            
-            -- Distance in kilometers, 2 decimal precision
-            distance DECIMAL(5,2) NOT NULL,
-            
-            -- Predefined difficulty levels
-            difficulty ENUM('easy', 'moderate', 'hard') NOT NULL,
-            
-            -- Links to user who created the route
-            created_by BIGINT UNSIGNED,
-            
-            -- Automatically set when record is created
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            
-            -- Ensure creator exists in users table
-            FOREIGN KEY (created_by) REFERENCES users(id)
-        )";
-        
-        // Execute the creation query
-        $db->executeQuery($sql);
+            $table->foreign('created_by')->references('id')->on('users');
+        });
     }
 
     /**
@@ -56,9 +40,6 @@ class CreateRoutesTable extends Migration
      */
     public function down()
     {
-        $db = app(DatabaseService::class);
-        
-        // Drop the table if it exists
-        $db->executeQuery("DROP TABLE IF EXISTS routes");
+        Schema::dropIfExists('routes');
     }
 }

@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use App\Services\DatabaseService;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Migration for creating the route_ratings table
@@ -12,42 +13,20 @@ class CreateRouteRatingsTable extends Migration
 {
     /**
      * Run the migrations - creates route_ratings table
-     * Uses raw SQL through DatabaseService
      */
     public function up()
     {
-        $db = app(DatabaseService::class);
-        
-        // SQL to create route_ratings table with required fields
-        // Includes foreign keys to both users and routes tables
-        $sql = "CREATE TABLE route_ratings (
-            -- Primary identifier for ratings
-            id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+        Schema::create('route_ratings', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('route_id');
+            $table->unsignedBigInteger('user_id');
+            $table->integer('rating');
+            $table->text('comment')->nullable();
+            $table->timestamp('created_at')->useCurrent();
             
-            -- Links to the rated route
-            route_id BIGINT UNSIGNED NOT NULL,
-            
-            -- Links to user who provided the rating
-            user_id BIGINT UNSIGNED NOT NULL,
-            
-            -- Rating value between 1 and 5
-            rating INT CHECK (rating BETWEEN 1 AND 5),
-            
-            -- Optional user feedback
-            comment TEXT,
-            
-            -- Automatically set when record is created
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            
-            -- Ensure route exists in routes table
-            FOREIGN KEY (route_id) REFERENCES routes(id),
-            
-            -- Ensure user exists in users table
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        )";
-        
-        // Execute the creation query
-        $db->executeQuery($sql);
+            $table->foreign('route_id')->references('id')->on('routes');
+            $table->foreign('user_id')->references('id')->on('users');
+        });
     }
 
     /**
@@ -56,9 +35,6 @@ class CreateRouteRatingsTable extends Migration
      */
     public function down()
     {
-        $db = app(DatabaseService::class);
-        
-        // Drop the table if it exists
-        $db->executeQuery("DROP TABLE IF EXISTS route_ratings");
+        Schema::dropIfExists('route_ratings');
     }
 }

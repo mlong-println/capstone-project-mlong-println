@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use App\Services\DatabaseService;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Add role column to Laravel's default users table
@@ -14,14 +15,9 @@ class AddRoleToUsersTable extends Migration
      */
     public function up()
     {
-        $db = app(DatabaseService::class);
-        
-        // Add ENUM column for user roles
-        $sql = "ALTER TABLE users 
-                ADD COLUMN role ENUM('runner', 'trainer') NOT NULL 
-                DEFAULT 'runner'";
-        
-        $db->executeQuery($sql);
+        Schema::table('users', function (Blueprint $table) {
+            $table->enum('role', ['runner', 'trainer'])->default('runner')->after('email');
+        });
     }
 
     /**
@@ -29,7 +25,8 @@ class AddRoleToUsersTable extends Migration
      */
     public function down()
     {
-        $db = app(DatabaseService::class);
-        $db->executeQuery("ALTER TABLE users DROP COLUMN role");
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('role');
+        });
     }
 }

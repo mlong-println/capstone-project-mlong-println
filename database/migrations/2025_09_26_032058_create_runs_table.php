@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use App\Services\DatabaseService;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 /**
  * Migration for creating the runs table
@@ -12,42 +13,20 @@ class CreateRunsTable extends Migration
 {
     /**
      * Run the migrations - creates runs table
-     * Uses raw SQL through DatabaseService
      */
     public function up()
     {
-        $db = app(DatabaseService::class);
-        
-        // SQL to create runs table with required fields
-        // Includes foreign keys to both users and routes tables
-        $sql = "CREATE TABLE runs (
-            -- Primary identifier for runs
-            id BIGINT UNSIGNED PRIMARY KEY AUTO_INCREMENT,
+        Schema::create('runs', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('route_id');
+            $table->timestamp('start_time');
+            $table->timestamp('end_time')->nullable();
+            $table->integer('completion_time')->nullable();
             
-            -- Links to user who completed the run
-            user_id BIGINT UNSIGNED NOT NULL,
-            
-            -- Links to the route that was run
-            route_id BIGINT UNSIGNED NOT NULL,
-            
-            -- When the run started
-            start_time TIMESTAMP NOT NULL,
-            
-            -- When the run finished (NULL if not completed)
-            end_time TIMESTAMP NULL,
-            
-            -- Total time taken in seconds (NULL if not completed)
-            completion_time INT NULL,
-            
-            -- Ensure user exists in users table
-            FOREIGN KEY (user_id) REFERENCES users(id),
-            
-            -- Ensure route exists in routes table
-            FOREIGN KEY (route_id) REFERENCES routes(id)
-        )";
-        
-        // Execute the creation query
-        $db->executeQuery($sql);
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('route_id')->references('id')->on('routes');
+        });
     }
 
     /**
@@ -56,9 +35,6 @@ class CreateRunsTable extends Migration
      */
     public function down()
     {
-        $db = app(DatabaseService::class);
-        
-        // Drop the table if it exists
-        $db->executeQuery("DROP TABLE IF EXISTS runs");
+        Schema::dropIfExists('runs');
     }
 }

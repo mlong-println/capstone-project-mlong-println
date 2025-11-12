@@ -13,13 +13,14 @@ use App\Services\DatabaseService;
  */
 class CheckRole
 {
-    /** @var DatabaseService */
+    /** @var DatabaseService|null */
     protected $db;
 
     /**
      * Initialize middleware with DatabaseService for raw SQL queries
+     * DatabaseService is optional to allow tests to work
      */
-    public function __construct(DatabaseService $db)
+    public function __construct(?DatabaseService $db = null)
     {
         $this->db = $db;
     }
@@ -41,17 +42,23 @@ class CheckRole
             return redirect()->route('login');
         }
 
-        // Get user's role from database using raw SQL
-        $user = $this->db->fetch(
-            "SELECT role FROM users WHERE id = ?",
-            [$request->user()->id]  // Get ID from authenticated user
-        );
+        // Get user's role - use DatabaseService if available, otherwise use Eloquent (for tests)
+        if ($this->db) {
+            $user = $this->db->fetch(
+                "SELECT role FROM users WHERE id = ?",
+                [$request->user()->id]
+            );
+            $userRole = $user['role'];
+        } else {
+            // Fallback for testing environment
+            $userRole = $request->user()->role;
+        }
 
         // If role doesn't match, redirect to appropriate dashboard
-        if ($user['role'] !== $role) {
+        if ($userRole !== $role) {
             // Determine redirect based on user's actual role
             return redirect()->route(
-                $user['role'] === 'runner' 
+                $userRole === 'runner' 
                     ? 'runner.dashboard'   // Redirect runners to runner dashboard
                     : 'trainer.dashboard'  // Redirect trainers to trainer dashboard
             );
