@@ -172,8 +172,10 @@ class RunnerPlanController extends Controller
             abort(403);
         }
 
-        $assignment->status = 'abandoned';
-        $assignment->save();
+        $assignment->update([
+            'status' => 'abandoned',
+            'actual_end_date' => now(),
+        ]);
 
         return Redirect::route('runner.dashboard')->with('success', 'Training plan abandoned. You can select a new plan anytime.');
     }

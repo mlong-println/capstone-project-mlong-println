@@ -165,9 +165,23 @@ export default function BrowsePlans({ plans, userProfile, activePlan }: BrowsePl
             </div>
           </div>
 
-          {/* Results Count */}
-          <div className="mt-3 text-sm text-gray-600">
-            Showing {filteredPlans.length} of {allPlans.length} plans
+          {/* Results Count and Clear Filters */}
+          <div className="mt-3 flex items-center justify-between">
+            <div className="text-sm text-gray-600">
+              Showing {filteredPlans.length} of {allPlans.length} plans
+            </div>
+            {(searchQuery !== '' || filterDistance !== 'all' || filterLevel !== 'all') && (
+              <button
+                onClick={() => {
+                  setSearchQuery('');
+                  setFilterDistance('all');
+                  setFilterLevel('all');
+                }}
+                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+              >
+                Clear all filters
+              </button>
+            )}
           </div>
         </div>
 

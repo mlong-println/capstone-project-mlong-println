@@ -91,10 +91,13 @@ class User extends Authenticatable
 
     /**
      * Helper: Get active plan assignment (for runners)
+     * Includes both 'active' and 'paused' plans
      */
     public function activePlanAssignment()
     {
-        return $this->planAssignments()->where('status', 'active')->first();
+        return $this->planAssignments()
+            ->whereIn('status', ['active', 'paused'])
+            ->first();
     }
 
     /**
