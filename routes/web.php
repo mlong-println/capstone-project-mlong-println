@@ -251,5 +251,45 @@ Route::middleware(['auth'])->prefix('events')->group(function () {
         ->name('events.leave');
 });
 
+/**
+ * Forum routes
+ * Protected by authentication middleware
+ * Accessible to all authenticated users
+ */
+Route::middleware(['auth'])->prefix('forum')->group(function () {
+    Route::get('/', [App\Http\Controllers\ForumController::class, 'index'])
+        ->name('forum.index');
+    
+    Route::get('/create', [App\Http\Controllers\ForumController::class, 'create'])
+        ->name('forum.create');
+    
+    Route::post('/', [App\Http\Controllers\ForumController::class, 'store'])
+        ->name('forum.store');
+    
+    Route::get('/{post}', [App\Http\Controllers\ForumController::class, 'show'])
+        ->name('forum.show');
+    
+    Route::get('/{post}/edit', [App\Http\Controllers\ForumController::class, 'edit'])
+        ->name('forum.edit');
+    
+    Route::put('/{post}', [App\Http\Controllers\ForumController::class, 'update'])
+        ->name('forum.update');
+    
+    Route::delete('/{post}', [App\Http\Controllers\ForumController::class, 'destroy'])
+        ->name('forum.destroy');
+    
+    Route::post('/{post}/comments', [App\Http\Controllers\ForumController::class, 'storeComment'])
+        ->name('forum.comments.store');
+    
+    Route::delete('/comments/{comment}', [App\Http\Controllers\ForumController::class, 'destroyComment'])
+        ->name('forum.comments.destroy');
+    
+    Route::post('/{post}/like', [App\Http\Controllers\ForumController::class, 'toggleLike'])
+        ->name('forum.like');
+    
+    Route::post('/comments/{comment}/like', [App\Http\Controllers\ForumController::class, 'toggleCommentLike'])
+        ->name('forum.comments.like');
+});
+
 // Include Laravel's authentication routes (login, register, etc.)
 require __DIR__.'/auth.php';

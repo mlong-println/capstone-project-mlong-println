@@ -134,6 +134,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Relationship: User has many Forum Posts
+     */
+    public function forumPosts(): HasMany
+    {
+        return $this->hasMany(ForumPost::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Relationship: User has many Forum Comments
+     */
+    public function forumComments(): HasMany
+    {
+        return $this->hasMany(ForumComment::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
      * Helper: Check if user is a trainer
      */
     public function isTrainer(): bool
