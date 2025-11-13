@@ -61,8 +61,13 @@ $stmt->execute($params);
 - CSRF protection enabled on all state-changing requests
 - Email verification flow implemented
 
-**Planned Enhancements**:
-- [ ] Add rate limiting on login/register routes (brute force protection)
+**Implemented Enhancements**:
+- [x] Rate limiting on login routes (5 attempts per minute per IP) - **COMPLETED 2025-11-13**
+- [x] Rate limiting on registration routes (5 attempts per minute per IP) - **COMPLETED 2025-11-13**
+- [x] Rate limiting on password reset routes (3 attempts per minute per IP) - **COMPLETED 2025-11-13**
+- [x] Comprehensive rate limiting tests (4 tests, all passing) - **COMPLETED 2025-11-13**
+
+**Future Enhancements**:
 - [ ] Consider MFA for trainer accounts
 - [ ] Explicitly configure password reset token expiration in `config/auth.php`
 
@@ -235,12 +240,18 @@ $stmt->execute($params);
 - ✅ Role-based access control
 - ✅ 100% test coverage including authorization tests
 
-### Pending Security Tasks
+### Completed Security Tasks
 1. [x] Run dependency vulnerability scans (`composer audit`, `npm audit`) - **COMPLETED 2025-11-13**
    - Fixed symfony/http-foundation CVE-2025-64500 (authorization bypass)
    - Fixed vite and tar vulnerabilities
    - Updated @types/node to resolve peer dependency conflicts
-2. [ ] Implement rate limiting on authentication routes
+2. [x] Implement rate limiting on authentication routes - **COMPLETED 2025-11-13**
+   - Login: 5 attempts per minute per IP
+   - Registration: 5 attempts per minute per IP
+   - Password reset: 3 attempts per minute per IP
+   - Created comprehensive test suite (4 tests, all passing)
+
+### Pending Security Tasks
 3. [ ] Conduct IDOR testing on all resource access
 4. [ ] Add security event logging
 5. [ ] Configure production security headers
@@ -253,7 +264,7 @@ $stmt->execute($params);
 
 ### High Priority
 1. [x] Run `composer audit` and `npm audit` - **COMPLETED**
-2. [ ] Add rate limiting to login/register routes
+2. [x] Add rate limiting to login/register routes - **COMPLETED**
 3. [ ] Audit all routes for proper middleware protection
 4. [ ] Test authorization for IDOR vulnerabilities
 
