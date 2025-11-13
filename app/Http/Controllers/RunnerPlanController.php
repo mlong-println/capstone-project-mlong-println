@@ -19,24 +19,62 @@ use Carbon\Carbon;
 class RunnerPlanController extends Controller
 {
     /**
-     * Browse all available training plans
+     * Browse all available training plans with optional filters
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         
-        // Get all public template plans
-        $plans = TrainingPlan::where('is_public', true)
-            ->where('is_template', true)
-            ->orderBy('distance_type')
+        // Start with base query for public template plans
+        $query = TrainingPlan::where('is_public', true)
+            ->where('is_template', true);
+
+        // Apply filters if provided
+        if ($request->has('distance_type') && $request->distance_type !== '') {
+            $query->where('distance_type', $request->distance_type);
+        }
+
+        if ($request->has('experience_level') && $request->experience_level !== '') {
+            $query->where('experience_level', $request->experience_level);
+        }
+
+        if ($request->has('duration_weeks') && $request->duration_weeks !== '') {
+            $query->where('duration_weeks', $request->duration_weeks);
+        }
+
+        // Apply search if provided (searches name and description)
+        if ($request->has('search') && $request->search !== '') {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Get filtered plans
+        $plans = $query->orderBy('distance_type')
             ->orderBy('experience_level')
             ->get()
             ->groupBy('distance_type');
+
+        // Get available filter options for the UI
+        $filterOptions = [
+            'distance_types' => ['5k', '10k', 'half_marathon', 'full_marathon', 'ultra'],
+            'experience_levels' => ['beginner', 'intermediate', 'advanced'],
+            'duration_weeks' => [8, 12, 16, 20, 24],
+        ];
 
         return Inertia::render('Runner/BrowsePlans', [
             'plans' => $plans,
             'userProfile' => $user->profile,
             'activePlan' => $user->activePlanAssignment(),
+            'filters' => [
+                'distance_type' => $request->distance_type ?? '',
+                'experience_level' => $request->experience_level ?? '',
+                'duration_weeks' => $request->duration_weeks ?? '',
+                'search' => $request->search ?? '',
+            ],
+            'filterOptions' => $filterOptions,
         ]);
     }
 
