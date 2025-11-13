@@ -13,12 +13,9 @@ class NotificationTest extends TestCase
 
     /**
      * Test user can view their notifications
-     * Note: Skipped until frontend component is created
      */
     public function test_user_can_view_notifications(): void
     {
-        $this->markTestSkipped('Frontend component not yet created - backend API tests passing');
-        
         $user = User::factory()->create(['role' => 'runner']);
         
         Notification::factory()->count(3)->create(['user_id' => $user->id]);
