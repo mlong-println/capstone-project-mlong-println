@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Link, router } from '@inertiajs/react';
+import NotificationBell from '@/Components/NotificationBell';
 
 /**
  * NavbarProps
@@ -48,7 +49,10 @@ export default function Navbar({ auth, canLogin = true, canRegister = true, them
 
   return (
     // Container positioned top-right (no background, uses parent's themed background)
-    <div className="flex items-center justify-end">
+    <div className="flex items-center justify-end gap-4">
+          {/* Notification Bell - only show for authenticated users */}
+          {auth.user && <NotificationBell />}
+          
           {/* Menu button (avatar/icon substitute) */}
           <div className="relative" ref={menuRef}>
             <button

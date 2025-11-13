@@ -1,6 +1,7 @@
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
+import NotificationBell from '@/Components/NotificationBell';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
@@ -8,7 +9,7 @@ import { PropsWithChildren, ReactNode, useState } from 'react';
 /**
  * AuthenticatedLayout
  * Layout wrapper for authenticated pages (dashboards, profile, etc.)
- * Includes top navigation with user dropdown and responsive mobile menu
+{{ ... }}
  */
 export default function Authenticated({
     header,
@@ -43,8 +44,11 @@ export default function Authenticated({
                             </div>
                         </div>
 
-                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
-                            <div className="relative ms-3">
+                        <div className="hidden sm:ms-6 sm:flex sm:items-center sm:space-x-4">
+                            {/* Notification Bell */}
+                            <NotificationBell />
+                            
+                            <div className="relative">
                                 <Dropdown>
                                     <Dropdown.Trigger>
                                         <span className="inline-flex rounded-md">

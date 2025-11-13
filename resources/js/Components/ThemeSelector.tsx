@@ -63,10 +63,10 @@ export default function ThemeSelector({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Theme button */}
+      {/* Theme button - matches navbar styling */}
       <button
         type="button"
-        className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition"
+        className="inline-flex items-center gap-2 rounded-md bg-white/10 backdrop-blur-sm px-3 py-2 text-sm font-medium text-white shadow-sm hover:bg-white/20 transition border border-white/20"
       >
         <span>Theme</span>
         <svg
@@ -84,24 +84,26 @@ export default function ThemeSelector({
         </svg>
       </button>
 
-      {/* Dropdown panel (shows on hover) */}
+      {/* Dropdown panel (shows on hover) - added pt-2 to create hover bridge */}
       {isHovered && (
-        <div className="absolute left-0 mt-2 w-40 rounded-md border border-gray-200 bg-white shadow-lg z-50">
-          <div className="py-1">
-            {(Object.keys(themes) as ThemeName[]).map((themeKey) => (
-              <button
-                key={themeKey}
-                type="button"
-                onClick={() => onThemeChange(themeKey)}
-                className={`block w-full text-left px-4 py-2 text-sm transition ${
-                  currentTheme === themeKey
-                    ? 'bg-gray-100 font-semibold text-gray-900'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`}
-              >
-                {themes[themeKey].name}
-              </button>
-            ))}
+        <div className="absolute left-0 pt-2 z-50">
+          <div className="w-40 rounded-md border border-gray-200 bg-white shadow-lg">
+            <div className="py-1">
+              {(Object.keys(themes) as ThemeName[]).map((themeKey) => (
+                <button
+                  key={themeKey}
+                  type="button"
+                  onClick={() => onThemeChange(themeKey)}
+                  className={`block w-full text-left px-4 py-2 text-sm transition ${
+                    currentTheme === themeKey
+                      ? 'bg-gray-100 font-semibold text-gray-900'
+                      : 'text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  {themes[themeKey].name}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
