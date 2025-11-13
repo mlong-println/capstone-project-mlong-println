@@ -54,14 +54,9 @@ class CheckRole
             $userRole = $request->user()->role;
         }
 
-        // If role doesn't match, redirect to appropriate dashboard
+        // If role doesn't match, return 403 forbidden
         if ($userRole !== $role) {
-            // Determine redirect based on user's actual role
-            return redirect()->route(
-                $userRole === 'runner' 
-                    ? 'runner.dashboard'   // Redirect runners to runner dashboard
-                    : 'trainer.dashboard'  // Redirect trainers to trainer dashboard
-            );
+            abort(403, 'Unauthorized access. You do not have permission to access this resource.');
         }
 
         // Role matches, continue to next middleware/handler

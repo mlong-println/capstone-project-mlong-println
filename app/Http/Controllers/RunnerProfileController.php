@@ -30,30 +30,40 @@ class RunnerProfileController extends Controller
             'profile' => $profile,
         ]);
     }
-/**
- * Update the runner's profile
- */
-public function update(Request $request)
-{
-    $user = auth()->user();
 
-    // Validate input
-    $validated = $request->validate([
-        'bio' => 'nullable|string|max:1000',
-        'location' => 'nullable|string|max:255',
-        'experience_level' => 'required|in:beginner,intermediate,advanced',
-        'current_goal' => 'nullable|string|max:255',
-        'current_weekly_distance' => 'nullable|string|max:50', // Changed to string to allow ranges
-    ]);
+    /**
+     * Update the runner's profile
+     */
+    public function update(Request $request)
+    {
+        $user = auth()->user();
 
-    // Update or create profile
-    $user->profile()->updateOrCreate(
-        ['user_id' => $user->id],
-        $validated
-    );
+        // Validate input
+        $validated = $request->validate([
+            'bio' => 'nullable|string|max:1000',
+            'location' => 'nullable|string|max:255',
+            'experience_level' => 'required|in:beginner,intermediate,advanced',
+            'current_goal' => 'nullable|string|max:255',
+            'current_weekly_distance' => 'nullable|string|max:50',
+            'total_runs' => 'nullable|integer|min:0',
+            'total_distance' => 'nullable|numeric|min:0',
+            'total_time_minutes' => 'nullable|integer|min:0',
+            'pr_5k_minutes' => 'nullable|numeric|min:0',
+            'pr_10k_minutes' => 'nullable|numeric|min:0',
+            'pr_half_marathon_minutes' => 'nullable|numeric|min:0',
+            'pr_full_marathon_minutes' => 'nullable|numeric|min:0',
+            'profile_public' => 'nullable|boolean',
+            'show_stats' => 'nullable|boolean',
+        ]);
 
-    return Redirect::route('runner.dashboard')->with('success', 'Profile updated successfully!');
-}
+        // Update or create profile
+        $user->profile()->updateOrCreate(
+            ['user_id' => $user->id],
+            $validated
+        );
+
+        return Redirect::route('runner.dashboard')->with('success', 'Profile updated successfully!');
+    }
 
     /**
      * View the runner's public profile

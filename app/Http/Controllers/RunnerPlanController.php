@@ -8,6 +8,7 @@ use App\Models\TrainingPlan;
 use App\Models\PlanAssignment;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\ValidationException;
 use Carbon\Carbon;
 
 /**
@@ -63,7 +64,9 @@ class RunnerPlanController extends Controller
 
         // Check if runner already has an active plan
         if ($user->activePlanAssignment()) {
-            return Redirect::back()->with('error', 'You already have an active training plan. Complete or abandon it first.');
+            throw ValidationException::withMessages([
+                'plan' => 'You already have an active training plan. Complete or abandon it first.',
+            ]);
         }
 
         // Check if profile is complete

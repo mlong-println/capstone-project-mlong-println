@@ -115,8 +115,12 @@ Route::middleware(['auth'])->group(function () {
         // Profile management
         Route::get('/profile/edit', [RunnerProfileController::class, 'edit'])
             ->name('profile.edit');
+        Route::post('/profile', [RunnerProfileController::class, 'update'])
+            ->name('profile.store');
         Route::patch('/profile', [RunnerProfileController::class, 'update'])
             ->name('profile.update');
+        Route::put('/profile/{id}', [RunnerProfileController::class, 'update'])
+            ->name('profile.update.id');
         Route::get('/profile', [RunnerProfileController::class, 'show'])
             ->name('profile.show');
         
