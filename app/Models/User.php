@@ -6,6 +6,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -111,6 +112,25 @@ class User extends Authenticatable
     public function unreadMessagesCount(): int
     {
         return $this->receivedMessages()->unread()->count();
+    }
+
+    /**
+     * Relationship: User has many organized Events
+     */
+    public function organizedEvents(): HasMany
+    {
+        return $this->hasMany(Event::class, 'organizer_id')->orderBy('event_date', 'desc');
+    }
+
+    /**
+     * Relationship: User participates in many Events
+     */
+    public function participatingEvents(): BelongsToMany
+    {
+        return $this->belongsToMany(Event::class, 'event_participants')
+            ->withPivot('status')
+            ->withTimestamps()
+            ->orderBy('event_date', 'desc');
     }
 
     /**

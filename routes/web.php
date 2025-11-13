@@ -217,5 +217,39 @@ Route::middleware(['auth'])->prefix('messages')->group(function () {
         ->name('messages.mark-all-read');
 });
 
+/**
+ * Event routes
+ * Protected by authentication middleware
+ * Accessible to all authenticated users
+ */
+Route::middleware(['auth'])->prefix('events')->group(function () {
+    Route::get('/', [App\Http\Controllers\EventController::class, 'index'])
+        ->name('events.index');
+    
+    Route::get('/create', [App\Http\Controllers\EventController::class, 'create'])
+        ->name('events.create');
+    
+    Route::post('/', [App\Http\Controllers\EventController::class, 'store'])
+        ->name('events.store');
+    
+    Route::get('/{event}', [App\Http\Controllers\EventController::class, 'show'])
+        ->name('events.show');
+    
+    Route::get('/{event}/edit', [App\Http\Controllers\EventController::class, 'edit'])
+        ->name('events.edit');
+    
+    Route::put('/{event}', [App\Http\Controllers\EventController::class, 'update'])
+        ->name('events.update');
+    
+    Route::post('/{event}/cancel', [App\Http\Controllers\EventController::class, 'cancel'])
+        ->name('events.cancel');
+    
+    Route::post('/{event}/join', [App\Http\Controllers\EventController::class, 'join'])
+        ->name('events.join');
+    
+    Route::post('/{event}/leave', [App\Http\Controllers\EventController::class, 'leave'])
+        ->name('events.leave');
+});
+
 // Include Laravel's authentication routes (login, register, etc.)
 require __DIR__.'/auth.php';
