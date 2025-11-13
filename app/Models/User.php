@@ -90,6 +90,30 @@ class User extends Authenticatable
     }
 
     /**
+     * Relationship: User has many sent Messages
+     */
+    public function sentMessages(): HasMany
+    {
+        return $this->hasMany(Message::class, 'sender_id')->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Relationship: User has many received Messages
+     */
+    public function receivedMessages(): HasMany
+    {
+        return $this->hasMany(Message::class, 'recipient_id')->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get unread messages count
+     */
+    public function unreadMessagesCount(): int
+    {
+        return $this->receivedMessages()->unread()->count();
+    }
+
+    /**
      * Helper: Check if user is a trainer
      */
     public function isTrainer(): bool

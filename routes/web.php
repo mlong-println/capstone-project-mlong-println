@@ -183,5 +183,39 @@ Route::middleware(['auth'])->prefix('notifications')->group(function () {
         ->name('notifications.delete-all-read');
 });
 
+/**
+ * Message routes
+ * Protected by authentication middleware
+ * Accessible to all authenticated users
+ */
+Route::middleware(['auth'])->prefix('messages')->group(function () {
+    Route::get('/inbox', [App\Http\Controllers\MessageController::class, 'inbox'])
+        ->name('messages.inbox');
+    
+    Route::get('/sent', [App\Http\Controllers\MessageController::class, 'sent'])
+        ->name('messages.sent');
+    
+    Route::get('/create', [App\Http\Controllers\MessageController::class, 'create'])
+        ->name('messages.create');
+    
+    Route::post('/', [App\Http\Controllers\MessageController::class, 'store'])
+        ->name('messages.store');
+    
+    Route::get('/{message}', [App\Http\Controllers\MessageController::class, 'show'])
+        ->name('messages.show');
+    
+    Route::delete('/{message}', [App\Http\Controllers\MessageController::class, 'destroy'])
+        ->name('messages.destroy');
+    
+    Route::get('/unread/count', [App\Http\Controllers\MessageController::class, 'unreadCount'])
+        ->name('messages.unread-count');
+    
+    Route::post('/{message}/read', [App\Http\Controllers\MessageController::class, 'markAsRead'])
+        ->name('messages.read');
+    
+    Route::post('/mark-all-read', [App\Http\Controllers\MessageController::class, 'markAllAsRead'])
+        ->name('messages.mark-all-read');
+});
+
 // Include Laravel's authentication routes (login, register, etc.)
 require __DIR__.'/auth.php';
