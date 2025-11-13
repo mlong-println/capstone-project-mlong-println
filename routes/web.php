@@ -158,5 +158,30 @@ Route::middleware(['auth'])->group(function () {
         ->name('profile.destroy');
 });
 
+/**
+ * Notification routes
+ * Protected by authentication middleware
+ * Accessible to all authenticated users
+ */
+Route::middleware(['auth'])->prefix('notifications')->group(function () {
+    Route::get('/', [App\Http\Controllers\NotificationController::class, 'index'])
+        ->name('notifications.index');
+    
+    Route::get('/unread-count', [App\Http\Controllers\NotificationController::class, 'unreadCount'])
+        ->name('notifications.unread-count');
+    
+    Route::post('/{notification}/read', [App\Http\Controllers\NotificationController::class, 'markAsRead'])
+        ->name('notifications.read');
+    
+    Route::post('/mark-all-read', [App\Http\Controllers\NotificationController::class, 'markAllAsRead'])
+        ->name('notifications.mark-all-read');
+    
+    Route::delete('/{notification}', [App\Http\Controllers\NotificationController::class, 'destroy'])
+        ->name('notifications.destroy');
+    
+    Route::delete('/read/all', [App\Http\Controllers\NotificationController::class, 'deleteAllRead'])
+        ->name('notifications.delete-all-read');
+});
+
 // Include Laravel's authentication routes (login, register, etc.)
 require __DIR__.'/auth.php';

@@ -74,6 +74,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Relationship: User has many Notifications
+     */
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Get unread notifications count
+     */
+    public function unreadNotificationsCount(): int
+    {
+        return $this->notifications()->unread()->count();
+    }
+
+    /**
      * Helper: Check if user is a trainer
      */
     public function isTrainer(): bool
