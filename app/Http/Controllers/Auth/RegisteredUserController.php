@@ -77,7 +77,14 @@ class RegisteredUserController extends Controller
                 [$request->email]
             );
 
-            $user = new User((array) $userData);
+            // Create User model instance and manually set attributes including id
+            $user = new User();
+            $user->id = $userData['id'];
+            $user->name = $userData['name'];
+            $user->email = $userData['email'];
+            $user->password = $userData['password'];
+            $user->role = $userData['role'];
+            $user->exists = true; // Mark as existing record
         } else {
             // Fallback for testing environment
             $request->validate([
