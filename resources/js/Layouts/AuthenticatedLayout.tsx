@@ -3,6 +3,7 @@ import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import NotificationBell from '@/Components/NotificationBell';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
+import { useTheme } from '@/Components/ThemeSelector';
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 
@@ -18,29 +19,37 @@ export default function Authenticated({
     // Get the authenticated user from Inertia page props
     // Non-null assertion (!) is safe here because this layout is only used on auth-protected routes
     const user = usePage().props.auth.user!;
+    const { themeConfig } = useTheme();
+
+    console.log('AuthenticatedLayout: themeConfig =', themeConfig);
+    console.log('AuthenticatedLayout: className will be:', `min-h-screen ${themeConfig.gradient}`);
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <nav className="border-b border-gray-100 bg-white">
+        <div className={`min-h-screen ${themeConfig.gradient}`} style={{ background: 'red' }}>
+            <nav className={`border-b border-white/20 ${themeConfig.navGradient} shadow-lg`}>
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
-                                <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
+                                <Link href="/" className={`text-xl font-bold ${themeConfig.textLight}`}>
+                                    RunConnect
                                 </Link>
                             </div>
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
+                                <Link
                                     href={route('dashboard')}
-                                    active={route().current('dashboard')}
+                                    className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition ${
+                                        route().current('dashboard')
+                                            ? 'border-white text-white'
+                                            : 'border-transparent text-white/70 hover:text-white hover:border-white/50'
+                                    }`}
                                 >
                                     Dashboard
-                                </NavLink>
+                                </Link>
                             </div>
                         </div>
 
@@ -54,7 +63,7 @@ export default function Authenticated({
                                         <span className="inline-flex rounded-md">
                                             <button
                                                 type="button"
-                                                className="inline-flex items-center rounded-md border border-transparent bg-white px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out hover:text-gray-700 focus:outline-none"
+                                                className="inline-flex items-center rounded-md border border-white/30 bg-white/10 backdrop-blur-sm px-3 py-2 text-sm font-medium leading-4 text-white transition duration-150 ease-in-out hover:bg-white/20 focus:outline-none"
                                             >
                                                 {user.name}
 
@@ -177,14 +186,14 @@ export default function Authenticated({
             </nav>
 
             {header && (
-                <header className="bg-white shadow">
-                    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+                <header className="bg-white/10 backdrop-blur-sm shadow-lg border-b border-white/20">
+                    <div className={`mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8 ${themeConfig.textLight}`}>
                         {header}
                     </div>
                 </header>
             )}
 
-            <main>{children}</main>
+            <main className="pb-12">{children}</main>
         </div>
     );
 }

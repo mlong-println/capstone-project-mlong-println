@@ -71,7 +71,7 @@ export default function Sent({ messages }: SentProps) {
             <div className="py-12">
                 <div className="mx-auto max-w-5xl sm:px-6 lg:px-8">
                     {localMessages.length === 0 ? (
-                        <div className="bg-white p-8 text-center rounded-lg shadow">
+                        <div className="bg-white/90 backdrop-blur-sm p-8 text-center rounded-lg shadow-lg border border-white/20">
                             <p className="text-gray-500">No sent messages.</p>
                             <Link
                                 href="/messages/create"
@@ -81,7 +81,7 @@ export default function Sent({ messages }: SentProps) {
                             </Link>
                         </div>
                     ) : (
-                        <div className="bg-white rounded-lg shadow overflow-hidden">
+                        <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden border border-white/20">
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead className="bg-gray-50">
                                     <tr>

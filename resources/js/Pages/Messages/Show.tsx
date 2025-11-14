@@ -87,7 +87,7 @@ export default function Show({ message, auth }: ShowProps) {
 
             <div className="py-12">
                 <div className="mx-auto max-w-4xl sm:px-6 lg:px-8">
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden border border-white/20">
                         {/* Message Header */}
                         <div className="border-b border-gray-200 bg-gray-50 px-6 py-4">
                             <h1 className="text-2xl font-bold text-gray-900 mb-4">

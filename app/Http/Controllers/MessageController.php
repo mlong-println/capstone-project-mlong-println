@@ -52,8 +52,15 @@ class MessageController extends Controller
         $recipientId = $request->query('recipient');
         $recipient = $recipientId ? User::find($recipientId) : null;
 
+        // Get all users except the current user for the recipient dropdown
+        $users = User::where('id', '!=', auth()->id())
+            ->select('id', 'name', 'email')
+            ->orderBy('name')
+            ->get();
+
         return Inertia::render('Messages/Create', [
             'recipient' => $recipient,
+            'users' => $users,
         ]);
     }
 

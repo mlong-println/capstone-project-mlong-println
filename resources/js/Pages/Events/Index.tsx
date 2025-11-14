@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { useState } from 'react';
 
@@ -23,13 +23,11 @@ interface Event {
     } | null;
 }
 
-interface EventsIndexProps {
+interface IndexProps {
     events: {
         data: Event[];
         current_page: number;
         last_page: number;
-        per_page: number;
-        total: number;
     };
     auth: {
         user: {
@@ -39,7 +37,9 @@ interface EventsIndexProps {
     };
 }
 
-export default function Index({ events, auth }: EventsIndexProps) {
+export default function Index({ events, auth }: IndexProps) {
+    const page = usePage<any>();
+    const flash = page.props.flash;
     const [localEvents, setLocalEvents] = useState(events.data);
 
     const joinEvent = (eventId: number) => {
@@ -110,8 +110,20 @@ export default function Index({ events, auth }: EventsIndexProps) {
 
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+                    {/* Flash Messages */}
+                    {flash?.success && (
+                        <div className="mb-6 rounded-lg bg-green-50 border border-green-200 p-4">
+                            <p className="text-sm text-green-800">{flash.success}</p>
+                        </div>
+                    )}
+                    {flash?.error && (
+                        <div className="mb-6 rounded-lg bg-red-50 border border-red-200 p-4">
+                            <p className="text-sm text-red-800">{flash.error}</p>
+                        </div>
+                    )}
+
                     {localEvents.length === 0 ? (
-                        <div className="bg-white p-8 text-center rounded-lg shadow">
+                        <div className="bg-white/90 backdrop-blur-sm p-8 text-center rounded-lg shadow-lg border border-white/20">
                             <p className="text-gray-500">No events available.</p>
                             <Link
                                 href="/events/create"
@@ -123,7 +135,7 @@ export default function Index({ events, auth }: EventsIndexProps) {
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {localEvents.map((event) => (
-                                <div key={event.id} className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden">
+                                <div key={event.id} className="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg hover:shadow-xl transition overflow-hidden border border-white/20">
                                     {/* Event Header */}
                                     <div className="p-6">
                                         <div className="flex items-start justify-between mb-3">

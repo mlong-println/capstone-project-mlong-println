@@ -24,7 +24,7 @@ interface Props extends PageProps {
  */
 export default function Welcome({ auth, canLogin, canRegister }: Props) {
   // Theme state with localStorage persistence
-  const { theme, themeConfig, changeTheme } = useTheme();
+  const { theme, themeConfig, setTheme } = useTheme();
 
   return (
     <div className={`min-h-screen ${themeConfig.gradient}`}>
@@ -35,7 +35,7 @@ export default function Welcome({ auth, canLogin, canRegister }: Props) {
       <div className={`w-full ${themeConfig.navGradient} shadow-lg`}>
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           {/* Theme selector on the left */}
-          <ThemeSelector currentTheme={theme} onThemeChange={changeTheme} />
+          <ThemeSelector currentTheme={theme} onThemeChange={setTheme} />
 
           {/* Navbar on the right */}
           <div className="flex-1 flex justify-end">

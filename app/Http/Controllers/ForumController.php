@@ -192,6 +192,11 @@ class ForumController extends Controller
     {
         $user = auth()->user();
 
+        // Prevent users from liking their own posts
+        if ($post->user_id === $user->id) {
+            return Redirect::back()->with('error', 'Self-motivation is great, but only others can like your posts!');
+        }
+
         $existingLike = ForumLike::where('user_id', $user->id)
             ->where('likeable_id', $post->id)
             ->where('likeable_type', ForumPost::class)
@@ -199,20 +204,15 @@ class ForumController extends Controller
 
         if ($existingLike) {
             $existingLike->delete();
-            $liked = false;
         } else {
             ForumLike::create([
                 'user_id' => $user->id,
                 'likeable_id' => $post->id,
                 'likeable_type' => ForumPost::class,
             ]);
-            $liked = true;
         }
 
-        return response()->json([
-            'liked' => $liked,
-            'likeCount' => $post->likeCount(),
-        ]);
+        return Redirect::back();
     }
 
     /**
@@ -222,6 +222,11 @@ class ForumController extends Controller
     {
         $user = auth()->user();
 
+        // Prevent users from liking their own comments
+        if ($comment->user_id === $user->id) {
+            return Redirect::back()->with('error', 'You cannot like your own comments!');
+        }
+
         $existingLike = ForumLike::where('user_id', $user->id)
             ->where('likeable_id', $comment->id)
             ->where('likeable_type', ForumComment::class)
@@ -229,19 +234,14 @@ class ForumController extends Controller
 
         if ($existingLike) {
             $existingLike->delete();
-            $liked = false;
         } else {
             ForumLike::create([
                 'user_id' => $user->id,
                 'likeable_id' => $comment->id,
                 'likeable_type' => ForumComment::class,
             ]);
-            $liked = true;
         }
 
-        return response()->json([
-            'liked' => $liked,
-            'likeCount' => $comment->likeCount(),
-        ]);
+        return Redirect::back();
     }
 }

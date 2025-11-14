@@ -71,7 +71,7 @@ export default function Edit({ event }: EditProps) {
 
             <div className="py-12">
                 <div className="mx-auto max-w-3xl sm:px-6 lg:px-8">
-                    <div className="bg-white rounded-lg shadow p-6">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-6 border border-white/20">
                         <form onSubmit={submit} className="space-y-6">
                             {/* Title */}
                             <div>

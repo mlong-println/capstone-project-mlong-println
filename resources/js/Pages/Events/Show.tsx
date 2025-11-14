@@ -128,7 +128,7 @@ export default function Show({ event, isOrganizer, hasJoined, auth }: ShowProps)
             <div className="py-12">
                 <div className="mx-auto max-w-5xl sm:px-6 lg:px-8 space-y-6">
                     {/* Main Event Card */}
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden border border-white/20">
                         <div className="p-6">
                             {/* Title and Status */}
                             <div className="flex items-start justify-between mb-4">
@@ -220,7 +220,7 @@ export default function Show({ event, isOrganizer, hasJoined, auth }: ShowProps)
                     </div>
 
                     {/* Participants List */}
-                    <div className="bg-white rounded-lg shadow overflow-hidden">
+                    <div className="bg-white/90 backdrop-blur-sm rounded-lg shadow-lg overflow-hidden border border-white/20">
                         <div className="p-6">
                             <h2 className="text-xl font-semibold text-gray-900 mb-4">
                                 Participants ({activeParticipants.length})

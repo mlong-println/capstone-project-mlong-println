@@ -1,6 +1,6 @@
 // resources/js/Components/ThemeSelector.tsx
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 
 /**
  * Theme configuration with vibrant, popping gradients
@@ -43,6 +43,54 @@ const themes = {
 } as const;
 
 export type ThemeName = keyof typeof themes;
+
+// Create theme context
+interface ThemeContextType {
+  theme: ThemeName;
+  setTheme: (theme: ThemeName) => void;
+  themeConfig: typeof themes[ThemeName];
+}
+
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+// Theme Provider Component
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<ThemeName>('forest');
+
+  // Load theme from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('theme') as ThemeName;
+    console.log('ThemeProvider: Loading theme from localStorage:', saved);
+    if (saved && themes[saved]) {
+      setTheme(saved);
+    }
+  }, []);
+
+  // Save to localStorage when theme changes
+  useEffect(() => {
+    console.log('ThemeProvider: Saving theme to localStorage:', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const value = {
+    theme,
+    setTheme,
+    themeConfig: themes[theme],
+  };
+
+  console.log('ThemeProvider: Rendering with theme:', theme, 'config:', themes[theme]);
+
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
+}
+
+// Hook to use theme context
+export function useTheme() {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error('useTheme must be used within ThemeProvider');
+  }
+  return context;
+}
 
 /**
  * Top-left button that shows theme options on hover
@@ -109,31 +157,4 @@ export default function ThemeSelector({
       )}
     </div>
   );
-}
-
-/**
- * Hook to manage theme state with localStorage persistence
- */
-export function useTheme() {
-  const [theme, setTheme] = useState<ThemeName>('forest');
-
-  // Load theme from localStorage on mount
-  useEffect(() => {
-    const saved = localStorage.getItem('theme') as ThemeName | null;
-    if (saved && saved in themes) {
-      setTheme(saved);
-    }
-  }, []);
-
-  // Save theme to localStorage when it changes
-  const changeTheme = (newTheme: ThemeName) => {
-    setTheme(newTheme);
-    localStorage.setItem('theme', newTheme);
-  };
-
-  return {
-    theme,
-    themeConfig: themes[theme],
-    changeTheme,
-  };
 }

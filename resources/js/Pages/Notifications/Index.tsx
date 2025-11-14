@@ -107,7 +107,7 @@ export default function Index({ notifications }: NotificationsIndexProps) {
             <div className="py-12">
                 <div className="mx-auto max-w-4xl sm:px-6 lg:px-8">
                     {localNotifications.length === 0 ? (
-                        <div className="bg-white p-8 text-center rounded-lg shadow">
+                        <div className="bg-white/90 backdrop-blur-sm p-8 text-center rounded-lg shadow-lg border border-white/20">
                             <p className="text-gray-500">No notifications yet.</p>
                         </div>
                     ) : (
@@ -115,8 +115,8 @@ export default function Index({ notifications }: NotificationsIndexProps) {
                             {localNotifications.map((notification) => (
                                 <div
                                     key={notification.id}
-                                    className={`bg-white rounded-lg shadow p-4 transition ${
-                                        !notification.read ? 'border-l-4 border-blue-500' : ''
+                                    className={`bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-4 transition border border-white/20 ${
+                                        !notification.read ? 'border-l-4 border-l-blue-500' : ''
                                     }`}
                                 >
                                     <div className="flex items-start justify-between">
