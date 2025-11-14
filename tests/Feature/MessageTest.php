@@ -81,8 +81,6 @@ class MessageTest extends TestCase
      */
     public function test_user_can_view_inbox(): void
     {
-        $this->markTestSkipped('Frontend component not yet created');
-        
         $user = User::factory()->create(['role' => 'runner']);
         
         Message::factory()->count(3)->create(['recipient_id' => $user->id]);
@@ -91,6 +89,10 @@ class MessageTest extends TestCase
             ->get('/messages/inbox');
 
         $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Messages/Inbox')
+            ->has('messages.data', 3)
+        );
     }
 
     /**
@@ -98,8 +100,6 @@ class MessageTest extends TestCase
      */
     public function test_user_can_view_sent_messages(): void
     {
-        $this->markTestSkipped('Frontend component not yet created');
-        
         $user = User::factory()->create(['role' => 'runner']);
         
         Message::factory()->count(3)->create(['sender_id' => $user->id]);
@@ -108,6 +108,10 @@ class MessageTest extends TestCase
             ->get('/messages/sent');
 
         $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Messages/Sent')
+            ->has('messages.data', 3)
+        );
     }
 
     /**
@@ -115,8 +119,6 @@ class MessageTest extends TestCase
      */
     public function test_user_can_view_received_message(): void
     {
-        $this->markTestSkipped('Frontend component not yet created');
-        
         $user = User::factory()->create(['role' => 'runner']);
         $message = Message::factory()->create(['recipient_id' => $user->id]);
 
@@ -124,6 +126,10 @@ class MessageTest extends TestCase
             ->get("/messages/{$message->id}");
 
         $response->assertStatus(200);
+        $response->assertInertia(fn ($page) => $page
+            ->component('Messages/Show')
+            ->has('message')
+        );
     }
 
     /**
@@ -131,8 +137,6 @@ class MessageTest extends TestCase
      */
     public function test_viewing_message_marks_as_read(): void
     {
-        $this->markTestSkipped('Frontend component not yet created');
-        
         $user = User::factory()->create(['role' => 'runner']);
         $message = Message::factory()->unread()->create(['recipient_id' => $user->id]);
 
