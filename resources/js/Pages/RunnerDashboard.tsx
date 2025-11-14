@@ -27,18 +27,15 @@ interface RunnerDashboardProps {
 }
 
 /**
- * RunnerDashboard
  * Role-specific dashboard for runner users.
  * Shows profile status, active training plan, and quick stats.
  * Uses theme gradient background for visual consistency.
  */
 export default function RunnerDashboard({ auth, user, profile, activePlan, stats }: RunnerDashboardProps) {
-  // Get current theme configuration
   const { themeConfig } = useTheme();
 
   return (
     <div className={`min-h-screen ${themeConfig.gradient}`}>
-      {/* Page title */}
       <Head title="Runner Dashboard" />
 
       {/* Top navbar with logout */}
@@ -103,24 +100,12 @@ export default function RunnerDashboard({ auth, user, profile, activePlan, stats
             <Link
               href="/notifications"
               className="flex flex-col items-center p-4 rounded-lg bg-yellow-50 hover:bg-yellow-100 transition text-center"
-            >
               <svg className="h-8 w-8 text-yellow-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
               <span className="text-sm font-medium text-gray-900">Notifications</span>
             </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Content grid */}
-      <div className="max-w-6xl mx-auto grid gap-6 px-6 pb-12 md:grid-cols-2">
-        {/* Active Training Plan */}
-        <section className="rounded-lg border border-white/30 bg-white/90 backdrop-blur-sm p-5 shadow-lg">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Active Training Plan</h2>
-            {!activePlan && (
-              <Link
+          </section>
                 href="/runner/plans"
                 className="text-sm text-blue-600 hover:text-blue-800 font-medium"
               >

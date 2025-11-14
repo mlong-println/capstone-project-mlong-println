@@ -291,5 +291,39 @@ Route::middleware(['auth'])->prefix('forum')->group(function () {
         ->name('forum.comments.like');
 });
 
+/**
+ * Route (running routes/maps) routes
+ * Protected by authentication middleware
+ * Accessible to all authenticated users
+ */
+Route::middleware(['auth'])->prefix('routes')->group(function () {
+    Route::get('/', [App\Http\Controllers\RouteController::class, 'index'])
+        ->name('routes.index');
+    
+    Route::get('/create', [App\Http\Controllers\RouteController::class, 'create'])
+        ->name('routes.create');
+    
+    Route::post('/', [App\Http\Controllers\RouteController::class, 'store'])
+        ->name('routes.store');
+    
+    Route::get('/{route}', [App\Http\Controllers\RouteController::class, 'show'])
+        ->name('routes.show');
+    
+    Route::get('/{route}/edit', [App\Http\Controllers\RouteController::class, 'edit'])
+        ->name('routes.edit');
+    
+    Route::put('/{route}', [App\Http\Controllers\RouteController::class, 'update'])
+        ->name('routes.update');
+    
+    Route::delete('/{route}', [App\Http\Controllers\RouteController::class, 'destroy'])
+        ->name('routes.destroy');
+    
+    Route::post('/{route}/rate', [App\Http\Controllers\RouteController::class, 'rate'])
+        ->name('routes.rate');
+    
+    Route::delete('/{route}/ratings/{rating}', [App\Http\Controllers\RouteController::class, 'deleteRating'])
+        ->name('routes.ratings.destroy');
+});
+
 // Include Laravel's authentication routes (login, register, etc.)
 require __DIR__.'/auth.php';

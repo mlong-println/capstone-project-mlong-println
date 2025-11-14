@@ -150,6 +150,22 @@ class User extends Authenticatable
     }
 
     /**
+     * Relationship: User has many created Routes
+     */
+    public function createdRoutes(): HasMany
+    {
+        return $this->hasMany(Route::class, 'created_by')->orderBy('created_at', 'desc');
+    }
+
+    /**
+     * Relationship: User has many Route Ratings
+     */
+    public function routeRatings(): HasMany
+    {
+        return $this->hasMany(RouteRating::class)->orderBy('created_at', 'desc');
+    }
+
+    /**
      * Helper: Check if user is a trainer
      */
     public function isTrainer(): bool

@@ -27,6 +27,7 @@ class CreateRoutesTable extends Migration
             $table->text('description')->nullable();
             $table->decimal('distance', 5, 2);
             $table->enum('difficulty', ['easy', 'moderate', 'hard']);
+            $table->json('coordinates')->nullable(); // Store map polyline as JSON
             $table->unsignedBigInteger('created_by')->nullable();
             $table->timestamp('created_at')->useCurrent();
             

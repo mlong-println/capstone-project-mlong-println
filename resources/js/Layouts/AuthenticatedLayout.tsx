@@ -1,3 +1,4 @@
+// Updated with navigation links
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
@@ -21,14 +22,11 @@ export default function Authenticated({
     const user = usePage().props.auth.user!;
     const { themeConfig } = useTheme();
 
-    console.log('AuthenticatedLayout: themeConfig =', themeConfig);
-    console.log('AuthenticatedLayout: className will be:', `min-h-screen ${themeConfig.gradient}`);
-
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
 
     return (
-        <div className={`min-h-screen ${themeConfig.gradient}`} style={{ background: 'red' }}>
+        <div className={`min-h-screen ${themeConfig.gradient}`}>
             <nav className={`border-b border-white/20 ${themeConfig.navGradient} shadow-lg`}>
                 <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                     <div className="flex h-16 justify-between">
@@ -49,6 +47,46 @@ export default function Authenticated({
                                     }`}
                                 >
                                     Dashboard
+                                </Link>
+                                <Link
+                                    href={route('forum.index')}
+                                    className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition ${
+                                        route().current('forum.*')
+                                            ? 'border-white text-white'
+                                            : 'border-transparent text-white/70 hover:text-white hover:border-white/50'
+                                    }`}
+                                >
+                                    Forum
+                                </Link>
+                                <Link
+                                    href={route('routes.index')}
+                                    className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition ${
+                                        route().current('routes.*')
+                                            ? 'border-white text-white'
+                                            : 'border-transparent text-white/70 hover:text-white hover:border-white/50'
+                                    }`}
+                                >
+                                    Routes
+                                </Link>
+                                <Link
+                                    href={route('events.index')}
+                                    className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition ${
+                                        route().current('events.*')
+                                            ? 'border-white text-white'
+                                            : 'border-transparent text-white/70 hover:text-white hover:border-white/50'
+                                    }`}
+                                >
+                                    Events
+                                </Link>
+                                <Link
+                                    href={route('messages.inbox')}
+                                    className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition ${
+                                        route().current('messages.*')
+                                            ? 'border-white text-white'
+                                            : 'border-transparent text-white/70 hover:text-white hover:border-white/50'
+                                    }`}
+                                >
+                                    Messages
                                 </Link>
                             </div>
                         </div>
