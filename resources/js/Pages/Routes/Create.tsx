@@ -4,6 +4,13 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import PrimaryButton from '@/Components/PrimaryButton';
+import RouteMap from '@/Components/RouteMap';
+import { useEffect } from 'react';
+
+interface Coordinate {
+    lat: number;
+    lng: number;
+}
 
 export default function Create() {
     // @ts-ignore - Type instantiation depth issue with useForm
@@ -12,8 +19,40 @@ export default function Create() {
         description: '',
         distance: '',
         difficulty: 'moderate' as 'easy' | 'moderate' | 'hard',
-        coordinates: null as null | any[],
+        coordinates: [] as Coordinate[],
     });
+
+    // Auto-calculate distance when coordinates change
+    useEffect(() => {
+        if (data.coordinates.length > 1) {
+            const calculatedDistance = calculateDistance(data.coordinates);
+            setData('distance', calculatedDistance.toFixed(2));
+        }
+    }, [data.coordinates]);
+
+    const calculateDistance = (coords: Coordinate[]) => {
+        if (coords.length < 2) return 0;
+
+        let totalDistance = 0;
+        for (let i = 0; i < coords.length - 1; i++) {
+            const lat1 = coords[i].lat;
+            const lon1 = coords[i].lng;
+            const lat2 = coords[i + 1].lat;
+            const lon2 = coords[i + 1].lng;
+
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            totalDistance += R * c;
+        }
+
+        return totalDistance;
+    };
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -101,27 +140,19 @@ export default function Create() {
                                 </div>
                             </div>
 
-                            {/* Map Placeholder */}
+                            {/* Interactive Map */}
                             <div>
-                                <InputLabel value="Route Map (Coming Soon)" />
-                                <div className="mt-1 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center bg-gray-50">
-                                    <svg
-                                        className="mx-auto h-12 w-12 text-gray-400"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-                                        />
-                                    </svg>
-                                    <p className="mt-2 text-sm text-gray-500">
-                                        Interactive map for drawing routes will be added soon
-                                    </p>
-                                </div>
+                                <InputLabel value="Route Map *" />
+                                <p className="text-sm text-gray-600 mb-2">
+                                    Click on the map to add waypoints and draw your route
+                                </p>
+                                <RouteMap
+                                    coordinates={data.coordinates}
+                                    onCoordinatesChange={(coords) => setData('coordinates', coords)}
+                                    editable={true}
+                                    height="500px"
+                                />
+                                <InputError message={errors.coordinates} className="mt-2" />
                             </div>
 
                             {/* Help Text */}

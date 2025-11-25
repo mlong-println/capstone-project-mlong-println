@@ -2,7 +2,7 @@
 
 import { Head, Link } from '@inertiajs/react';
 import { useTheme } from '@/Components/ThemeSelector';
-import Navbar from '@/Components/Navbar';
+import ThemedNavBar from '@/Components/ThemedNavBar';
 
 /**
  * RunnerDashboard Props
@@ -29,7 +29,6 @@ interface RunnerDashboardProps {
 /**
  * Role-specific dashboard for runner users.
  * Shows profile status, active training plan, and quick stats.
- * Uses theme gradient background for visual consistency.
  */
 export default function RunnerDashboard({ auth, user, profile, activePlan, stats }: RunnerDashboardProps) {
   const { themeConfig } = useTheme();
@@ -38,11 +37,9 @@ export default function RunnerDashboard({ auth, user, profile, activePlan, stats
     <div className={`min-h-screen ${themeConfig.gradient}`}>
       <Head title="Runner Dashboard" />
 
-      {/* Top navbar with logout */}
+      {/* Top navbar with navigation links */}
       <div className={`w-full ${themeConfig.navGradient} shadow-lg`}>
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-end">
-          <Navbar auth={auth} themeTextClass={themeConfig.textLight} />
-        </div>
+        <ThemedNavBar auth={auth} themeTextClass={themeConfig.textLight} />
       </div>
 
       {/* Header */}

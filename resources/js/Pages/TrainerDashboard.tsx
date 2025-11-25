@@ -2,7 +2,7 @@
 
 import { Head, Link } from '@inertiajs/react';
 import { useTheme } from '@/Components/ThemeSelector';
-import Navbar from '@/Components/Navbar';
+import ThemedNavBar from '@/Components/ThemedNavBar';
 
 /**
  * TrainerDashboard Props
@@ -43,29 +43,24 @@ interface TrainerDashboardProps {
  * TrainerDashboard
  * Role-specific dashboard for trainer users.
  * Shows overview of runners and training plans with quick stats.
- * Uses theme gradient background for visual consistency.
  */
 export default function TrainerDashboard({ auth, runners, trainingPlans, stats }: TrainerDashboardProps) {
-  // Get current theme configuration
   const { themeConfig } = useTheme();
 
   return (
     <div className={`min-h-screen ${themeConfig.gradient}`}>
-      {/* Page title */}
       <Head title="Trainer Dashboard" />
 
-      {/* Top navbar with logout */}
+      {/* Top navbar with navigation links */}
       <div className={`w-full ${themeConfig.navGradient} shadow-lg`}>
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-end">
-          <Navbar auth={auth} themeTextClass={themeConfig.textLight} />
-        </div>
+        <ThemedNavBar auth={auth} themeTextClass={themeConfig.textLight} />
       </div>
 
       {/* Header */}
       <div className="max-w-6xl mx-auto py-10 px-6">
         <h1 className={`text-3xl font-bold ${themeConfig.text}`}>Trainer Dashboard</h1>
         <p className={`mt-2 ${themeConfig.text} opacity-80`}>
-          Welcome back, Michael. Manage your athletes and their training plans here.
+          Manage your athletes and their training plans.
         </p>
 
         {/* Quick Stats */}
