@@ -194,7 +194,9 @@ class ForumController extends Controller
 
         // Prevent users from liking their own posts
         if ($post->user_id === $user->id) {
-            return Redirect::back()->with('error', 'Self-motivation is great, but only others can like your posts!');
+            return response()->json([
+                'error' => 'Self-motivation is great, but only others can like your posts!'
+            ], 403);
         }
 
         $existingLike = ForumLike::where('user_id', $user->id)
@@ -204,15 +206,20 @@ class ForumController extends Controller
 
         if ($existingLike) {
             $existingLike->delete();
+            $liked = false;
         } else {
             ForumLike::create([
                 'user_id' => $user->id,
                 'likeable_id' => $post->id,
                 'likeable_type' => ForumPost::class,
             ]);
+            $liked = true;
         }
 
-        return Redirect::back();
+        return response()->json([
+            'liked' => $liked,
+            'likes_count' => $post->likes()->count()
+        ]);
     }
 
     /**
@@ -224,7 +231,9 @@ class ForumController extends Controller
 
         // Prevent users from liking their own comments
         if ($comment->user_id === $user->id) {
-            return Redirect::back()->with('error', 'You cannot like your own comments!');
+            return response()->json([
+                'error' => 'You cannot like your own comments!'
+            ], 403);
         }
 
         $existingLike = ForumLike::where('user_id', $user->id)
@@ -234,14 +243,19 @@ class ForumController extends Controller
 
         if ($existingLike) {
             $existingLike->delete();
+            $liked = false;
         } else {
             ForumLike::create([
                 'user_id' => $user->id,
                 'likeable_id' => $comment->id,
                 'likeable_type' => ForumComment::class,
             ]);
+            $liked = true;
         }
 
-        return Redirect::back();
+        return response()->json([
+            'liked' => $liked,
+            'likes_count' => $comment->likes()->count()
+        ]);
     }
 }
