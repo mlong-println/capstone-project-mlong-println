@@ -20,9 +20,21 @@ class TestDataSeeder extends Seeder
         // Get existing runner ID for linking ratings
         $runner = $db->fetch("SELECT id FROM users WHERE email = ?", ['runner@test.com']);
         
+        // Skip if no runner found
+        if (!$runner) {
+            $this->command->warn('No runner@test.com user found. Skipping route ratings.');
+            return;
+        }
+        
         // Get existing routes in difficulty order
         // This ensures we rate easy->moderate->hard in order
         $routes = $db->fetchAll("SELECT id, difficulty FROM routes ORDER BY difficulty");
+        
+        // Skip if no routes exist
+        if (count($routes) < 3) {
+            $this->command->warn('Not enough routes found. Skipping route ratings.');
+            return;
+        }
         
         // SQL for creating all three ratings at once
         // Uses single query for better performance
@@ -51,5 +63,7 @@ class TestDataSeeder extends Seeder
             4,                         // rating
             'Great training route, tough but rewarding'
         ]);
+        
+        $this->command->info('Route ratings added successfully!');
     }
 }

@@ -14,6 +14,7 @@ use App\Models\TrainingPlan;
  */
 class TrainingPlanSeeder extends Seeder
 {
+    use TrainingPlanStructures;
     /**
      * Run the database seeds.
      */
@@ -38,7 +39,6 @@ class TrainingPlanSeeder extends Seeder
                 'duration_weeks' => 8,
                 'weekly_mileage_peak' => 15,
                 'prerequisites' => 'Ability to walk continuously for 30 minutes',
-                'goals' => 'Complete a 5K race comfortably',
                 'is_template' => true,
                 'is_public' => true,
                 'created_by' => $trainer->id,
@@ -56,7 +56,7 @@ class TrainingPlanSeeder extends Seeder
                 'is_template' => true,
                 'is_public' => true,
                 'created_by' => $trainer->id,
-                'weekly_structure' => null, // Will add detailed structure later
+                'weekly_structure' => $this->getIntermediate5kStructure(),
             ],
             [
                 'name' => 'Advanced 5K - 6 Weeks',
@@ -70,7 +70,7 @@ class TrainingPlanSeeder extends Seeder
                 'is_template' => true,
                 'is_public' => true,
                 'created_by' => $trainer->id,
-                'weekly_structure' => null,
+                'weekly_structure' => $this->getAdvanced5kStructure(),
             ],
             
             // 10K Plans
@@ -86,7 +86,7 @@ class TrainingPlanSeeder extends Seeder
                 'is_template' => true,
                 'is_public' => true,
                 'created_by' => $trainer->id,
-                'weekly_structure' => null,
+                'weekly_structure' => $this->getBeginner10kStructure(),
             ],
             [
                 'name' => 'Intermediate 10K - 8 Weeks',
@@ -100,7 +100,7 @@ class TrainingPlanSeeder extends Seeder
                 'is_template' => true,
                 'is_public' => true,
                 'created_by' => $trainer->id,
-                'weekly_structure' => null,
+                'weekly_structure' => $this->getIntermediate10kStructure(),
             ],
             [
                 'name' => 'Advanced 10K - 8 Weeks',
@@ -114,7 +114,7 @@ class TrainingPlanSeeder extends Seeder
                 'is_template' => true,
                 'is_public' => true,
                 'created_by' => $trainer->id,
-                'weekly_structure' => null,
+                'weekly_structure' => $this->getAdvanced10kStructure(),
             ],
             
             // Half Marathon Plans
@@ -130,7 +130,7 @@ class TrainingPlanSeeder extends Seeder
                 'is_template' => true,
                 'is_public' => true,
                 'created_by' => $trainer->id,
-                'weekly_structure' => null,
+                'weekly_structure' => $this->getBeginnerHalfStructure(),
             ],
             [
                 'name' => 'Intermediate Half Marathon - 12 Weeks',
@@ -144,7 +144,7 @@ class TrainingPlanSeeder extends Seeder
                 'is_template' => true,
                 'is_public' => true,
                 'created_by' => $trainer->id,
-                'weekly_structure' => null,
+                'weekly_structure' => $this->getIntermediateHalfStructure(),
             ],
             [
                 'name' => 'Advanced Half Marathon - 12 Weeks',
@@ -158,7 +158,7 @@ class TrainingPlanSeeder extends Seeder
                 'is_template' => true,
                 'is_public' => true,
                 'created_by' => $trainer->id,
-                'weekly_structure' => null,
+                'weekly_structure' => $this->getAdvancedHalfStructure(),
             ],
             
             // Full Marathon Plans
@@ -174,7 +174,7 @@ class TrainingPlanSeeder extends Seeder
                 'is_template' => true,
                 'is_public' => true,
                 'created_by' => $trainer->id,
-                'weekly_structure' => null,
+                'weekly_structure' => $this->getBeginnerMarathonStructure(),
             ],
             [
                 'name' => 'Intermediate Full Marathon - 16 Weeks',
@@ -188,7 +188,7 @@ class TrainingPlanSeeder extends Seeder
                 'is_template' => true,
                 'is_public' => true,
                 'created_by' => $trainer->id,
-                'weekly_structure' => null,
+                'weekly_structure' => $this->getIntermediateMarathonStructure(),
             ],
             [
                 'name' => 'Advanced Full Marathon - 18 Weeks',
@@ -202,7 +202,7 @@ class TrainingPlanSeeder extends Seeder
                 'is_template' => true,
                 'is_public' => true,
                 'created_by' => $trainer->id,
-                'weekly_structure' => null,
+                'weekly_structure' => $this->getAdvancedMarathonStructure(),
             ],
             
             // Ultra Marathon Plan
@@ -218,7 +218,7 @@ class TrainingPlanSeeder extends Seeder
                 'is_template' => true,
                 'is_public' => true,
                 'created_by' => $trainer->id,
-                'weekly_structure' => null,
+                'weekly_structure' => $this->getUltraStructure(),
             ],
         ];
 
@@ -242,22 +242,74 @@ class TrainingPlanSeeder extends Seeder
                 ['day' => 'Monday', 'workout' => 'Rest'],
                 ['day' => 'Tuesday', 'workout' => 'Walk 5 min, Run 1 min / Walk 2 min (repeat 5x), Walk 5 min'],
                 ['day' => 'Wednesday', 'workout' => 'Rest or cross-training'],
-                ['day' => 'Thursday', 'workout' => 'Walk 5 min, Run 1 min / Walk 2 min (repeat 5x), Walk 5 min'],
-                ['day' => 'Friday', 'workout' => 'Rest'],
-                ['day' => 'Saturday', 'workout' => 'Walk 5 min, Run 2 min / Walk 2 min (repeat 4x), Walk 5 min'],
-                ['day' => 'Sunday', 'workout' => 'Rest or easy walk 20 min'],
-            ],
-            'week_2' => [
-                ['day' => 'Monday', 'workout' => 'Rest'],
-                ['day' => 'Tuesday', 'workout' => 'Walk 5 min, Run 2 min / Walk 2 min (repeat 5x), Walk 5 min'],
-                ['day' => 'Wednesday', 'workout' => 'Rest or cross-training'],
                 ['day' => 'Thursday', 'workout' => 'Walk 5 min, Run 2 min / Walk 2 min (repeat 5x), Walk 5 min'],
                 ['day' => 'Friday', 'workout' => 'Rest'],
                 ['day' => 'Saturday', 'workout' => 'Walk 5 min, Run 3 min / Walk 2 min (repeat 4x), Walk 5 min'],
                 ['day' => 'Sunday', 'workout' => 'Rest or easy walk 25 min'],
             ],
-            // Weeks 3-8 would continue with progressive increases
-            // For now, this demonstrates the structure
+            'week_2' => [
+                ['day' => 'Monday', 'workout' => 'Rest'],
+                ['day' => 'Tuesday', 'workout' => 'Walk 5 min, Run 3 min / Walk 2 min (repeat 5x), Walk 5 min'],
+                ['day' => 'Wednesday', 'workout' => 'Rest or cross-training'],
+                ['day' => 'Thursday', 'workout' => 'Walk 5 min, Run 3 min / Walk 2 min (repeat 5x), Walk 5 min'],
+                ['day' => 'Friday', 'workout' => 'Rest'],
+                ['day' => 'Saturday', 'workout' => 'Walk 5 min, Run 5 min / Walk 2 min (repeat 4x), Walk 5 min'],
+                ['day' => 'Sunday', 'workout' => 'Rest or easy walk 30 min'],
+            ],
+            'week_3' => [
+                ['day' => 'Monday', 'workout' => 'Rest'],
+                ['day' => 'Tuesday', 'workout' => 'Walk 5 min, Run 5 min / Walk 2 min (repeat 5x), Walk 5 min'],
+                ['day' => 'Wednesday', 'workout' => 'Rest or cross-training'],
+                ['day' => 'Thursday', 'workout' => 'Walk 5 min, Run 5 min / Walk 2 min (repeat 5x), Walk 5 min'],
+                ['day' => 'Friday', 'workout' => 'Rest'],
+                ['day' => 'Saturday', 'workout' => 'Walk 5 min, Run 7 min / Walk 2 min (repeat 3x), Walk 5 min'],
+                ['day' => 'Sunday', 'workout' => 'Rest or easy walk 30 min'],
+            ],
+            'week_4' => [
+                ['day' => 'Monday', 'workout' => 'Rest'],
+                ['day' => 'Tuesday', 'workout' => 'Walk 5 min, Run 7 min / Walk 2 min (repeat 3x), Walk 5 min'],
+                ['day' => 'Wednesday', 'workout' => 'Rest or cross-training'],
+                ['day' => 'Thursday', 'workout' => 'Walk 5 min, Run 7 min / Walk 2 min (repeat 3x), Walk 5 min'],
+                ['day' => 'Friday', 'workout' => 'Rest'],
+                ['day' => 'Saturday', 'workout' => 'Walk 5 min, Run 10 min / Walk 2 min (repeat 2x), Walk 5 min'],
+                ['day' => 'Sunday', 'workout' => 'Rest or easy walk 35 min'],
+            ],
+            'week_5' => [
+                ['day' => 'Monday', 'workout' => 'Rest'],
+                ['day' => 'Tuesday', 'workout' => 'Walk 5 min, Run 10 min / Walk 2 min (repeat 2x), Walk 5 min'],
+                ['day' => 'Wednesday', 'workout' => 'Rest or cross-training'],
+                ['day' => 'Thursday', 'workout' => 'Walk 5 min, Run 12 min / Walk 2 min, Run 8 min, Walk 5 min'],
+                ['day' => 'Friday', 'workout' => 'Rest'],
+                ['day' => 'Saturday', 'workout' => 'Walk 5 min, Run 15 min / Walk 2 min, Run 5 min, Walk 5 min'],
+                ['day' => 'Sunday', 'workout' => 'Rest or easy walk 40 min'],
+            ],
+            'week_6' => [
+                ['day' => 'Monday', 'workout' => 'Rest'],
+                ['day' => 'Tuesday', 'workout' => 'Walk 5 min, Run 15 min / Walk 2 min, Run 10 min, Walk 5 min'],
+                ['day' => 'Wednesday', 'workout' => 'Rest or cross-training'],
+                ['day' => 'Thursday', 'workout' => 'Walk 5 min, Run 20 min / Walk 2 min, Run 5 min, Walk 5 min'],
+                ['day' => 'Friday', 'workout' => 'Rest'],
+                ['day' => 'Saturday', 'workout' => 'Walk 5 min, Run 25 min, Walk 5 min'],
+                ['day' => 'Sunday', 'workout' => 'Rest or easy walk 30 min'],
+            ],
+            'week_7' => [
+                ['day' => 'Monday', 'workout' => 'Rest'],
+                ['day' => 'Tuesday', 'workout' => 'Walk 5 min, Run 20 min, Walk 5 min'],
+                ['day' => 'Wednesday', 'workout' => 'Rest'],
+                ['day' => 'Thursday', 'workout' => 'Walk 5 min, Run 15 min, Walk 5 min'],
+                ['day' => 'Friday', 'workout' => 'Rest'],
+                ['day' => 'Saturday', 'workout' => 'Walk 5 min, Run 30 min, Walk 5 min'],
+                ['day' => 'Sunday', 'workout' => 'Rest or easy walk 35 min'],
+            ],
+            'week_8' => [
+                ['day' => 'Monday', 'workout' => 'Rest'],
+                ['day' => 'Tuesday', 'workout' => 'Walk 5 min, Run 20 min, Walk 5 min'],
+                ['day' => 'Wednesday', 'workout' => 'Rest'],
+                ['day' => 'Thursday', 'workout' => 'Walk 5 min, Run 15 min, Walk 5 min'],
+                ['day' => 'Friday', 'workout' => 'Rest'],
+                ['day' => 'Saturday', 'workout' => 'Race Day! 5K - Start slow, finish strong'],
+                ['day' => 'Sunday', 'workout' => 'Rest and celebrate!'],
+            ],
         ];
     }
 }
