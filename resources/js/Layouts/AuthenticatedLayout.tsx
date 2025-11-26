@@ -4,6 +4,7 @@ import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import NotificationBell from '@/Components/NotificationBell';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
+import Toast from '@/Components/Toast';
 import { useTheme } from '@/Components/ThemeSelector';
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
@@ -232,6 +233,9 @@ export default function Authenticated({
             )}
 
             <main className="pb-12">{children}</main>
+            
+            {/* Toast Notifications */}
+            <Toast />
         </div>
     );
 }

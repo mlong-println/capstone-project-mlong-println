@@ -57,23 +57,94 @@ export default function RouteMap({
     height = '400px'
 }: RouteMapProps) {
     const [localCoords, setLocalCoords] = useState<Coordinate[]>(coordinates);
+    const [routePath, setRoutePath] = useState<Coordinate[]>([]); // Actual road-snapped path
     const [elevations, setElevations] = useState<number[]>([]);
     const [loadingElevation, setLoadingElevation] = useState(false);
+    const [loadingRoute, setLoadingRoute] = useState(false);
     const mapRef = useRef<L.Map | null>(null);
+    const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     // Default center - Hamilton, Ontario, Canada
     const defaultCenter: [number, number] = [43.2557, -79.8711]; // Hamilton, ON
     const defaultZoom = 13;
 
+    // Sync with parent coordinates
     useEffect(() => {
         setLocalCoords(coordinates);
-        // Fetch elevations when coordinates change
-        if (coordinates.length > 0) {
-            fetchElevations(coordinates);
-        } else {
-            setElevations([]);
-        }
     }, [coordinates]);
+
+    // Handle route snapping when localCoords changes
+    useEffect(() => {
+        // Clear any pending fetch
+        if (fetchTimeoutRef.current) {
+            clearTimeout(fetchTimeoutRef.current);
+        }
+        
+        if (localCoords.length === 0) {
+            setRoutePath([]);
+            setElevations([]);
+            return;
+        }
+        
+        if (localCoords.length === 1) {
+            setRoutePath(localCoords);
+            return;
+        }
+        
+        // For 2+ waypoints, debounce the route snapping slightly
+        fetchTimeoutRef.current = setTimeout(() => {
+            fetchRoutePath(localCoords);
+        }, 300); // Small delay to batch rapid clicks
+        
+        return () => {
+            if (fetchTimeoutRef.current) {
+                clearTimeout(fetchTimeoutRef.current);
+            }
+        };
+    }, [localCoords]);
+
+    // Fetch road-snapped route using OSRM (free, no API key needed)
+    const fetchRoutePath = async (waypoints: Coordinate[]) => {
+        if (waypoints.length < 2) return;
+        
+        setLoadingRoute(true);
+        try {
+            // Build OSRM URL: /route/v1/foot/lng,lat;lng,lat?overview=full&geometries=geojson
+            const coords = waypoints.map(w => `${w.lng},${w.lat}`).join(';');
+            const url = `https://router.project-osrm.org/route/v1/foot/${coords}?overview=full&geometries=geojson`;
+            
+            const response = await fetch(url);
+            
+            if (response.ok) {
+                const data = await response.json();
+                if (data.routes && data.routes.length > 0) {
+                    const routeCoords = data.routes[0].geometry.coordinates.map((c: number[]) => ({
+                        lng: c[0],
+                        lat: c[1],
+                    }));
+                    setRoutePath(routeCoords);
+                    
+                    // Fetch elevations for the snapped route
+                    fetchElevations(routeCoords);
+                } else {
+                    setRoutePath(waypoints);
+                    fetchElevations(waypoints);
+                }
+            } else {
+                // Fallback to straight lines if API fails
+                console.warn('Route snapping failed, using straight lines');
+                setRoutePath(waypoints);
+                fetchElevations(waypoints);
+            }
+        } catch (error) {
+            console.error('Failed to fetch route path:', error);
+            // Fallback to straight lines
+            setRoutePath(waypoints);
+            fetchElevations(waypoints);
+        } finally {
+            setLoadingRoute(false);
+        }
+    };
 
     // Fetch elevation data from Open-Elevation API
     const fetchElevations = async (coords: Coordinate[]) => {
@@ -106,6 +177,7 @@ export default function RouteMap({
         const newCoords = [...localCoords, { lat, lng }];
         setLocalCoords(newCoords);
         
+        // Immediately notify parent of user waypoints (not snapped path)
         if (onCoordinatesChange) {
             onCoordinatesChange(newCoords);
         }
@@ -129,16 +201,17 @@ export default function RouteMap({
         }
     };
 
-    // Calculate approximate distance using Haversine formula
+    // Calculate distance using the road-snapped path (more accurate)
     const calculateDistance = () => {
-        if (localCoords.length < 2) return 0;
+        const pathToUse = routePath.length >= 2 ? routePath : localCoords;
+        if (pathToUse.length < 2) return 0;
 
         let totalDistance = 0;
-        for (let i = 0; i < localCoords.length - 1; i++) {
-            const lat1 = localCoords[i].lat;
-            const lon1 = localCoords[i].lng;
-            const lat2 = localCoords[i + 1].lat;
-            const lon2 = localCoords[i + 1].lng;
+        for (let i = 0; i < pathToUse.length - 1; i++) {
+            const lat1 = pathToUse[i].lat;
+            const lon1 = pathToUse[i].lng;
+            const lat2 = pathToUse[i + 1].lat;
+            const lon2 = pathToUse[i + 1].lng;
 
             const R = 6371; // Earth's radius in km
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -185,7 +258,8 @@ export default function RouteMap({
             {editable && (
                 <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
                     <div className="text-sm text-blue-800">
-                        <strong>Click on the map</strong> to add waypoints for your route
+                        <strong>Click on the map</strong> to add waypoints - route will snap to roads/paths
+                        {loadingRoute && <span className="ml-2 text-blue-600">⏳ Calculating route...</span>}
                     </div>
                     <div className="flex gap-2">
                         {localCoords.length > 0 && (
@@ -225,17 +299,17 @@ export default function RouteMap({
                     
                     {editable && <MapClickHandler onMapClick={handleMapClick} />}
                     
-                    {/* Draw polyline connecting waypoints */}
-                    {localCoords.length > 1 && (
+                    {/* Draw road-snapped route */}
+                    {routePath.length > 1 && (
                         <Polyline
-                            positions={localCoords.map(coord => [coord.lat, coord.lng])}
-                            color="blue"
-                            weight={4}
-                            opacity={0.7}
+                            positions={routePath.map(coord => [coord.lat, coord.lng])}
+                            color="#2563eb"
+                            weight={5}
+                            opacity={0.8}
                         />
                     )}
                     
-                    {/* Show markers at each waypoint */}
+                    {/* Show markers at each waypoint (user clicks) */}
                     {localCoords.map((coord, index) => (
                         <Marker
                             key={index}

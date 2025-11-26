@@ -64,6 +64,14 @@ class Route extends Model
     }
 
     /**
+     * Get all photos for this route
+     */
+    public function photos(): HasMany
+    {
+        return $this->hasMany(RoutePhoto::class);
+    }
+
+    /**
      * Get average rating for this route
      */
     public function averageRating(): float

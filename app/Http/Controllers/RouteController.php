@@ -16,13 +16,45 @@ use Illuminate\Http\RedirectResponse;
 class RouteController extends Controller
 {
     /**
-     * Display a listing of all routes
+     * Display a listing of all routes with search/filter
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        $routes = Route::with(['creator', 'ratings'])
-            ->withCount('ratings')
-            ->get()
+        $query = Route::with(['creator', 'ratings'])
+            ->withCount('ratings');
+
+        // Search by name
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter by distance range
+        if ($request->filled('distance_range')) {
+            switch ($request->distance_range) {
+                case '1-5':
+                    $query->whereBetween('distance', [1, 5]);
+                    break;
+                case '5-10':
+                    $query->whereBetween('distance', [5, 10]);
+                    break;
+                case '10-21':
+                    $query->whereBetween('distance', [10, 21]);
+                    break;
+                case '21-30':
+                    $query->whereBetween('distance', [21, 30]);
+                    break;
+                case '30+':
+                    $query->where('distance', '>=', 30);
+                    break;
+            }
+        }
+
+        // Filter by difficulty (terrain)
+        if ($request->filled('difficulty')) {
+            $query->where('difficulty', $request->difficulty);
+        }
+
+        $routes = $query->get()
             ->map(function ($route) {
                 return [
                     'id' => $route->id,
@@ -42,6 +74,11 @@ class RouteController extends Controller
 
         return Inertia::render('Routes/Index', [
             'routes' => $routes,
+            'filters' => [
+                'search' => $request->search,
+                'distance_range' => $request->distance_range,
+                'difficulty' => $request->difficulty,
+            ],
         ]);
     }
 
@@ -75,7 +112,7 @@ class RouteController extends Controller
             'created_by' => auth()->id(),
         ]);
 
-        return redirect()->route('routes.show', $route)
+        return redirect()->route('routes.index')
             ->with('success', 'Route created successfully!');
     }
 

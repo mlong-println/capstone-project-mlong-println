@@ -5,7 +5,7 @@ import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import PrimaryButton from '@/Components/PrimaryButton';
 import RouteMap from '@/Components/RouteMap';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface Coordinate {
     lat: number;
@@ -13,6 +13,8 @@ interface Coordinate {
 }
 
 export default function Create() {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    
     // @ts-ignore - Type instantiation depth issue with useForm
     const { data, setData, post, processing, errors } = useForm({
         name: '',
@@ -56,7 +58,29 @@ export default function Create() {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('routes.store'));
+        
+        // Prevent duplicate submissions
+        if (isSubmitting || processing) {
+            console.log('Already submitting, ignoring click');
+            return;
+        }
+        
+        setIsSubmitting(true);
+        console.log('Form submitting with data:', data);
+        
+        post('/routes', {
+            onSuccess: () => {
+                console.log('Route created successfully!');
+                setIsSubmitting(false);
+            },
+            onError: (errors) => {
+                console.error('Validation errors:', errors);
+                setIsSubmitting(false);
+            },
+            onFinish: () => {
+                setIsSubmitting(false);
+            },
+        });
     };
 
     return (
@@ -171,13 +195,13 @@ export default function Create() {
                             {/* Action Buttons */}
                             <div className="flex items-center justify-end gap-4">
                                 <Link
-                                    href={route('routes.index')}
+                                    href="/routes"
                                     className="text-sm text-gray-600 hover:text-gray-900"
                                 >
                                     Cancel
                                 </Link>
-                                <PrimaryButton disabled={processing}>
-                                    Create Route
+                                <PrimaryButton type="submit" disabled={isSubmitting || processing}>
+                                    {isSubmitting || processing ? 'Creating...' : 'Create Route'}
                                 </PrimaryButton>
                             </div>
                         </form>

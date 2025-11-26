@@ -1,5 +1,6 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link, usePage, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { useState } from 'react';
 
 interface RunningRoute {
     id: number;
@@ -18,11 +19,38 @@ interface RunningRoute {
 
 interface IndexProps {
     routes: RunningRoute[];
+    filters: {
+        search?: string;
+        distance_range?: string;
+        difficulty?: string;
+    };
 }
 
-export default function Index({ routes }: IndexProps) {
+export default function Index({ routes, filters }: IndexProps) {
     const page = usePage<any>();
     const flash = page.props.flash;
+    
+    const [search, setSearch] = useState(filters.search || '');
+    const [distanceRange, setDistanceRange] = useState(filters.distance_range || '');
+    const [difficulty, setDifficulty] = useState(filters.difficulty || '');
+
+    const handleFilter = () => {
+        router.get('/routes', {
+            search: search || undefined,
+            distance_range: distanceRange || undefined,
+            difficulty: difficulty || undefined,
+        }, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const clearFilters = () => {
+        setSearch('');
+        setDistanceRange('');
+        setDifficulty('');
+        router.get('/routes');
+    };
 
     const getDifficultyColor = (difficulty: string) => {
         switch (difficulty) {
@@ -67,7 +95,7 @@ export default function Index({ routes }: IndexProps) {
                         Running Routes
                     </h2>
                     <Link
-                        href={route('routes.create')}
+                        href="/routes/create"
                         className="inline-flex items-center rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
                     >
                         Create New Route
@@ -90,6 +118,81 @@ export default function Index({ routes }: IndexProps) {
                             <p className="text-sm text-red-800">{flash.error}</p>
                         </div>
                     )}
+
+                    {/* Search and Filter Section */}
+                    <div className="bg-white rounded-lg shadow p-6 mb-6">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-4">Search & Filter Routes</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            {/* Search by Name */}
+                            <div>
+                                <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Search by Name
+                                </label>
+                                <input
+                                    type="text"
+                                    id="search"
+                                    value={search}
+                                    onChange={(e) => setSearch(e.target.value)}
+                                    placeholder="Route name..."
+                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                />
+                            </div>
+
+                            {/* Distance Range */}
+                            <div>
+                                <label htmlFor="distance_range" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Distance Range
+                                </label>
+                                <select
+                                    id="distance_range"
+                                    value={distanceRange}
+                                    onChange={(e) => setDistanceRange(e.target.value)}
+                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                                    <option value="">All Distances</option>
+                                    <option value="1-5">1-5 km</option>
+                                    <option value="5-10">5-10 km</option>
+                                    <option value="10-21">10-21 km</option>
+                                    <option value="21-30">21-30 km</option>
+                                    <option value="30+">30+ km</option>
+                                </select>
+                            </div>
+
+                            {/* Difficulty/Terrain */}
+                            <div>
+                                <label htmlFor="difficulty" className="block text-sm font-medium text-gray-700 mb-1">
+                                    Difficulty
+                                </label>
+                                <select
+                                    id="difficulty"
+                                    value={difficulty}
+                                    onChange={(e) => setDifficulty(e.target.value)}
+                                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                                    <option value="">All Difficulties</option>
+                                    <option value="easy">Easy</option>
+                                    <option value="moderate">Moderate</option>
+                                    <option value="hard">Hard</option>
+                                </select>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex items-end gap-2">
+                                <button
+                                    onClick={handleFilter}
+                                    className="flex-1 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                                >
+                                    Apply
+                                </button>
+                                <button
+                                    onClick={clearFilters}
+                                    className="rounded-md bg-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-300"
+                                >
+                                    Clear
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
                     {routes.length === 0 ? (
                         <div className="bg-white p-8 text-center rounded-lg shadow">
@@ -114,7 +217,7 @@ export default function Index({ routes }: IndexProps) {
                             </p>
                             <div className="mt-6">
                                 <Link
-                                    href={route('routes.create')}
+                                    href="/routes/create"
                                     className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
                                 >
                                     Create Route
@@ -126,7 +229,7 @@ export default function Index({ routes }: IndexProps) {
                             {routes.map((runningRoute) => (
                                 <Link
                                     key={runningRoute.id}
-                                    href={route('routes.show', runningRoute.id)}
+                                    href={`/routes/${runningRoute.id}`}
                                     className="bg-white rounded-lg shadow hover:shadow-xl transition p-6"
                                 >
                                     <div className="flex items-start justify-between">
