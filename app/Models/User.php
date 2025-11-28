@@ -83,6 +83,24 @@ class User extends Authenticatable
     }
 
     /**
+     * Relationship: User has many achievements
+     */
+    public function achievements(): BelongsToMany
+    {
+        return $this->belongsToMany(Achievement::class, 'user_achievements')
+            ->withPivot(['year', 'month', 'value_achieved', 'achieved_at'])
+            ->withTimestamps();
+    }
+
+    /**
+     * Relationship: User has many user achievements
+     */
+    public function userAchievements(): HasMany
+    {
+        return $this->hasMany(UserAchievement::class);
+    }
+
+    /**
      * Get unread notifications count
      */
     public function unreadNotificationsCount(): int

@@ -367,5 +367,15 @@ Route::middleware(['auth'])->prefix('explore')->group(function () {
         ->name('explore.show');
 });
 
+/**
+ * Achievements routes
+ * Protected by authentication middleware
+ * Accessible to all authenticated users
+ */
+Route::middleware(['auth'])->prefix('achievements')->group(function () {
+    Route::get('/', [App\Http\Controllers\AchievementController::class, 'index'])
+        ->name('achievements.index');
+});
+
 // Include Laravel's authentication routes (login, register, etc.)
 require __DIR__.'/auth.php';

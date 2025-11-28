@@ -96,7 +96,17 @@ class RunController extends Controller
 
         \Log::info('Created run:', $run->toArray());
 
-        return Redirect::route('runs.index')->with('success', 'Run logged successfully!');
+        // Check for achievements
+        $achievementService = new \App\Services\AchievementService();
+        $newAchievements = $achievementService->checkAchievements(auth()->user(), $run);
+        
+        $message = 'Run logged successfully!';
+        if (count($newAchievements) > 0) {
+            $achievementNames = implode(', ', array_map(fn($a) => $a->name, $newAchievements));
+            $message .= " 🏆 Achievement unlocked: {$achievementNames}!";
+        }
+
+        return Redirect::route('runs.index')->with('success', $message);
     }
 
     /**
