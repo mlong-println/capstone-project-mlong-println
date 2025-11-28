@@ -22,6 +22,7 @@ class Run extends Model
         'start_time',
         'end_time',
         'completion_time',
+        'notes',
     ];
 
     protected $casts = [
@@ -72,6 +73,13 @@ class Run extends Model
 
         $minutes = floor($pace);
         $seconds = round(($pace - $minutes) * 60);
+        
+        // Handle case where rounding gives 60 seconds
+        if ($seconds >= 60) {
+            $minutes++;
+            $seconds = 0;
+        }
+        
         return sprintf('%d:%02d /km', $minutes, $seconds);
     }
 
@@ -84,8 +92,16 @@ class Run extends Model
             return 'N/A';
         }
 
-        $minutes = floor($this->completion_time / 60);
-        $seconds = $this->completion_time % 60;
+        $totalSeconds = $this->completion_time;
+        $hours = floor($totalSeconds / 3600);
+        $minutes = floor(($totalSeconds % 3600) / 60);
+        $seconds = $totalSeconds % 60;
+        
+        // Format based on duration
+        if ($hours > 0) {
+            return sprintf('%d:%02d:%02d', $hours, $minutes, $seconds);
+        }
+        
         return sprintf('%d:%02d', $minutes, $seconds);
     }
 }

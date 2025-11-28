@@ -1,4 +1,4 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
@@ -23,7 +23,7 @@ export default function Create({ routes }: CreateRunProps) {
         hours: '0',
         minutes: '30',
         seconds: '0',
-        completion_time: 0,
+        notes: '',
     });
 
     const [selectedRoute, setSelectedRoute] = useState<Route | null>(null);
@@ -37,16 +37,25 @@ export default function Create({ routes }: CreateRunProps) {
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        // Convert time to seconds
-        const totalSeconds = 
-            (parseInt(data.hours) * 3600) + 
-            (parseInt(data.minutes) * 60) + 
-            parseInt(data.seconds);
+        // Convert time to seconds (treat empty as 0)
+        const hours = parseInt(data.hours || '0');
+        const minutes = parseInt(data.minutes || '0');
+        const seconds = parseInt(data.seconds || '0');
+        const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
 
-        // Update completion_time in form data
-        setData('completion_time', totalSeconds);
+        // Validate that total time is at least 1 second
+        if (totalSeconds < 1) {
+            alert('Please enter a valid run time (at least 1 second)');
+            return;
+        }
 
-        post('/runs');
+        // Submit with completion_time included
+        router.post('/runs', {
+            route_id: data.route_id,
+            start_time: data.start_time,
+            completion_time: totalSeconds,
+            notes: data.notes,
+        });
     };
 
     // Calculate estimated pace
@@ -123,46 +132,65 @@ export default function Create({ routes }: CreateRunProps) {
                                         <label htmlFor="hours" className="block text-sm text-gray-600 mb-1">
                                             Hours
                                         </label>
-                                        <TextInput
+                                        <input
                                             id="hours"
                                             type="number"
                                             min="0"
                                             max="23"
                                             value={data.hours}
                                             onChange={(e) => setData('hours', e.target.value)}
-                                            className="block w-full"
+                                            className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            placeholder="0"
                                         />
                                     </div>
                                     <div>
                                         <label htmlFor="minutes" className="block text-sm text-gray-600 mb-1">
                                             Minutes
                                         </label>
-                                        <TextInput
+                                        <input
                                             id="minutes"
                                             type="number"
                                             min="0"
                                             max="59"
                                             value={data.minutes}
                                             onChange={(e) => setData('minutes', e.target.value)}
-                                            className="block w-full"
+                                            className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            placeholder="0"
                                         />
                                     </div>
                                     <div>
                                         <label htmlFor="seconds" className="block text-sm text-gray-600 mb-1">
                                             Seconds
                                         </label>
-                                        <TextInput
+                                        <input
                                             id="seconds"
                                             type="number"
                                             min="0"
                                             max="59"
                                             value={data.seconds}
                                             onChange={(e) => setData('seconds', e.target.value)}
-                                            className="block w-full"
+                                            className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            placeholder="0"
                                         />
                                     </div>
                                 </div>
-                                <InputError message={errors.completion_time} className="mt-2" />
+                            </div>
+
+                            {/* Run Notes */}
+                            <div>
+                                <InputLabel value="How did that run feel?" />
+                                <textarea
+                                    value={data.notes}
+                                    onChange={(e) => setData('notes', e.target.value)}
+                                    maxLength={250}
+                                    rows={3}
+                                    placeholder="Share your thoughts about this run... (optional)"
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                />
+                                <div className="mt-1 text-xs text-gray-500 text-right">
+                                    {data.notes.length}/250 characters
+                                </div>
+                                <InputError message={errors.notes} className="mt-2" />
                             </div>
 
                             {/* Stats Preview */}

@@ -124,8 +124,34 @@ class RouteController extends Controller
         $route->load(['creator', 'ratings.user']);
 
         $userRating = null;
+        $userRuns = [];
+        $personalBest = null;
+        
         if (auth()->check()) {
             $userRating = $route->getUserRating(auth()->id());
+            
+            // Get user's runs on this route, sorted by fastest time
+            $runs = \App\Models\Run::where('user_id', auth()->id())
+                ->where('route_id', $route->id)
+                ->orderBy('completion_time', 'asc')
+                ->get();
+            
+            if ($runs->isNotEmpty()) {
+                $personalBest = $runs->first()->completion_time;
+                
+                $userRuns = $runs->map(function($run, $index) use ($personalBest) {
+                    return [
+                        'id' => $run->id,
+                        'start_time' => $run->start_time,
+                        'completion_time' => $run->completion_time,
+                        'formatted_time' => $run->formatted_time,
+                        'formatted_pace' => $run->formatted_pace,
+                        'notes' => $run->notes,
+                        'is_personal_best' => $run->completion_time === $personalBest,
+                        'rank' => $index + 1,
+                    ];
+                })->toArray();
+            }
         }
 
         return Inertia::render('Routes/Show', [
@@ -161,6 +187,7 @@ class RouteController extends Controller
                 'rating' => $userRating->rating,
                 'comment' => $userRating->comment,
             ] : null,
+            'userRuns' => $userRuns,
             'canEdit' => auth()->check() && auth()->id() === $route->created_by,
         ]);
     }

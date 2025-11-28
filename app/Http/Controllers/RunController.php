@@ -26,7 +26,18 @@ class RunController extends Controller
         $runs = Run::where('user_id', $user->id)
             ->with('route')
             ->orderBy('start_time', 'desc')
-            ->get();
+            ->get()
+            ->map(function($run) {
+                return [
+                    'id' => $run->id,
+                    'start_time' => $run->start_time,
+                    'completion_time' => $run->completion_time,
+                    'formatted_time' => $run->formatted_time,
+                    'formatted_pace' => $run->formatted_pace,
+                    'notes' => $run->notes,
+                    'route' => $run->route,
+                ];
+            });
 
         return Inertia::render('Runs/Index', [
             'runs' => $runs,
@@ -59,22 +70,31 @@ class RunController extends Controller
      */
     public function store(Request $request)
     {
+        // Log incoming data for debugging
+        \Log::info('Run store request data:', $request->all());
+
         $validated = $request->validate([
             'route_id' => 'required|exists:routes,id',
             'start_time' => 'required|date',
-            'completion_time' => 'required|integer|min:1', // in seconds
+            'completion_time' => 'required|integer', // in seconds
+            'notes' => 'nullable|string|max:250',
         ]);
+
+        \Log::info('Validated data:', $validated);
 
         $startTime = Carbon::parse($validated['start_time']);
         $endTime = $startTime->copy()->addSeconds($validated['completion_time']);
 
-        Run::create([
+        $run = Run::create([
             'user_id' => auth()->id(),
             'route_id' => $validated['route_id'],
             'start_time' => $startTime,
             'end_time' => $endTime,
             'completion_time' => $validated['completion_time'],
+            'notes' => $validated['notes'] ?? null,
         ]);
+
+        \Log::info('Created run:', $run->toArray());
 
         return Redirect::route('runs.index')->with('success', 'Run logged successfully!');
     }
@@ -92,7 +112,16 @@ class RunController extends Controller
         $run->load('route');
 
         return Inertia::render('Runs/Show', [
-            'run' => $run,
+            'run' => [
+                'id' => $run->id,
+                'start_time' => $run->start_time,
+                'end_time' => $run->end_time,
+                'completion_time' => $run->completion_time,
+                'formatted_time' => $run->formatted_time,
+                'formatted_pace' => $run->formatted_pace,
+                'notes' => $run->notes,
+                'route' => $run->route,
+            ],
         ]);
     }
 

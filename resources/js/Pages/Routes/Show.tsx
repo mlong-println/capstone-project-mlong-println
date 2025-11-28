@@ -33,6 +33,17 @@ interface RunningRoute {
     ratings: Rating[];
 }
 
+interface UserRun {
+    id: number;
+    start_time: string;
+    completion_time: number;
+    formatted_time: string;
+    formatted_pace: string;
+    notes: string | null;
+    is_personal_best: boolean;
+    rank: number;
+}
+
 interface ShowProps {
     route: RunningRoute;
     userRating: {
@@ -40,10 +51,11 @@ interface ShowProps {
         rating: number;
         comment: string | null;
     } | null;
+    userRuns: UserRun[];
     canEdit: boolean;
 }
 
-export default function Show({ route: runningRoute, userRating, canEdit }: ShowProps) {
+export default function Show({ route: runningRoute, userRating, userRuns, canEdit }: ShowProps) {
     const page = usePage<any>();
     const flash = page.props.flash;
     const [showRatingForm, setShowRatingForm] = useState(false);
