@@ -325,5 +325,30 @@ Route::middleware(['auth'])->prefix('routes')->group(function () {
         ->name('routes.ratings.destroy');
 });
 
+/**
+ * Run (running logs) routes
+ * Protected by authentication middleware
+ * Accessible to all authenticated users
+ */
+Route::middleware(['auth'])->prefix('runs')->group(function () {
+    Route::get('/', [App\Http\Controllers\RunController::class, 'index'])
+        ->name('runs.index');
+    
+    Route::get('/create', [App\Http\Controllers\RunController::class, 'create'])
+        ->name('runs.create');
+    
+    Route::post('/', [App\Http\Controllers\RunController::class, 'store'])
+        ->name('runs.store');
+    
+    Route::get('/stats', [App\Http\Controllers\RunController::class, 'stats'])
+        ->name('runs.stats');
+    
+    Route::get('/{run}', [App\Http\Controllers\RunController::class, 'show'])
+        ->name('runs.show');
+    
+    Route::delete('/{run}', [App\Http\Controllers\RunController::class, 'destroy'])
+        ->name('runs.destroy');
+});
+
 // Include Laravel's authentication routes (login, register, etc.)
 require __DIR__.'/auth.php';
