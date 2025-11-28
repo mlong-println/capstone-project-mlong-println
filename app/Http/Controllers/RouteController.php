@@ -162,6 +162,7 @@ class RouteController extends Controller
                 'distance' => $route->distance,
                 'difficulty' => $route->difficulty,
                 'coordinates' => $route->coordinates,
+                'is_public' => $route->is_public,
                 'created_at' => $route->created_at->format('M d, Y'),
                 'creator' => [
                     'id' => $route->creator->id,
@@ -189,6 +190,7 @@ class RouteController extends Controller
             ] : null,
             'userRuns' => $userRuns,
             'canEdit' => auth()->check() && auth()->id() === $route->created_by,
+            'isAdmin' => auth()->check() && auth()->user()->role === 'admin',
         ]);
     }
 
@@ -236,25 +238,22 @@ class RouteController extends Controller
 
         $route->update($validated);
 
-        return redirect()->route('routes.show', $route)
-            ->with('success', 'Route updated successfully!');
+        return Redirect::route('routes.show', $route)->with('success', 'Route updated successfully!');
     }
 
     /**
-     * Remove the specified route from storage
+     * Remove the specified route
      */
     public function destroy(Route $route): RedirectResponse
     {
         // Only the creator can delete
         if (auth()->id() !== $route->created_by) {
-            return redirect()->route('routes.show', $route)
-                ->with('error', 'You can only delete routes you created.');
+            abort(403, 'Unauthorized');
         }
 
         $route->delete();
 
-        return redirect()->route('routes.index')
-            ->with('success', 'Route deleted successfully!');
+        return Redirect::route('routes.index')->with('success', 'Route deleted successfully!');
     }
 
     /**
@@ -304,5 +303,22 @@ class RouteController extends Controller
 
         return redirect()->route('routes.show', $route)
             ->with('success', 'Rating deleted successfully!');
+    }
+
+    /**
+     * Toggle public status of a route (Admin only)
+     */
+    public function togglePublic(Route $route): RedirectResponse
+    {
+        // Only admins can toggle public status
+        if (auth()->user()->role !== 'admin') {
+            abort(403, 'Unauthorized');
+        }
+
+        $route->is_public = !$route->is_public;
+        $route->save();
+
+        $status = $route->is_public ? 'public' : 'private';
+        return back()->with('success', "Route is now {$status}!");
     }
 }

@@ -36,6 +36,7 @@ class Route extends Model
         'difficulty',
         'created_by',
         'coordinates', // JSON field for map polyline
+        'is_public',
     ];
 
     /**
@@ -45,6 +46,7 @@ class Route extends Model
         'distance' => 'decimal:2',
         'coordinates' => 'array', // Store map coordinates as JSON
         'created_at' => 'datetime',
+        'is_public' => 'boolean',
     ];
 
     /**
@@ -69,6 +71,14 @@ class Route extends Model
     public function photos(): HasMany
     {
         return $this->hasMany(RoutePhoto::class);
+    }
+
+    /**
+     * Get all runs for this route
+     */
+    public function runs(): HasMany
+    {
+        return $this->hasMany(Run::class);
     }
 
     /**

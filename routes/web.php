@@ -3,7 +3,7 @@
 /**
  * Web Routes Configuration
  * Defines all web routes for RunConnect application
- * Includes role-based routing for runners and trainers
+ * Includes role-based routing for runners and admins
  */
 
 use App\Http\Controllers\ProfileController;
@@ -54,7 +54,7 @@ Route::middleware(['auth'])->group(function () {
 
         // Redirect to role-specific dashboard
         return redirect()->route(
-            $user->role === 'runner' ? 'runner.dashboard' : 'trainer.dashboard'
+            $user->role === 'runner' ? 'runner.dashboard' : 'admin.dashboard'
         );
     })->name('dashboard');
 
@@ -79,17 +79,17 @@ Route::middleware(['auth'])->group(function () {
         ->middleware(CheckRole::class . ':runner') // use class + parameter
         ->name('runner.dashboard');
 
-    // Trainer-specific dashboard
+    // Admin-specific dashboard
     // IMPORTANT: Reference middleware by CLASS with parameter, avoids alias resolution issues.
-    Route::get('/trainer/dashboard', [TrainerDashboardController::class, 'index'])
-        ->middleware(CheckRole::class . ':trainer') // use class + parameter
-        ->name('trainer.dashboard');
+    Route::get('/admin/dashboard', [TrainerDashboardController::class, 'index'])
+        ->middleware(CheckRole::class . ':admin') // use class + parameter
+        ->name('admin.dashboard');
 
     /**
-     * Trainer-specific routes
+     * Admin-specific routes
      * For viewing and managing runners and training plans
      */
-    Route::middleware(CheckRole::class . ':trainer')->prefix('trainer')->name('trainer.')->group(function () {
+    Route::middleware(CheckRole::class . ':admin')->prefix('admin')->name('admin.')->group(function () {
         // View all runners
         Route::get('/runners', [TrainerDashboardController::class, 'viewRunners'])
             ->name('runners');
@@ -323,6 +323,10 @@ Route::middleware(['auth'])->prefix('routes')->group(function () {
     
     Route::delete('/{route}/ratings/{rating}', [App\Http\Controllers\RouteController::class, 'deleteRating'])
         ->name('routes.ratings.destroy');
+    
+    Route::post('/{route}/toggle-public', [App\Http\Controllers\RouteController::class, 'togglePublic'])
+        ->name('routes.toggle-public')
+        ->middleware(CheckRole::class . ':admin');
 });
 
 /**
@@ -348,6 +352,19 @@ Route::middleware(['auth'])->prefix('runs')->group(function () {
     
     Route::delete('/{run}', [App\Http\Controllers\RunController::class, 'destroy'])
         ->name('runs.destroy');
+});
+
+/**
+ * Explore (public routes) routes
+ * Protected by authentication middleware
+ * Accessible to all authenticated users
+ */
+Route::middleware(['auth'])->prefix('explore')->group(function () {
+    Route::get('/', [App\Http\Controllers\ExploreController::class, 'index'])
+        ->name('explore.index');
+    
+    Route::get('/{route}', [App\Http\Controllers\ExploreController::class, 'show'])
+        ->name('explore.show');
 });
 
 // Include Laravel's authentication routes (login, register, etc.)

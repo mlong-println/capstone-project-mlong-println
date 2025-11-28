@@ -23,6 +23,7 @@ interface RunningRoute {
     distance: number;
     difficulty: 'easy' | 'moderate' | 'hard';
     coordinates: any;
+    is_public: boolean;
     created_at: string;
     creator: {
         id: number;
@@ -53,9 +54,10 @@ interface ShowProps {
     } | null;
     userRuns: UserRun[];
     canEdit: boolean;
+    isAdmin: boolean;
 }
 
-export default function Show({ route: runningRoute, userRating, userRuns, canEdit }: ShowProps) {
+export default function Show({ route: runningRoute, userRating, userRuns, canEdit, isAdmin }: ShowProps) {
     const page = usePage<any>();
     const flash = page.props.flash;
     const [showRatingForm, setShowRatingForm] = useState(false);
@@ -126,23 +128,42 @@ export default function Show({ route: runningRoute, userRating, userRuns, canEdi
                 <div className="flex items-center justify-between">
                     <h2 className="text-xl font-semibold leading-tight text-gray-800">
                         {runningRoute.name}
+                        {runningRoute.is_public && (
+                            <span className="ml-3 inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800">
+                                Public
+                            </span>
+                        )}
                     </h2>
-                    {canEdit && (
-                        <div className="flex gap-2">
-                            <Link
-                                href={route('routes.edit', runningRoute.id)}
-                                className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-                            >
-                                Edit
-                            </Link>
+                    <div className="flex gap-2">
+                        {isAdmin && (
                             <button
-                                onClick={deleteRoute}
-                                className="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500"
+                                onClick={() => router.post(`/routes/${runningRoute.id}/toggle-public`)}
+                                className={`inline-flex items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm ${
+                                    runningRoute.is_public 
+                                        ? 'bg-gray-600 hover:bg-gray-500' 
+                                        : 'bg-green-600 hover:bg-green-500'
+                                }`}
                             >
-                                Delete
+                                {runningRoute.is_public ? 'Make Private' : 'Make Public'}
                             </button>
-                        </div>
-                    )}
+                        )}
+                        {canEdit && (
+                            <>
+                                <Link
+                                    href={route('routes.edit', runningRoute.id)}
+                                    className="inline-flex items-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
+                                >
+                                    Edit
+                                </Link>
+                                <button
+                                    onClick={deleteRoute}
+                                    className="inline-flex items-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500"
+                                >
+                                    Delete
+                                </button>
+                            </>
+                        )}
+                    </div>
                 </div>
             }
         >
@@ -362,6 +383,87 @@ export default function Show({ route: runningRoute, userRating, userRuns, canEdi
                             )}
                         </div>
                     </div>
+
+                    {/* Personal Run History */}
+                    {userRuns && userRuns.length > 0 && (
+                        <div className="bg-white rounded-lg shadow p-6">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                                Your Run History on This Route
+                            </h3>
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Rank
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Date
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Time
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Pace
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Notes
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {userRuns.map((run) => (
+                                            <tr key={run.id} className={run.is_personal_best ? 'bg-yellow-50' : ''}>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        {run.is_personal_best && (
+                                                            <span className="text-2xl mr-2" title="Personal Best!">
+                                                                🥇
+                                                            </span>
+                                                        )}
+                                                        <span className="text-sm font-medium text-gray-900">
+                                                            #{run.rank}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {new Date(run.start_time).toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric'
+                                                    })}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`text-sm font-semibold ${run.is_personal_best ? 'text-yellow-700' : 'text-gray-900'}`}>
+                                                        {run.formatted_time}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {run.formatted_pace}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-gray-600">
+                                                    {run.notes ? (
+                                                        <span className="italic">{run.notes.substring(0, 50)}{run.notes.length > 50 ? '...' : ''}</span>
+                                                    ) : (
+                                                        <span className="text-gray-400">-</span>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {userRuns.length > 1 && (
+                                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <p className="text-sm text-blue-800">
+                                        <strong>Total runs on this route:</strong> {userRuns.length} | 
+                                        <strong className="ml-2">Personal Best:</strong> {userRuns[0].formatted_time} 
+                                        ({userRuns[0].formatted_pace})
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Back Button */}
                     <div>
