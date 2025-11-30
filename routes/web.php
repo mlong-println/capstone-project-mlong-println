@@ -63,6 +63,19 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/runner/dashboard', function () {
         $user = auth()->user();
         $user->load('profile');
+
+        // Calculate real stats from runs
+        $totalRuns = \App\Models\Run::where('user_id', $user->id)->count();
+        $totalDistance = \App\Models\Run::where('user_id', $user->id)
+            ->join('routes', 'runs.route_id', '=', 'routes.id')
+            ->sum('routes.distance');
+
+        // Calculate this week's distance
+        $startOfWeek = \Carbon\Carbon::now()->startOfWeek();
+        $weekDistance = \App\Models\Run::where('user_id', $user->id)
+            ->where('start_time', '>=', $startOfWeek)
+            ->join('routes', 'runs.route_id', '=', 'routes.id')
+            ->sum('routes.distance');
         
         return Inertia::render('RunnerDashboard', [
             'auth' => ['user' => $user],
@@ -70,9 +83,9 @@ Route::middleware(['auth'])->group(function () {
             'profile' => $user->profile,
             'activePlan' => $user->activePlanAssignment(),
             'stats' => [
-                'total_runs' => $user->profile->total_runs ?? 0,
-                'total_distance' => $user->profile->total_distance ?? 0,
-                'current_weekly_mileage' => $user->profile->current_weekly_mileage ?? 0,
+                'total_runs' => $totalRuns,
+                'total_distance' => round($totalDistance, 2),
+                'current_weekly_mileage' => round($weekDistance, 2),
             ],
         ]);
     })

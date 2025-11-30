@@ -49,6 +49,12 @@ export default function ThemedNavBar({ auth, themeTextClass }: ThemedNavBarProps
                         >
                             Messages
                         </Link>
+                        <Link
+                            href="/achievements"
+                            className={`${themeTextClass} hover:text-white transition font-medium`}
+                        >
+                            Achievements
+                        </Link>
                     </div>
 
                     {/* Right: Notification Bell + User Dropdown */}

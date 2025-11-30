@@ -89,6 +89,16 @@ export default function Authenticated({
                                 >
                                     Messages
                                 </Link>
+                                <Link
+                                    href={route('achievements.index')}
+                                    className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition ${
+                                        route().current('achievements.*')
+                                            ? 'border-white text-white'
+                                            : 'border-transparent text-white/70 hover:text-white hover:border-white/50'
+                                    }`}
+                                >
+                                    Achievements
+                                </Link>
                             </div>
                         </div>
 
@@ -195,6 +205,12 @@ export default function Authenticated({
                             active={route().current('dashboard')}
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink
+                            href={route('achievements.index')}
+                            active={route().current('achievements.*')}
+                        >
+                            Achievements
                         </ResponsiveNavLink>
                     </div>
 
