@@ -106,9 +106,12 @@ export default function Sent({ messages }: SentProps) {
                                     {localMessages.map((message) => (
                                         <tr key={message.id} className="hover:bg-gray-50 transition">
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <div className="text-sm font-medium text-gray-900">
+                                                <Link
+                                                    href={`/users/${message.recipient.id}`}
+                                                    className="text-sm font-medium text-gray-900 hover:text-indigo-600"
+                                                >
                                                     {message.recipient.name}
-                                                </div>
+                                                </Link>
                                             </td>
                                             <td className="px-6 py-4">
                                                 <Link

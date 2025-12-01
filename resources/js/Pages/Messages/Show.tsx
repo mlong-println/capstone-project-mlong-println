@@ -97,11 +97,23 @@ export default function Show({ message, auth }: ShowProps) {
                                 <div>
                                     <p className="text-gray-700">
                                         <span className="font-medium">From:</span>{' '}
-                                        {message.sender.name} ({message.sender.email})
+                                        <Link
+                                            href={`/users/${message.sender.id}`}
+                                            className="text-indigo-600 hover:text-indigo-800 font-medium"
+                                        >
+                                            {message.sender.name}
+                                        </Link>
+                                        {' '}({message.sender.email})
                                     </p>
                                     <p className="text-gray-700 mt-1">
                                         <span className="font-medium">To:</span>{' '}
-                                        {message.recipient.name} ({message.recipient.email})
+                                        <Link
+                                            href={`/users/${message.recipient.id}`}
+                                            className="text-indigo-600 hover:text-indigo-800 font-medium"
+                                        >
+                                            {message.recipient.name}
+                                        </Link>
+                                        {' '}({message.recipient.email})
                                     </p>
                                 </div>
                                 <div className="text-right">

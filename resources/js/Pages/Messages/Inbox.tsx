@@ -132,9 +132,12 @@ export default function Inbox({ messages, unreadCount }: InboxProps) {
                                                     {!message.read && (
                                                         <span className="inline-block h-2 w-2 rounded-full bg-blue-600 mr-2"></span>
                                                     )}
-                                                    <div className="text-sm font-medium text-gray-900">
+                                                    <Link
+                                                        href={`/users/${message.sender.id}`}
+                                                        className="text-sm font-medium text-gray-900 hover:text-indigo-600"
+                                                    >
                                                         {message.sender.name}
-                                                    </div>
+                                                    </Link>
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">

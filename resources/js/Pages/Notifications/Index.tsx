@@ -10,6 +10,7 @@ interface Notification {
     read: boolean;
     read_at: string | null;
     action_url: string | null;
+    data: string | null;
     created_at: string;
 }
 
@@ -63,12 +64,10 @@ export default function Index({ notifications }: NotificationsIndexProps) {
 
     const deleteAllRead = () => {
         if (confirm('Are you sure you want to delete all read notifications?')) {
-            router.delete('/notifications/read/all', {
+            router.delete('/notifications/delete-read', {
                 preserveScroll: true,
                 onSuccess: () => {
-                    setLocalNotifications(prev =>
-                        prev.filter(n => !n.read)
-                    );
+                    setLocalNotifications(prev => prev.filter(n => !n.read));
                 },
             });
         }

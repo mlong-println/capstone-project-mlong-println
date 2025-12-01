@@ -152,6 +152,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Relationship: User has many Runs
+     */
+    public function runs(): HasMany
+    {
+        return $this->hasMany(Run::class);
+    }
+
+    /**
      * Relationship: User has many Forum Posts
      */
     public function forumPosts(): HasMany
@@ -216,5 +224,70 @@ class User extends Authenticatable
     public function hasProfile(): bool
     {
         return $this->profile()->exists();
+    }
+
+    /**
+     * Relationship: Users this user is following
+     */
+    public function following(): HasMany
+    {
+        return $this->hasMany(Follow::class, 'follower_id');
+    }
+
+    /**
+     * Relationship: Users following this user
+     */
+    public function followers(): HasMany
+    {
+        return $this->hasMany(Follow::class, 'following_id');
+    }
+
+    /**
+     * Get approved followers count
+     */
+    public function followersCount(): int
+    {
+        return $this->followers()->approved()->count();
+    }
+
+    /**
+     * Get approved following count
+     */
+    public function followingCount(): int
+    {
+        return $this->following()->approved()->count();
+    }
+
+    /**
+     * Check if this user is following another user
+     */
+    public function isFollowing(User $user): bool
+    {
+        return $this->following()
+            ->where('following_id', $user->id)
+            ->approved()
+            ->exists();
+    }
+
+    /**
+     * Check if this user has a pending follow request to another user
+     */
+    public function hasPendingRequestTo(User $user): bool
+    {
+        return $this->following()
+            ->where('following_id', $user->id)
+            ->pending()
+            ->exists();
+    }
+
+    /**
+     * Check if another user is following this user
+     */
+    public function isFollowedBy(User $user): bool
+    {
+        return $this->followers()
+            ->where('follower_id', $user->id)
+            ->approved()
+            ->exists();
     }
 }

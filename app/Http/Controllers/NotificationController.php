@@ -16,7 +16,9 @@ class NotificationController extends Controller
     {
         $user = auth()->user();
         
+        // Exclude social notifications (they go to Activity page)
         $notifications = $user->notifications()
+            ->whereNotIn('type', ['follow_request', 'follow_approved', 'like', 'comment'])
             ->paginate(20);
 
         return Inertia::render('Notifications/Index', [

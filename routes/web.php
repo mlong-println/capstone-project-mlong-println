@@ -396,5 +396,34 @@ Route::middleware(['auth'])->prefix('achievements')->group(function () {
         ->name('achievements.leave');
 });
 
+// User Profile Routes
+Route::get('/users/{user}', [App\Http\Controllers\UserProfileController::class, 'show'])
+    ->name('users.show');
+
+// Activity Routes (social interactions)
+Route::middleware('auth')->get('/activity', [App\Http\Controllers\ActivityController::class, 'index'])
+    ->name('activity.index');
+
+// Follow/Unfollow Routes
+Route::middleware('auth')->group(function () {
+    Route::post('/users/{user}/follow', [App\Http\Controllers\FollowController::class, 'follow'])
+        ->name('users.follow');
+    
+    Route::delete('/users/{user}/unfollow', [App\Http\Controllers\FollowController::class, 'unfollow'])
+        ->name('users.unfollow');
+    
+    Route::post('/follows/{follow}/approve', [App\Http\Controllers\FollowController::class, 'approve'])
+        ->name('follows.approve');
+    
+    Route::post('/follows/{follow}/reject', [App\Http\Controllers\FollowController::class, 'reject'])
+        ->name('follows.reject');
+    
+    Route::delete('/follows/{follow}/remove', [App\Http\Controllers\FollowController::class, 'removeFollower'])
+        ->name('follows.remove');
+    
+    Route::get('/follows/pending', [App\Http\Controllers\FollowController::class, 'pendingRequests'])
+        ->name('follows.pending');
+});
+
 // Include Laravel's authentication routes (login, register, etc.)
 require __DIR__.'/auth.php';
