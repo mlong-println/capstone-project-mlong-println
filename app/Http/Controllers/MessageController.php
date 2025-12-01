@@ -101,6 +101,37 @@ class MessageController extends Controller
     }
 
     /**
+     * Display conversation with a specific user
+     */
+    public function conversation(User $user)
+    {
+        $currentUser = auth()->user();
+        
+        // Get all messages between current user and the specified user
+        $messages = Message::where(function($query) use ($currentUser, $user) {
+            $query->where('sender_id', $currentUser->id)
+                  ->where('recipient_id', $user->id);
+        })->orWhere(function($query) use ($currentUser, $user) {
+            $query->where('sender_id', $user->id)
+                  ->where('recipient_id', $currentUser->id);
+        })
+        ->with(['sender', 'recipient'])
+        ->orderBy('created_at', 'asc')
+        ->get();
+        
+        // Mark all messages from the other user as read
+        Message::where('sender_id', $user->id)
+            ->where('recipient_id', $currentUser->id)
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+        
+        return Inertia::render('Messages/Conversation', [
+            'otherUser' => $user,
+            'messages' => $messages,
+        ]);
+    }
+
+    /**
      * Display a specific message
      */
     public function show(Message $message)

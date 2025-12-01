@@ -320,7 +320,7 @@ export default function RouteMap({
                 </MapContainer>
             </div>
 
-            {localCoords.length > 0 && (
+            {editable && localCoords.length > 0 && (
                 <div className="bg-gray-50 rounded-lg p-4">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                         <div>
@@ -329,7 +329,7 @@ export default function RouteMap({
                         </div>
                         {localCoords.length > 1 && (
                             <div>
-                                <div className="text-gray-600">Distance</div>
+                                <div className="text-gray-600">Estimated Distance</div>
                                 <div className="text-lg font-semibold text-gray-900">{calculateDistance()} km</div>
                             </div>
                         )}

@@ -133,8 +133,8 @@ export default function Inbox({ messages, unreadCount }: InboxProps) {
                                                         <span className="inline-block h-2 w-2 rounded-full bg-blue-600 mr-2"></span>
                                                     )}
                                                     <Link
-                                                        href={`/users/${message.sender.id}`}
-                                                        className="text-sm font-medium text-gray-900 hover:text-indigo-600"
+                                                        href={`/messages/user/${message.sender.id}`}
+                                                        className="font-medium text-indigo-600 hover:text-indigo-800"
                                                     >
                                                         {message.sender.name}
                                                     </Link>

@@ -208,6 +208,9 @@ Route::middleware(['auth'])->prefix('messages')->group(function () {
     Route::get('/sent', [App\Http\Controllers\MessageController::class, 'sent'])
         ->name('messages.sent');
     
+    Route::get('/user/{user}', [App\Http\Controllers\MessageController::class, 'conversation'])
+        ->name('messages.conversation');
+    
     Route::get('/create', [App\Http\Controllers\MessageController::class, 'create'])
         ->name('messages.create');
     
@@ -401,8 +404,16 @@ Route::get('/users/{user}', [App\Http\Controllers\UserProfileController::class, 
     ->name('users.show');
 
 // Activity Routes (social interactions)
-Route::middleware('auth')->get('/activity', [App\Http\Controllers\ActivityController::class, 'index'])
-    ->name('activity.index');
+Route::middleware('auth')->group(function () {
+    Route::get('/activity', [App\Http\Controllers\ActivityController::class, 'index'])
+        ->name('activity.index');
+    
+    Route::get('/activity/pending-count', [App\Http\Controllers\ActivityController::class, 'pendingCount'])
+        ->name('activity.pending-count');
+    
+    Route::post('/activity/mark-all-read', [App\Http\Controllers\ActivityController::class, 'markAllAsRead'])
+        ->name('activity.mark-all-read');
+});
 
 // Follow/Unfollow Routes
 Route::middleware('auth')->group(function () {

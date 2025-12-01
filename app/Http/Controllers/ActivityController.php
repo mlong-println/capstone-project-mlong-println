@@ -53,4 +53,45 @@ class ActivityController extends Controller
             'unreadCount' => $unreadCount,
         ]);
     }
+    
+    /**
+     * Get pending activity count (for heart icon)
+     * Includes: pending follow requests, unread likes, unread follow approvals
+     */
+    public function pendingCount()
+    {
+        $user = auth()->user();
+        
+        // Count pending follow requests
+        $pendingFollows = Follow::where('following_id', $user->id)
+            ->where('status', 'pending')
+            ->count();
+        
+        // Count unread social notifications (likes, follow approvals)
+        $unreadSocialNotifications = Notification::where('user_id', $user->id)
+            ->whereIn('type', ['follow_approved', 'like'])
+            ->whereNull('read_at')
+            ->count();
+        
+        $totalCount = $pendingFollows + $unreadSocialNotifications;
+        
+        return response()->json([
+            'count' => $totalCount,
+        ]);
+    }
+    
+    /**
+     * Mark all social notifications as read
+     */
+    public function markAllAsRead()
+    {
+        $user = auth()->user();
+        
+        Notification::where('user_id', $user->id)
+            ->whereIn('type', ['follow_approved', 'like'])
+            ->whereNull('read_at')
+            ->update(['read_at' => now()]);
+        
+        return redirect()->back()->with('success', 'All activity marked as read');
+    }
 }

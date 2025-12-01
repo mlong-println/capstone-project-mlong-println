@@ -194,9 +194,7 @@ class ForumController extends Controller
 
         // Prevent users from liking their own posts
         if ($post->user_id === $user->id) {
-            return response()->json([
-                'error' => 'Self-motivation is great, but only others can like your posts!'
-            ], 403);
+            return Redirect::back()->with('error', 'Self-motivation is great, but only others can like your posts!');
         }
 
         $existingLike = ForumLike::where('user_id', $user->id)
@@ -206,20 +204,29 @@ class ForumController extends Controller
 
         if ($existingLike) {
             $existingLike->delete();
-            $liked = false;
+            $message = 'Post unliked';
         } else {
             ForumLike::create([
                 'user_id' => $user->id,
                 'likeable_id' => $post->id,
                 'likeable_type' => ForumPost::class,
             ]);
-            $liked = true;
+            $message = 'Post liked!';
+            
+            // Notify post author if someone else liked their post
+            if ($post->user_id !== $user->id) {
+                Notification::create([
+                    'user_id' => $post->user_id,
+                    'type' => 'like',
+                    'title' => 'Someone Liked Your Post',
+                    'message' => $user->name . ' liked your post "' . $post->title . '"',
+                    'data' => json_encode(['post_id' => $post->id]),
+                    'action_url' => route('forum.show', $post->id),
+                ]);
+            }
         }
 
-        return response()->json([
-            'liked' => $liked,
-            'likes_count' => $post->likes()->count()
-        ]);
+        return Redirect::back()->with('success', $message);
     }
 
     /**
@@ -231,9 +238,7 @@ class ForumController extends Controller
 
         // Prevent users from liking their own comments
         if ($comment->user_id === $user->id) {
-            return response()->json([
-                'error' => 'You cannot like your own comments!'
-            ], 403);
+            return Redirect::back()->with('error', 'You cannot like your own comments!');
         }
 
         $existingLike = ForumLike::where('user_id', $user->id)
@@ -243,19 +248,28 @@ class ForumController extends Controller
 
         if ($existingLike) {
             $existingLike->delete();
-            $liked = false;
+            $message = 'Comment unliked';
         } else {
             ForumLike::create([
                 'user_id' => $user->id,
                 'likeable_id' => $comment->id,
                 'likeable_type' => ForumComment::class,
             ]);
-            $liked = true;
+            $message = 'Comment liked!';
+            
+            // Notify comment author if someone else liked their comment
+            if ($comment->user_id !== $user->id) {
+                Notification::create([
+                    'user_id' => $comment->user_id,
+                    'type' => 'like',
+                    'title' => 'Someone Liked Your Comment',
+                    'message' => $user->name . ' liked your comment',
+                    'data' => json_encode(['comment_id' => $comment->id, 'post_id' => $comment->post_id]),
+                    'action_url' => route('forum.show', $comment->post_id),
+                ]);
+            }
         }
 
-        return response()->json([
-            'liked' => $liked,
-            'likes_count' => $comment->likes()->count()
-        ]);
+        return Redirect::back()->with('success', $message);
     }
 }

@@ -56,12 +56,28 @@ export default function Index({ pendingFollowRequests, socialNotifications, unre
         });
     };
 
+    const markAllAsRead = () => {
+        router.post('/activity/mark-all-read', {}, {
+            preserveScroll: true,
+        });
+    };
+
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Activity {unreadCount > 0 && `(${unreadCount} pending)`}
-                </h2>
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                        Activity {unreadCount > 0 && `(${unreadCount} pending)`}
+                    </h2>
+                    {socialNotifications.data.length > 0 && (
+                        <button
+                            onClick={markAllAsRead}
+                            className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition"
+                        >
+                            Mark All Read
+                        </button>
+                    )}
+                </div>
             }
         >
             <Head title="Activity" />
