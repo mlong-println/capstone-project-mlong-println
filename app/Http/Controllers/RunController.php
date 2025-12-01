@@ -60,8 +60,15 @@ class RunController extends Controller
             ->orderBy('name')
             ->get(['id', 'name', 'distance']);
 
+        // Get user's active shoes
+        $shoes = $user->shoes()
+            ->where('is_active', true)
+            ->orderBy('created_at', 'desc')
+            ->get(['id', 'brand', 'model', 'color']);
+
         return Inertia::render('Runs/Create', [
             'routes' => $routes,
+            'shoes' => $shoes,
         ]);
     }
 
@@ -75,6 +82,7 @@ class RunController extends Controller
 
         $validated = $request->validate([
             'route_id' => 'required|exists:routes,id',
+            'shoe_id' => 'nullable|exists:shoes,id',
             'start_time' => 'required|date',
             'completion_time' => 'required|integer', // in seconds
             'notes' => 'nullable|string|max:250',
@@ -98,12 +106,21 @@ class RunController extends Controller
         $run = Run::create([
             'user_id' => auth()->id(),
             'route_id' => $validated['route_id'],
+            'shoe_id' => $validated['shoe_id'] ?? null,
             'start_time' => $startTime,
             'end_time' => $endTime,
             'completion_time' => $validated['completion_time'],
             'notes' => $validated['notes'] ?? null,
             'elevation_gain' => $elevationGain,
         ]);
+
+        // Update shoe distance if a shoe was selected
+        if ($validated['shoe_id'] && $route) {
+            $shoe = \App\Models\Shoe::find($validated['shoe_id']);
+            if ($shoe && $shoe->user_id === auth()->id()) {
+                $shoe->increment('distance', $route->distance);
+            }
+        }
 
         \Log::info('Created run:', $run->toArray());
 

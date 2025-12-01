@@ -56,6 +56,12 @@ export default function ThemedNavBar({ auth, themeTextClass }: ThemedNavBarProps
                         >
                             Achievements
                         </Link>
+                        <Link
+                            href="/gear"
+                            className={`${themeTextClass} hover:text-white transition font-medium`}
+                        >
+                            Gear
+                        </Link>
                     </div>
 
                     {/* Right: Activity Heart + Notification Bell + User Dropdown */}

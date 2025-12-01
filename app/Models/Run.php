@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * Run Model
@@ -19,6 +21,7 @@ class Run extends Model
     protected $fillable = [
         'user_id',
         'route_id',
+        'shoe_id',
         'start_time',
         'end_time',
         'completion_time',
@@ -46,6 +49,38 @@ class Run extends Model
     public function route(): BelongsTo
     {
         return $this->belongsTo(Route::class);
+    }
+
+    /**
+     * Get the shoe used for this run
+     */
+    public function shoe(): BelongsTo
+    {
+        return $this->belongsTo(Shoe::class);
+    }
+
+    /**
+     * Get comments for this run
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(RunComment::class)->with('user')->latest();
+    }
+
+    /**
+     * Get users who liked this run
+     */
+    public function likes(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'run_likes')->withTimestamps();
+    }
+
+    /**
+     * Get likes count
+     */
+    public function likesCount(): int
+    {
+        return $this->likes()->count();
     }
 
     /**

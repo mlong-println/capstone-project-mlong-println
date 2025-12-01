@@ -77,6 +77,100 @@ Route::middleware(['auth'])->group(function () {
             ->join('routes', 'runs.route_id', '=', 'routes.id')
             ->sum('routes.distance');
         
+        // Get followed users' IDs
+        $followingIds = \App\Models\Follow::where('follower_id', $user->id)
+            ->where('status', 'approved')
+            ->pluck('following_id');
+        
+        // Get social feed activities
+        $feedActivities = collect();
+        
+        // Recent runs from followed users AND user's own runs
+        $allUserIds = $followingIds->push($user->id);
+        
+        $recentRuns = \App\Models\Run::whereIn('user_id', $allUserIds)
+            ->with(['user', 'route', 'likes', 'comments.user'])
+            ->orderBy('start_time', 'desc')
+            ->limit(15)
+            ->get()
+            ->map(function($run) use ($user) {
+                $likesCount = $run->likes->count();
+                $commentsCount = $run->comments->count();
+                $userLiked = $run->likes->contains('id', $user->id);
+                
+                // Get route preview (first 5 coordinates)
+                $routePreview = null;
+                if ($run->route && $run->route->coordinates) {
+                    $coords = is_string($run->route->coordinates) 
+                        ? json_decode($run->route->coordinates, true) 
+                        : $run->route->coordinates;
+                    if (is_array($coords) && count($coords) > 0) {
+                        $routePreview = array_slice($coords, 0, min(5, count($coords)));
+                    }
+                }
+                
+                return [
+                    'type' => 'run',
+                    'run_id' => $run->id,
+                    'user' => $run->user->name,
+                    'user_id' => $run->user->id,
+                    'is_own_run' => $run->user_id === $user->id,
+                    'message' => "completed a {$run->route->distance}km run on {$run->route->name}",
+                    'time' => $run->start_time,
+                    'data' => [
+                        'pace' => $run->formatted_pace,
+                        'distance' => $run->route->distance,
+                        'route_name' => $run->route->name,
+                        'route_preview' => $routePreview,
+                        'likes_count' => $likesCount,
+                        'comments_count' => $commentsCount,
+                        'user_liked' => $userLiked,
+                        'comments' => $run->comments->take(3)->map(fn($c) => [
+                            'id' => $c->id,
+                            'user_name' => $c->user->name,
+                            'user_id' => $c->user->id,
+                            'comment' => $c->comment,
+                            'created_at' => $c->created_at,
+                            'can_delete' => $c->user_id === $user->id,
+                        ]),
+                    ],
+                ];
+            });
+        
+        // Recent events
+        $recentEvents = \App\Models\Event::where('event_date', '>=', now())
+            ->with('creator')
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(fn($event) => [
+                'type' => 'event',
+                'user' => $event->creator->name,
+                'user_id' => $event->creator->id,
+                'message' => "created event: {$event->title}",
+                'time' => $event->created_at,
+                'data' => ['event_id' => $event->id, 'event_date' => $event->event_date],
+            ]);
+        
+        // Recent achievements (challenges)
+        $recentChallenges = \App\Models\Achievement::where('created_at', '>=', now()->subDays(7))
+            ->orderBy('created_at', 'desc')
+            ->limit(3)
+            ->get()
+            ->map(fn($achievement) => [
+                'type' => 'challenge',
+                'user' => 'RunConnect',
+                'user_id' => null,
+                'message' => "New challenge available: {$achievement->name}",
+                'time' => $achievement->created_at,
+                'data' => ['achievement_id' => $achievement->id],
+            ]);
+        
+        $feedActivities = $recentRuns->concat($recentEvents)->concat($recentChallenges)
+            ->sortByDesc('time')
+            ->take(15)
+            ->values();
+        
         return Inertia::render('RunnerDashboard', [
             'auth' => ['user' => $user],
             'user' => $user,
@@ -87,6 +181,7 @@ Route::middleware(['auth'])->group(function () {
                 'total_distance' => round($totalDistance, 2),
                 'current_weekly_mileage' => round($weekDistance, 2),
             ],
+            'feedActivities' => $feedActivities,
         ]);
     })
         ->middleware(CheckRole::class . ':runner') // use class + parameter
@@ -397,6 +492,45 @@ Route::middleware(['auth'])->prefix('achievements')->group(function () {
     
     Route::delete('/{achievement}/leave', [App\Http\Controllers\AchievementController::class, 'leave'])
         ->name('achievements.leave');
+});
+
+// Gear Routes
+Route::middleware(['auth'])->prefix('gear')->group(function () {
+    Route::get('/', [App\Http\Controllers\GearController::class, 'index'])
+        ->name('gear.index');
+    
+    Route::get('/create', [App\Http\Controllers\GearController::class, 'create'])
+        ->name('gear.create');
+    
+    Route::post('/', [App\Http\Controllers\GearController::class, 'store'])
+        ->name('gear.store');
+    
+    Route::get('/{shoe}/edit', [App\Http\Controllers\GearController::class, 'edit'])
+        ->name('gear.edit');
+    
+    Route::put('/{shoe}', [App\Http\Controllers\GearController::class, 'update'])
+        ->name('gear.update');
+    
+    Route::post('/{shoe}/retire', [App\Http\Controllers\GearController::class, 'retire'])
+        ->name('gear.retire');
+    
+    Route::post('/{shoe}/reactivate', [App\Http\Controllers\GearController::class, 'reactivate'])
+        ->name('gear.reactivate');
+    
+    Route::delete('/{shoe}', [App\Http\Controllers\GearController::class, 'destroy'])
+        ->name('gear.destroy');
+});
+
+// Run Interaction Routes (likes and comments)
+Route::middleware(['auth'])->prefix('runs')->group(function () {
+    Route::post('/{run}/like', [App\Http\Controllers\RunInteractionController::class, 'toggleLike'])
+        ->name('runs.like');
+    
+    Route::post('/{run}/comment', [App\Http\Controllers\RunInteractionController::class, 'addComment'])
+        ->name('runs.comment');
+    
+    Route::delete('/comments/{comment}', [App\Http\Controllers\RunInteractionController::class, 'deleteComment'])
+        ->name('runs.comment.delete');
 });
 
 // User Profile Routes

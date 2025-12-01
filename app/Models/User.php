@@ -168,6 +168,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Relationship: User has many Shoes
+     */
+    public function shoes(): HasMany
+    {
+        return $this->hasMany(Shoe::class);
+    }
+
+    /**
      * Relationship: User has many Forum Comments
      */
     public function forumComments(): HasMany

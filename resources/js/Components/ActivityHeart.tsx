@@ -27,10 +27,10 @@ export default function ActivityHeart() {
     return (
         <Link
             href="/activity"
-            className="relative text-white/80 hover:text-white transition"
+            className="relative inline-flex items-center justify-center rounded-full bg-white/10 p-2 text-white/80 hover:bg-white/20 hover:text-white transition"
         >
             <svg
-                className="h-6 w-6 fill-current"
+                className="h-5 w-5 fill-current"
                 viewBox="0 0 20 20"
                 xmlns="http://www.w3.org/2000/svg"
             >
@@ -41,7 +41,7 @@ export default function ActivityHeart() {
                 />
             </svg>
             {pendingCount > 0 && (
-                <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 w-5 text-xs font-bold text-white bg-red-600 rounded-full">
+                <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
                     {pendingCount > 9 ? '9+' : pendingCount}
                 </span>
             )}

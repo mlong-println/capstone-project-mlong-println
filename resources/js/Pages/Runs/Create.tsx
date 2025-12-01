@@ -12,13 +12,22 @@ interface Route {
     distance: number;
 }
 
-interface CreateRunProps {
-    routes: Route[];
+interface Shoe {
+    id: number;
+    brand: string;
+    model: string;
+    color: string | null;
 }
 
-export default function Create({ routes }: CreateRunProps) {
+interface CreateRunProps {
+    routes: Route[];
+    shoes: Shoe[];
+}
+
+export default function Create({ routes, shoes }: CreateRunProps) {
     const { data, setData, post, processing, errors } = useForm({
         route_id: '',
+        shoe_id: '',
         start_time: new Date().toISOString().slice(0, 16),
         hours: '0',
         minutes: '30',
@@ -52,6 +61,7 @@ export default function Create({ routes }: CreateRunProps) {
         // Submit with completion_time included
         router.post('/runs', {
             route_id: data.route_id,
+            shoe_id: data.shoe_id || null,
             start_time: data.start_time,
             completion_time: totalSeconds,
             notes: data.notes,
@@ -108,6 +118,30 @@ export default function Create({ routes }: CreateRunProps) {
                                     ))}
                                 </select>
                                 <InputError message={errors.route_id} className="mt-2" />
+                            </div>
+
+                            {/* Shoe Selection */}
+                            <div>
+                                <InputLabel htmlFor="shoe_id" value="Shoe (Optional)" />
+                                <select
+                                    id="shoe_id"
+                                    value={data.shoe_id}
+                                    onChange={(e) => setData('shoe_id', e.target.value)}
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                                    <option value="">No shoe selected</option>
+                                    {shoes.map((shoe) => (
+                                        <option key={shoe.id} value={shoe.id}>
+                                            {shoe.brand} {shoe.model} {shoe.color ? `(${shoe.color})` : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                                {shoes.length === 0 && (
+                                    <p className="mt-2 text-sm text-gray-500">
+                                        No active shoes. <a href="/gear/create" className="text-indigo-600 hover:text-indigo-800">Add a shoe</a> to track mileage.
+                                    </p>
+                                )}
+                                <InputError message={errors.shoe_id} className="mt-2" />
                             </div>
 
                             {/* Start Time */}
