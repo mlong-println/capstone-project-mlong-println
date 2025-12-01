@@ -135,6 +135,15 @@ export default function Show({ route: runningRoute, userRating, userRuns, canEdi
                         )}
                     </h2>
                     <div className="flex gap-2">
+                        <Link
+                            href={route('runs.create', { route_id: runningRoute.id })}
+                            className="inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500"
+                        >
+                            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            Log Activity
+                        </Link>
                         {isAdmin && (
                             <button
                                 onClick={() => router.post(`/routes/${runningRoute.id}/toggle-public`)}

@@ -388,6 +388,12 @@ Route::middleware(['auth'])->prefix('explore')->group(function () {
 Route::middleware(['auth'])->prefix('achievements')->group(function () {
     Route::get('/', [App\Http\Controllers\AchievementController::class, 'index'])
         ->name('achievements.index');
+    
+    Route::post('/{achievement}/join', [App\Http\Controllers\AchievementController::class, 'join'])
+        ->name('achievements.join');
+    
+    Route::delete('/{achievement}/leave', [App\Http\Controllers\AchievementController::class, 'leave'])
+        ->name('achievements.leave');
 });
 
 // Include Laravel's authentication routes (login, register, etc.)

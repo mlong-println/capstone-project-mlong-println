@@ -85,6 +85,16 @@ class RunController extends Controller
         $startTime = Carbon::parse($validated['start_time']);
         $endTime = $startTime->copy()->addSeconds($validated['completion_time']);
 
+        // Calculate elevation gain from route coordinates
+        $route = \App\Models\Route::find($validated['route_id']);
+        $elevationGain = null;
+        
+        if ($route && $route->coordinates) {
+            \Log::info('Attempting to calculate elevation for route: ' . $route->id);
+            $elevationGain = $this->calculateElevationGain($route->coordinates);
+            \Log::info('Elevation calculated: ' . ($elevationGain ?? 'null'));
+        }
+
         $run = Run::create([
             'user_id' => auth()->id(),
             'route_id' => $validated['route_id'],
@@ -92,6 +102,7 @@ class RunController extends Controller
             'end_time' => $endTime,
             'completion_time' => $validated['completion_time'],
             'notes' => $validated['notes'] ?? null,
+            'elevation_gain' => $elevationGain,
         ]);
 
         \Log::info('Created run:', $run->toArray());
@@ -203,5 +214,65 @@ class RunController extends Controller
             'best_pace' => $bestPace ? sprintf('%d:%02d /km', floor($bestPace), round(($bestPace - floor($bestPace)) * 60)) : 'N/A',
             'personal_records' => $prs,
         ]);
+    }
+
+    /**
+     * Calculate elevation gain from route coordinates using Open-Elevation API
+     */
+    private function calculateElevationGain($coordinates)
+    {
+        try {
+            // If coordinates is a string, decode it
+            if (is_string($coordinates)) {
+                $coordinates = json_decode($coordinates, true);
+            }
+            
+            if (!$coordinates || !is_array($coordinates) || count($coordinates) < 2) {
+                return 0;
+            }
+
+            // Prepare locations for API
+            $locations = array_map(function($coord) {
+                return [
+                    'latitude' => $coord['lat'],
+                    'longitude' => $coord['lng']
+                ];
+            }, $coordinates);
+
+            // Call Open-Elevation API
+            \Log::info('Calling elevation API with ' . count($locations) . ' locations');
+            $response = \Http::timeout(15)->post('https://api.open-elevation.com/api/v1/lookup', [
+                'locations' => $locations
+            ]);
+
+            if (!$response->successful()) {
+                \Log::warning('Elevation API failed with status: ' . $response->status());
+                return null;
+            }
+
+            $data = $response->json();
+            \Log::info('Elevation API response received');
+            
+            if (!isset($data['results']) || !is_array($data['results'])) {
+                \Log::warning('Invalid elevation API response structure');
+                return null;
+            }
+            
+            $elevations = array_map(fn($r) => $r['elevation'], $data['results']);
+
+            // Calculate total elevation change (both up and down)
+            $totalElevationChange = 0;
+            for ($i = 1; $i < count($elevations); $i++) {
+                $diff = abs($elevations[$i] - $elevations[$i - 1]);
+                $totalElevationChange += $diff;
+            }
+
+            \Log::info('Total elevation change calculated: ' . $totalElevationChange);
+            return round($totalElevationChange, 2);
+        } catch (\Exception $e) {
+            \Log::error('Failed to calculate elevation: ' . $e->getMessage());
+            \Log::error('Stack trace: ' . $e->getTraceAsString());
+            return null;
+        }
     }
 }

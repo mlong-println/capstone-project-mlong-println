@@ -115,14 +115,21 @@ export default function Index({ notifications }: NotificationsIndexProps) {
                             {localNotifications.map((notification) => (
                                 <div
                                     key={notification.id}
-                                    className={`bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-4 transition border border-white/20 ${
+                                    className={`backdrop-blur-sm rounded-lg shadow-lg p-4 transition border border-white/20 ${
+                                        notification.type === 'achievement' 
+                                            ? 'bg-gradient-to-r from-yellow-50 to-amber-50' 
+                                            : 'bg-white/90'
+                                    } ${
                                         !notification.read ? 'border-l-4 border-l-blue-500' : ''
                                     }`}
                                 >
                                     <div className="flex items-start justify-between">
                                         <div className="flex-1">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="font-semibold text-gray-900">
+                                                {notification.type === 'achievement' && (
+                                                    <span className="text-2xl">🏆</span>
+                                                )}
+                                                <h3 className={`font-semibold ${notification.type === 'achievement' ? 'text-yellow-600' : 'text-gray-900'}`}>
                                                     {notification.title}
                                                 </h3>
                                                 {!notification.read && (

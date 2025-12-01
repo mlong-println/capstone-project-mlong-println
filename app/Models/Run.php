@@ -23,6 +23,7 @@ class Run extends Model
         'end_time',
         'completion_time',
         'notes',
+        'elevation_gain',
     ];
 
     protected $casts = [
