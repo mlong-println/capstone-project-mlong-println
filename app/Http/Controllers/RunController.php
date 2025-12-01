@@ -130,7 +130,7 @@ class RunController extends Controller
             abort(403);
         }
 
-        $run->load('route');
+        $run->load('route', 'user');
 
         return Inertia::render('Runs/Show', [
             'run' => [
@@ -140,8 +140,20 @@ class RunController extends Controller
                 'completion_time' => $run->completion_time,
                 'formatted_time' => $run->formatted_time,
                 'formatted_pace' => $run->formatted_pace,
+                'elevation_gain' => $run->elevation_gain,
                 'notes' => $run->notes,
-                'route' => $run->route,
+                'route' => [
+                    'id' => $run->route->id,
+                    'name' => $run->route->name,
+                    'distance' => $run->route->distance,
+                    'coordinates' => $run->route->coordinates,
+                    'start_location' => $run->route->start_location,
+                    'end_location' => $run->route->end_location,
+                ],
+                'user' => [
+                    'id' => $run->user->id,
+                    'name' => $run->user->name,
+                ],
             ],
         ]);
     }

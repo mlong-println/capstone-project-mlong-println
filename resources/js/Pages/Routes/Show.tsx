@@ -422,7 +422,11 @@ export default function Show({ route: runningRoute, userRating, userRuns, canEdi
                                     </thead>
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {userRuns.map((run) => (
-                                            <tr key={run.id} className={run.is_personal_best ? 'bg-yellow-50' : ''}>
+                                            <tr 
+                                                key={run.id} 
+                                                className={`cursor-pointer transition hover:bg-gray-50 ${run.is_personal_best ? 'bg-yellow-50 hover:bg-yellow-100' : ''}`}
+                                                onClick={() => router.visit(`/runs/${run.id}`)}
+                                            >
                                                 <td className="px-6 py-4 whitespace-nowrap">
                                                     <div className="flex items-center">
                                                         {run.is_personal_best && (

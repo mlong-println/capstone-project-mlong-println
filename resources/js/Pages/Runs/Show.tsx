@@ -1,5 +1,6 @@
 import { Head, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import RouteMap from '@/Components/RouteMap';
 import { useState } from 'react';
 
 interface Run {
@@ -9,12 +10,19 @@ interface Run {
     completion_time: number;
     formatted_time: string;
     formatted_pace: string;
+    elevation_gain: number | null;
+    notes: string | null;
     route: {
         id: number;
         name: string;
         distance: number;
-        difficulty: string;
-        description: string;
+        coordinates: Array<{ lat: number; lng: number }>;
+        start_location: string;
+        end_location: string;
+    };
+    user: {
+        id: number;
+        name: string;
     };
 }
 
@@ -81,7 +89,7 @@ export default function Show({ run }: ShowRunProps) {
                         </div>
 
                         {/* Stats Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div className="bg-blue-50 rounded-lg p-4">
                                 <div className="text-sm font-medium text-blue-600 mb-1">Distance</div>
                                 <div className="text-2xl font-bold text-blue-900">{run.route.distance} km</div>
@@ -94,42 +102,49 @@ export default function Show({ run }: ShowRunProps) {
                                 <div className="text-sm font-medium text-purple-600 mb-1">Pace</div>
                                 <div className="text-2xl font-bold text-purple-900">{run.formatted_pace}</div>
                             </div>
-                            <div className="bg-orange-50 rounded-lg p-4">
-                                <div className="text-sm font-medium text-orange-600 mb-1">Difficulty</div>
-                                <div className="text-2xl font-bold text-orange-900 capitalize">{run.route.difficulty}</div>
-                            </div>
+                            {run.elevation_gain !== null && (
+                                <div className="bg-orange-50 rounded-lg p-4">
+                                    <div className="text-sm font-medium text-orange-600 mb-1">Elevation</div>
+                                    <div className="text-2xl font-bold text-orange-900">{Math.round(run.elevation_gain)}m</div>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* Route Information */}
+                    {/* Route Map */}
                     <div className="bg-white rounded-lg shadow p-6">
-                        <h4 className="text-lg font-semibold text-gray-900 mb-4">Route Information</h4>
-                        <div className="space-y-3">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4">Route Map</h4>
+                        <div className="rounded-lg overflow-hidden">
+                            <RouteMap coordinates={run.route.coordinates} />
+                        </div>
+                        <div className="mt-4 space-y-2">
                             <div>
-                                <span className="text-sm font-medium text-gray-600">Route Name:</span>
+                                <span className="text-sm font-medium text-gray-600">Route:</span>
                                 <Link
                                     href={`/routes/${run.route.id}`}
-                                    className="ml-2 text-indigo-600 hover:text-indigo-900"
+                                    className="ml-2 text-indigo-600 hover:text-indigo-900 font-medium"
                                 >
                                     {run.route.name}
                                 </Link>
                             </div>
-                            {run.route.description && (
-                                <div>
-                                    <span className="text-sm font-medium text-gray-600">Description:</span>
-                                    <p className="mt-1 text-sm text-gray-900">{run.route.description}</p>
-                                </div>
-                            )}
-                        </div>
-                        <div className="mt-4">
-                            <Link
-                                href={`/routes/${run.route.id}`}
-                                className="inline-flex items-center text-sm font-medium text-indigo-600 hover:text-indigo-900"
-                            >
-                                View Full Route Details →
-                            </Link>
+                            <div>
+                                <span className="text-sm font-medium text-gray-600">Start:</span>
+                                <span className="ml-2 text-sm text-gray-900">{run.route.start_location}</span>
+                            </div>
+                            <div>
+                                <span className="text-sm font-medium text-gray-600">End:</span>
+                                <span className="ml-2 text-sm text-gray-900">{run.route.end_location}</span>
+                            </div>
                         </div>
                     </div>
+
+                    {/* Notes */}
+                    {run.notes && (
+                        <div className="bg-white rounded-lg shadow p-6">
+                            <h4 className="text-lg font-semibold text-gray-900 mb-3">Notes</h4>
+                            <p className="text-gray-700 whitespace-pre-wrap">{run.notes}</p>
+                        </div>
+                    )}
 
                     {/* Timeline */}
                     <div className="bg-white rounded-lg shadow p-6">
