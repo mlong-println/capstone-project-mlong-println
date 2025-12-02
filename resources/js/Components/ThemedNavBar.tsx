@@ -2,6 +2,7 @@ import { Link } from '@inertiajs/react';
 import NotificationBell from '@/Components/NotificationBell';
 import ActivityHeart from '@/Components/ActivityHeart';
 import Dropdown from '@/Components/Dropdown';
+import { useState, useEffect, useRef } from 'react';
 
 interface ThemedNavBarProps {
     auth: { user: any };
@@ -10,58 +11,173 @@ interface ThemedNavBarProps {
 
 /**
  * ThemedNavBar
- * Navigation bar with links for themed dashboard pages
- * Includes: Dashboard, Forum, Routes, Events, Messages
+ * Navigation bar with dropdown menus for organized navigation
+ * Sections: Training, Activity, Social, Profile
  */
 export default function ThemedNavBar({ auth, themeTextClass }: ThemedNavBarProps) {
+    const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+    const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const toggleDropdown = (name: string) => {
+        setOpenDropdown(openDropdown === name ? null : name);
+    };
+
+    const closeDropdown = () => {
+        setOpenDropdown(null);
+    };
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                closeDropdown();
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
     return (
         <div className="w-full">
             <div className="max-w-7xl mx-auto px-4 py-3">
                 <div className="flex items-center justify-between">
-                    {/* Left: Navigation Links */}
-                    <div className="flex items-center space-x-6">
+                    {/* Left: Navigation Dropdowns */}
+                    <div ref={dropdownRef} className="flex items-center space-x-6">
+                        {/* Dashboard Link (standalone) */}
                         <Link
                             href="/dashboard"
                             className={`${themeTextClass} hover:text-white transition font-medium`}
                         >
                             Dashboard
                         </Link>
-                        <Link
-                            href="/forum"
-                            className={`${themeTextClass} hover:text-white transition font-medium`}
-                        >
-                            Forum
-                        </Link>
-                        <Link
-                            href="/routes"
-                            className={`${themeTextClass} hover:text-white transition font-medium`}
-                        >
-                            Routes
-                        </Link>
-                        <Link
-                            href="/events"
-                            className={`${themeTextClass} hover:text-white transition font-medium`}
-                        >
-                            Events
-                        </Link>
-                        <Link
-                            href="/messages/inbox"
-                            className={`${themeTextClass} hover:text-white transition font-medium`}
-                        >
-                            Messages
-                        </Link>
-                        <Link
-                            href="/achievements"
-                            className={`${themeTextClass} hover:text-white transition font-medium`}
-                        >
-                            Achievements
-                        </Link>
-                        <Link
-                            href="/gear"
-                            className={`${themeTextClass} hover:text-white transition font-medium`}
-                        >
-                            Gear
-                        </Link>
+
+                        {/* Training Dropdown */}
+                        <div className="relative">
+                            <button
+                                onClick={() => toggleDropdown('training')}
+                                className={`${themeTextClass} hover:text-white transition font-medium flex items-center gap-1`}
+                            >
+                                Training
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                            </button>
+                            {openDropdown === 'training' && (
+                                <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                    <div className="py-1">
+                                        <Link
+                                            href="/runner/plans"
+                                            onClick={closeDropdown}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Browse Plans
+                                        </Link>
+                                        <Link
+                                            href="/runner/my-plan"
+                                            onClick={closeDropdown}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            My Plan
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Activity Dropdown */}
+                        <div className="relative">
+                            <button
+                                onClick={() => toggleDropdown('activity')}
+                                className={`${themeTextClass} hover:text-white transition font-medium flex items-center gap-1`}
+                            >
+                                Activity
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                            </button>
+                            {openDropdown === 'activity' && (
+                                <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                    <div className="py-1">
+                                        <Link
+                                            href="/routes"
+                                            onClick={closeDropdown}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Routes
+                                        </Link>
+                                        <Link
+                                            href="/runs"
+                                            onClick={closeDropdown}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Runs
+                                        </Link>
+                                        <Link
+                                            href="/gear"
+                                            onClick={closeDropdown}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Gear
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Social Dropdown */}
+                        <div className="relative">
+                            <button
+                                onClick={() => toggleDropdown('social')}
+                                className={`${themeTextClass} hover:text-white transition font-medium flex items-center gap-1`}
+                            >
+                                Social
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                            </button>
+                            {openDropdown === 'social' && (
+                                <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                    <div className="py-1">
+                                        <Link
+                                            href="/forum"
+                                            onClick={closeDropdown}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Forum
+                                        </Link>
+                                        <Link
+                                            href="/messages/inbox"
+                                            onClick={closeDropdown}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Messages
+                                        </Link>
+                                        <Link
+                                            href="/events"
+                                            onClick={closeDropdown}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Events
+                                        </Link>
+                                        <Link
+                                            href="/activity"
+                                            onClick={closeDropdown}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Follow Requests
+                                        </Link>
+                                        <Link
+                                            href="/users"
+                                            onClick={closeDropdown}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Find Users
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Right: Activity Heart + Notification Bell + User Dropdown */}
@@ -92,6 +208,9 @@ export default function ThemedNavBar({ auth, themeTextClass }: ThemedNavBarProps
                             </Dropdown.Trigger>
 
                             <Dropdown.Content>
+                                <Dropdown.Link href="/achievements">
+                                    Achievements
+                                </Dropdown.Link>
                                 <Dropdown.Link href={route('profile.edit')}>
                                     Profile
                                 </Dropdown.Link>
