@@ -128,6 +128,27 @@ class RunnerPlanController extends Controller
             'completion_percentage' => 0,
         ]);
 
+        // Notify admin/trainer who created the plan
+        if ($plan->created_by) {
+            $planCreator = \App\Models\User::find($plan->created_by);
+            if ($planCreator && ($planCreator->role === 'admin' || $planCreator->role === 'trainer')) {
+                \App\Models\Notification::create([
+                    'user_id' => $planCreator->id,
+                    'type' => 'plan_signup',
+                    'title' => 'New Training Plan Signup',
+                    'message' => $user->name . " started your training plan: {$plan->name}",
+                    'data' => json_encode([
+                        'plan_id' => $plan->id,
+                        'runner_id' => $user->id,
+                        'runner_name' => $user->name,
+                        'plan_name' => $plan->name,
+                        'start_date' => $startDate,
+                    ]),
+                    'is_read' => false,
+                ]);
+            }
+        }
+
         return Redirect::route('runner.dashboard')->with('success', 'Training plan assigned successfully! Let\'s get started!');
     }
 

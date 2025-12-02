@@ -25,6 +25,7 @@ interface RouteMapProps {
     onCoordinatesChange?: (coords: Coordinate[]) => void;
     editable?: boolean;
     height?: string;
+    enableRoadSnapping?: boolean;
 }
 
 /**
@@ -54,13 +55,18 @@ export default function RouteMap({
     coordinates, 
     onCoordinatesChange, 
     editable = false,
-    height = '400px'
+    height = '400px',
+    enableRoadSnapping = false  // Default to OFF - straight lines work better for park trails
 }: RouteMapProps) {
-    const [localCoords, setLocalCoords] = useState<Coordinate[]>(coordinates);
+    // Ensure coordinates is always an array
+    const safeCoordinates = Array.isArray(coordinates) ? coordinates : [];
+    
+    const [localCoords, setLocalCoords] = useState<Coordinate[]>(safeCoordinates);
     const [routePath, setRoutePath] = useState<Coordinate[]>([]); // Actual road-snapped path
     const [elevations, setElevations] = useState<number[]>([]);
     const [loadingElevation, setLoadingElevation] = useState(false);
     const [loadingRoute, setLoadingRoute] = useState(false);
+    const [roadSnapping, setRoadSnapping] = useState(true);  // Start with snapping ON for Google Maps
     const mapRef = useRef<L.Map | null>(null);
     const fetchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -70,7 +76,7 @@ export default function RouteMap({
 
     // Sync with parent coordinates
     useEffect(() => {
-        setLocalCoords(coordinates);
+        setLocalCoords(safeCoordinates);
     }, [coordinates]);
 
     // Handle route snapping when localCoords changes
@@ -91,54 +97,64 @@ export default function RouteMap({
             return;
         }
         
-        // For 2+ waypoints, debounce the route snapping slightly
-        fetchTimeoutRef.current = setTimeout(() => {
-            fetchRoutePath(localCoords);
-        }, 300); // Small delay to batch rapid clicks
+        // For 2+ waypoints, fetch route path if road snapping is enabled AND editable
+        if (roadSnapping && editable) {
+            fetchTimeoutRef.current = setTimeout(() => {
+                fetchRoutePath(localCoords);
+            }, 300); // Small delay to batch rapid clicks
+        } else {
+            // Use straight lines between waypoints (or when viewing non-editable routes)
+            setRoutePath(localCoords);
+            if (editable) {
+                fetchElevations(localCoords);
+            }
+        }
         
         return () => {
             if (fetchTimeoutRef.current) {
                 clearTimeout(fetchTimeoutRef.current);
             }
         };
-    }, [localCoords]);
+    }, [localCoords, roadSnapping]);
 
-    // Fetch road-snapped route using OSRM (free, no API key needed)
+    // Fetch route snapping via Laravel backend
     const fetchRoutePath = async (waypoints: Coordinate[]) => {
         if (waypoints.length < 2) return;
         
         setLoadingRoute(true);
         try {
-            // Build OSRM URL: /route/v1/foot/lng,lat;lng,lat?overview=full&geometries=geojson
-            const coords = waypoints.map(w => `${w.lng},${w.lat}`).join(';');
-            const url = `https://router.project-osrm.org/route/v1/foot/${coords}?overview=full&geometries=geojson`;
+            console.log('🗺️ Snapping route with', waypoints.length, 'waypoints...');
             
-            const response = await fetch(url);
+            const response = await fetch('/api/route-snap', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                },
+                body: JSON.stringify({ waypoints }),
+            });
             
             if (response.ok) {
                 const data = await response.json();
-                if (data.routes && data.routes.length > 0) {
-                    const routeCoords = data.routes[0].geometry.coordinates.map((c: number[]) => ({
-                        lng: c[0],
-                        lat: c[1],
-                    }));
-                    setRoutePath(routeCoords);
-                    
-                    // Fetch elevations for the snapped route
-                    fetchElevations(routeCoords);
+                console.log('✅ Route snap response:', data);
+                
+                if (data.success && data.coordinates && data.coordinates.length > 0) {
+                    console.log('✅ Route snapped successfully with', data.coordinates.length, 'points');
+                    setRoutePath(data.coordinates);
+                    fetchElevations(data.coordinates);
                 } else {
+                    console.warn('⚠️ Route snapping returned no coordinates, using waypoints');
                     setRoutePath(waypoints);
                     fetchElevations(waypoints);
                 }
             } else {
-                // Fallback to straight lines if API fails
-                console.warn('Route snapping failed, using straight lines');
+                const errorText = await response.text();
+                console.error('❌ Route snapping API error:', response.status, errorText);
                 setRoutePath(waypoints);
                 fetchElevations(waypoints);
             }
         } catch (error) {
-            console.error('Failed to fetch route path:', error);
-            // Fallback to straight lines
+            console.error('❌ Failed to fetch route path:', error);
             setRoutePath(waypoints);
             fetchElevations(waypoints);
         } finally {
@@ -256,30 +272,44 @@ export default function RouteMap({
     return (
         <div className="space-y-3">
             {editable && (
-                <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div className="text-sm text-blue-800">
-                        <strong>Click on the map</strong> to add waypoints - route will snap to roads/paths
-                        {loadingRoute && <span className="ml-2 text-blue-600">⏳ Calculating route...</span>}
-                    </div>
-                    <div className="flex gap-2">
-                        {localCoords.length > 0 && (
-                            <>
-                                <button
-                                    type="button"
-                                    onClick={handleUndoLast}
-                                    className="px-3 py-1 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700 transition"
-                                >
-                                    Undo Last
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleClearRoute}
-                                    className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
-                                >
-                                    Clear Route
-                                </button>
-                            </>
-                        )}
+                <div className="space-y-2">
+                    <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg p-3">
+                        <div className="text-sm text-blue-800">
+                            <strong>Click on the map</strong> to add waypoints
+                            {roadSnapping ? ' - route will snap to roads/paths' : ' - straight lines between points'}
+                            {loadingRoute && <span className="ml-2 text-blue-600">⏳ Calculating route...</span>}
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setRoadSnapping(!roadSnapping)}
+                                className={`px-3 py-1 text-sm rounded transition ${
+                                    roadSnapping 
+                                        ? 'bg-green-600 text-white hover:bg-green-700' 
+                                        : 'bg-gray-600 text-white hover:bg-gray-700'
+                                }`}
+                            >
+                                {roadSnapping ? '🛣️ Road Snap: ON' : '📍 Direct Lines'}
+                            </button>
+                            {localCoords.length > 0 && (
+                                <>
+                                    <button
+                                        type="button"
+                                        onClick={handleUndoLast}
+                                        className="px-3 py-1 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700 transition"
+                                    >
+                                        Undo Last
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={handleClearRoute}
+                                        className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
+                                    >
+                                        Clear Route
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             )}

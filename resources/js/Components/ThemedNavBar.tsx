@@ -38,6 +38,8 @@ export default function ThemedNavBar({ auth, themeTextClass }: ThemedNavBarProps
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const isAdmin = auth.user.role === 'admin';
+
     return (
         <div className="w-full">
             <div className="max-w-7xl mx-auto px-4 py-3">
@@ -52,8 +54,187 @@ export default function ThemedNavBar({ auth, themeTextClass }: ThemedNavBarProps
                             Dashboard
                         </Link>
 
-                        {/* Training Dropdown */}
-                        <div className="relative">
+                        {/* Admin-specific dropdowns */}
+                        {isAdmin ? (
+                            <>
+                                {/* Athletes Dropdown */}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => toggleDropdown('athletes')}
+                                        className={`${themeTextClass} hover:text-white transition font-medium flex items-center gap-1`}
+                                    >
+                                        Athletes
+                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    {openDropdown === 'athletes' && (
+                                        <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                            <div className="py-1">
+                                                <Link
+                                                    href="/trainer/runners"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    View All Athletes
+                                                </Link>
+                                                <Link
+                                                    href="/users"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    Find Athletes
+                                                </Link>
+                                                <Link
+                                                    href="/trainer/plans"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    Training Plans
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Routes Dropdown */}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => toggleDropdown('routes')}
+                                        className={`${themeTextClass} hover:text-white transition font-medium flex items-center gap-1`}
+                                    >
+                                        Routes
+                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    {openDropdown === 'routes' && (
+                                        <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                            <div className="py-1">
+                                                <Link
+                                                    href="/routes"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    All Routes
+                                                </Link>
+                                                <Link
+                                                    href="/routes/create"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    Create Route
+                                                </Link>
+                                                <Link
+                                                    href="/explore"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    Explore & Leaderboards
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Social Dropdown for Admin */}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => toggleDropdown('social')}
+                                        className={`${themeTextClass} hover:text-white transition font-medium flex items-center gap-1`}
+                                    >
+                                        Social
+                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    {openDropdown === 'social' && (
+                                        <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                            <div className="py-1">
+                                                <Link
+                                                    href="/forum"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    Forum
+                                                </Link>
+                                                <Link
+                                                    href="/events"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    Events
+                                                </Link>
+                                                <Link
+                                                    href="/messages/inbox"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    Messages
+                                                </Link>
+                                                <Link
+                                                    href="/safety-alerts"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    Safety Alerts
+                                                </Link>
+                                                <Link
+                                                    href="/users"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    Find Users
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Admin Tools Dropdown */}
+                                <div className="relative">
+                                    <button
+                                        onClick={() => toggleDropdown('admin')}
+                                        className={`${themeTextClass} hover:text-white transition font-medium flex items-center gap-1`}
+                                    >
+                                        Admin
+                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    {openDropdown === 'admin' && (
+                                        <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
+                                            <div className="py-1">
+                                                <Link
+                                                    href="/forum"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    Flagged Posts
+                                                </Link>
+                                                <Link
+                                                    href="/safety-alerts"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    Review Alerts
+                                                </Link>
+                                                <Link
+                                                    href="/achievements"
+                                                    onClick={closeDropdown}
+                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                                >
+                                                    Manage Challenges
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                {/* Runner Training Dropdown */}
+                                <div className="relative">
                             <button
                                 onClick={() => toggleDropdown('training')}
                                 className={`${themeTextClass} hover:text-white transition font-medium flex items-center gap-1`}
@@ -178,6 +359,8 @@ export default function ThemedNavBar({ auth, themeTextClass }: ThemedNavBarProps
                                 </div>
                             )}
                         </div>
+                            </>
+                        )}
                     </div>
 
                     {/* Right: Activity Heart + Notification Bell + User Dropdown */}

@@ -93,7 +93,7 @@ class RunController extends Controller
         \Log::info('Validated data:', $validated);
 
         $startTime = Carbon::parse($validated['start_time']);
-        $endTime = $startTime->copy()->addSeconds($validated['completion_time']);
+        $endTime = $startTime->copy()->addSeconds((int)$validated['completion_time']);
 
         // Calculate elevation gain from route coordinates
         $route = \App\Models\Route::find($validated['route_id']);
@@ -133,6 +133,27 @@ class RunController extends Controller
         }
 
         \Log::info('Created run:', $run->toArray());
+
+        // Notify admin if run was on an admin-created route
+        if ($route && $route->created_by) {
+            $routeCreator = \App\Models\User::find($route->created_by);
+            if ($routeCreator && $routeCreator->role === 'admin' && $routeCreator->id !== auth()->id()) {
+                \App\Models\Notification::create([
+                    'user_id' => $routeCreator->id,
+                    'type' => 'run_completed',
+                    'title' => 'Run Completed on Your Route',
+                    'message' => auth()->user()->name . " completed a run on {$route->name} ({$route->distance}km)",
+                    'data' => json_encode([
+                        'run_id' => $run->id,
+                        'route_id' => $route->id,
+                        'runner_name' => auth()->user()->name,
+                        'route_name' => $route->name,
+                        'distance' => $route->distance,
+                    ]),
+                    'is_read' => false,
+                ]);
+            }
+        }
 
         // Check for achievements
         $achievementService = new \App\Services\AchievementService();

@@ -21,7 +21,7 @@ interface RunComment {
 }
 
 interface FeedActivity {
-  type: 'run' | 'event' | 'challenge';
+  type: 'run' | 'event' | 'challenge' | 'safety_alert';
   run_id?: number;
   user: string;
   user_id: number | null;
@@ -40,6 +40,12 @@ interface FeedActivity {
     event_id?: number;
     event_date?: string;
     achievement_id?: number;
+    alert_id?: number;
+    severity?: string;
+    alert_type?: string;
+    location?: string;
+    severity_color?: string;
+    alert_type_icon?: string;
   };
 }
 
@@ -84,7 +90,7 @@ export default function RunnerDashboard({ auth, user, profile, activePlan, stats
     return `${diffDays}d ago`;
   };
 
-  const getActivityIcon = (type: string) => {
+  const getActivityIcon = (type: string, alertTypeIcon?: string) => {
     switch (type) {
       case 'run':
         return '🏃';
@@ -92,6 +98,8 @@ export default function RunnerDashboard({ auth, user, profile, activePlan, stats
         return '📅';
       case 'challenge':
         return '🏆';
+      case 'safety_alert':
+        return alertTypeIcon || '⚠️';
       default:
         return '📢';
     }
@@ -133,7 +141,7 @@ export default function RunnerDashboard({ auth, user, profile, activePlan, stats
       <BackgroundSlideshow />
 
       {/* Top navbar with navigation links - Keep theme color */}
-      <div className={`w-full ${themeConfig.navGradient} shadow-lg relative z-10`}>
+      <div className={`w-full ${themeConfig.navGradient} shadow-lg relative z-50`}>
         <ThemedNavBar auth={auth} themeTextClass={themeConfig.textLight} />
       </div>
 
@@ -216,7 +224,7 @@ export default function RunnerDashboard({ auth, user, profile, activePlan, stats
                         <div className="space-y-2">
                           {/* User and Message */}
                           <div className="flex items-start gap-2">
-                            <span className="text-xl">{getActivityIcon(activity.type)}</span>
+                            <span className="text-xl">{getActivityIcon(activity.type, activity.data.alert_type_icon)}</span>
                             <div className="flex-1">
                               <p className="text-sm text-gray-900">
                                 {activity.user_id ? (
@@ -226,7 +234,9 @@ export default function RunnerDashboard({ auth, user, profile, activePlan, stats
                                 ) : (
                                   <span className="font-semibold">{activity.user}</span>
                                 )}{' '}
-                                <span className="text-gray-600">{activity.message}</span>
+                                <Link href={`/runs/${activity.run_id}`} className="text-gray-600 hover:text-indigo-600 hover:underline">
+                                  {activity.message}
+                                </Link>
                               </p>
                               <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(activity.time)}</p>
                             </div>
@@ -234,7 +244,7 @@ export default function RunnerDashboard({ auth, user, profile, activePlan, stats
 
                           {/* Route Preview */}
                           {activity.data.route_preview && activity.data.route_preview.length > 0 && (
-                            <div className="ml-7 bg-gray-100 rounded p-2 text-xs">
+                            <Link href={`/runs/${activity.run_id}`} className="ml-7 bg-gray-100 hover:bg-gray-200 rounded p-2 text-xs block transition">
                               <div className="flex items-center gap-2">
                                 <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
@@ -242,7 +252,7 @@ export default function RunnerDashboard({ auth, user, profile, activePlan, stats
                                 <span className="text-gray-700 font-medium">{activity.data.route_name}</span>
                                 <span className="text-gray-500">• {activity.data.distance}km • {activity.data.pace}</span>
                               </div>
-                            </div>
+                            </Link>
                           )}
 
                           {/* Like and Comment Actions */}
@@ -317,22 +327,52 @@ export default function RunnerDashboard({ auth, user, profile, activePlan, stats
                           )}
                         </div>
                       ) : (
-                        /* Non-Run Activities (Events, Challenges) */
-                        <div className="flex items-start gap-2">
-                          <span className="text-xl">{getActivityIcon(activity.type)}</span>
-                          <div className="flex-1">
-                            <p className="text-sm text-gray-900">
-                              {activity.user_id ? (
-                                <Link href={`/users/${activity.user_id}`} className="font-semibold hover:text-indigo-600">
-                                  {activity.user}
-                                </Link>
-                              ) : (
-                                <span className="font-semibold">{activity.user}</span>
-                              )}{' '}
-                              <span className="text-gray-600">{activity.message}</span>
-                            </p>
-                            <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(activity.time)}</p>
+                        /* Non-Run Activities (Events, Challenges, Safety Alerts) */
+                        <div className="space-y-2">
+                          <div className="flex items-start gap-2">
+                            <span className="text-xl">{getActivityIcon(activity.type, activity.data.alert_type_icon)}</span>
+                            <div className="flex-1">
+                              <p className="text-sm text-gray-900">
+                                {activity.user_id ? (
+                                  <Link href={`/users/${activity.user_id}`} className="font-semibold hover:text-indigo-600">
+                                    {activity.user}
+                                  </Link>
+                                ) : (
+                                  <span className="font-semibold">{activity.user}</span>
+                                )}{' '}
+                                {activity.type === 'event' && activity.data.event_id ? (
+                                  <Link href={`/events/${activity.data.event_id}`} className="text-gray-600 hover:text-indigo-600 hover:underline">
+                                    {activity.message}
+                                  </Link>
+                                ) : activity.type === 'safety_alert' && activity.data.alert_id ? (
+                                  <Link href={`/safety-alerts/${activity.data.alert_id}`} className="text-gray-600 hover:text-indigo-600 hover:underline">
+                                    {activity.message}
+                                  </Link>
+                                ) : (
+                                  <span className="text-gray-600">{activity.message}</span>
+                                )}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-1">{formatTimeAgo(activity.time)}</p>
+                            </div>
                           </div>
+                          
+                          {/* Safety Alert Details */}
+                          {activity.type === 'safety_alert' && activity.data.location && (
+                            <div className="ml-7 bg-orange-50 border border-orange-200 rounded p-2 text-xs">
+                              <div className="flex items-center gap-2">
+                                <svg className="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                <span className="text-gray-700 font-medium">{activity.data.location}</span>
+                                {activity.data.severity_color && (
+                                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${activity.data.severity_color}`}>
+                                    {activity.data.severity?.toUpperCase()}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>

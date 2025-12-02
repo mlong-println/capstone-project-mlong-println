@@ -4,6 +4,7 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import TextInput from '@/Components/TextInput';
 import PrimaryButton from '@/Components/PrimaryButton';
+import RouteMap from '@/Components/RouteMap';
 
 interface RunningRoute {
     id: number;
@@ -118,27 +119,21 @@ export default function Edit({ route: runningRoute }: EditProps) {
                                 </div>
                             </div>
 
-                            {/* Map Placeholder */}
+                            {/* Route Map */}
                             <div>
-                                <InputLabel value="Route Map (Coming Soon)" />
-                                <div className="mt-1 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center bg-gray-50">
-                                    <svg
-                                        className="mx-auto h-12 w-12 text-gray-400"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
-                                        />
-                                    </svg>
-                                    <p className="mt-2 text-sm text-gray-500">
-                                        Interactive map editing will be added soon
-                                    </p>
-                                </div>
+                                <InputLabel value="Route Map" />
+                                <p className="text-sm text-gray-600 mb-2">
+                                    Click on the map to add waypoints. The route will automatically snap to roads.
+                                </p>
+                                <RouteMap
+                                    coordinates={data.coordinates || []}
+                                    onCoordinatesChange={(coords) => setData('coordinates', coords)}
+                                    editable={true}
+                                    height="500px"
+                                />
+                                <p className="text-xs text-gray-500 mt-2">
+                                    💡 Tip: Add waypoints to create your route. The distance will be calculated automatically.
+                                </p>
                             </div>
 
                             {/* Warning */}

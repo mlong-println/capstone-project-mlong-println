@@ -89,6 +89,7 @@ Route::middleware(['auth'])->group(function () {
         $allUserIds = $followingIds->push($user->id);
         
         $recentRuns = \App\Models\Run::whereIn('user_id', $allUserIds)
+            ->where('is_public', true)
             ->with(['user', 'route', 'likes', 'comments.user'])
             ->orderBy('start_time', 'desc')
             ->limit(15)
@@ -166,7 +167,29 @@ Route::middleware(['auth'])->group(function () {
                 'data' => ['achievement_id' => $achievement->id],
             ]);
         
-        $feedActivities = $recentRuns->concat($recentEvents)->concat($recentChallenges)
+        // Recent safety alerts
+        $recentSafetyAlerts = \App\Models\SafetyAlert::with('user')
+            ->active()
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(fn($alert) => [
+                'type' => 'safety_alert',
+                'user' => $alert->user->name,
+                'user_id' => $alert->user->id,
+                'message' => "reported a safety alert: {$alert->title}",
+                'time' => $alert->created_at,
+                'data' => [
+                    'alert_id' => $alert->id,
+                    'severity' => $alert->severity,
+                    'alert_type' => $alert->alert_type,
+                    'location' => $alert->location,
+                    'severity_color' => $alert->severity_color,
+                    'alert_type_icon' => $alert->alert_type_icon,
+                ],
+            ]);
+        
+        $feedActivities = $recentRuns->concat($recentEvents)->concat($recentChallenges)->concat($recentSafetyAlerts)
             ->sortByDesc('time')
             ->take(15)
             ->values();
@@ -577,29 +600,36 @@ Route::middleware('auth')->group(function () {
 });
 
 /**
- * Trail Alerts routes
- * For reporting trail conditions, hazards, closures, etc.
+ * Safety Alerts routes
+ * For reporting route conditions, hazards, closures, etc.
  * Protected by authentication middleware
  */
-Route::middleware(['auth'])->prefix('trail-alerts')->name('trail-alerts.')->group(function () {
-    Route::get('/', [App\Http\Controllers\TrailAlertController::class, 'index'])
+Route::middleware(['auth'])->prefix('safety-alerts')->name('safety-alerts.')->group(function () {
+    Route::get('/', [App\Http\Controllers\SafetyAlertController::class, 'index'])
         ->name('index');
     
-    Route::get('/create', [App\Http\Controllers\TrailAlertController::class, 'create'])
+    Route::get('/create', [App\Http\Controllers\SafetyAlertController::class, 'create'])
         ->name('create');
     
-    Route::post('/', [App\Http\Controllers\TrailAlertController::class, 'store'])
+    Route::post('/', [App\Http\Controllers\SafetyAlertController::class, 'store'])
         ->name('store');
     
-    Route::get('/{trailAlert}', [App\Http\Controllers\TrailAlertController::class, 'show'])
+    Route::get('/{safetyAlert}', [App\Http\Controllers\SafetyAlertController::class, 'show'])
         ->name('show');
     
-    Route::put('/{trailAlert}', [App\Http\Controllers\TrailAlertController::class, 'update'])
+    Route::put('/{safetyAlert}', [App\Http\Controllers\SafetyAlertController::class, 'update'])
         ->name('update');
     
-    Route::delete('/{trailAlert}', [App\Http\Controllers\TrailAlertController::class, 'destroy'])
+    Route::delete('/{safetyAlert}', [App\Http\Controllers\SafetyAlertController::class, 'destroy'])
         ->name('destroy');
 });
+
+/**
+ * Route Snapping API
+ * Snaps waypoints to pedestrian paths using external routing services
+ */
+Route::middleware(['auth'])->post('/api/route-snap', [App\Http\Controllers\RouteSnapController::class, 'snap'])
+    ->name('api.route-snap');
 
 // Include Laravel's authentication routes (login, register, etc.)
 require __DIR__.'/auth.php';

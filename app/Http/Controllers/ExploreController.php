@@ -21,8 +21,9 @@ class ExploreController extends Controller
 
         // Get all public routes with leaderboard data
         $routes = $query->get()->map(function($route) {
-            // Get top 3 runs overall
+            // Get top 3 public runs overall
             $topRuns = $route->runs()
+                ->where('is_public', true)
                 ->with('user')
                 ->orderBy('completion_time', 'asc')
                 ->take(3)
@@ -71,8 +72,9 @@ class ExploreController extends Controller
         // Get filter from request
         $filter = request('filter', 'overall'); // overall, male, female
 
-        // Build leaderboard query
+        // Build leaderboard query - only public runs
         $leaderboardQuery = $route->runs()
+            ->where('is_public', true)
             ->with('user')
             ->orderBy('completion_time', 'asc');
 
