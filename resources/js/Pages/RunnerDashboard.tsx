@@ -4,6 +4,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import { useTheme } from '@/Components/ThemeSelector';
 import ThemedNavBar from '@/Components/ThemedNavBar';
 import InspirationalQuotes from '@/Components/InspirationalQuotes';
+import BackgroundSlideshow from '@/Components/BackgroundSlideshow';
 import { useState } from 'react';
 
 /**
@@ -125,36 +126,41 @@ export default function RunnerDashboard({ auth, user, profile, activePlan, stats
   };
 
   return (
-    <div className={`min-h-screen ${themeConfig.gradient}`}>
+    <div className="min-h-screen relative">
       <Head title="Runner Dashboard" />
+      
+      {/* Background Slideshow */}
+      <BackgroundSlideshow />
 
-      {/* Top navbar with navigation links */}
-      <div className={`w-full ${themeConfig.navGradient} shadow-lg`}>
+      {/* Top navbar with navigation links - Keep theme color */}
+      <div className={`w-full ${themeConfig.navGradient} shadow-lg relative z-10`}>
         <ThemedNavBar auth={auth} themeTextClass={themeConfig.textLight} />
       </div>
 
-      {/* Header */}
-      <div className="max-w-6xl mx-auto py-10 px-6">
-        <h1 className={`text-3xl font-bold ${themeConfig.text}`}>Runner Dashboard</h1>
-        <p className={`mt-2 ${themeConfig.text} opacity-80`}>
-          Welcome back, {user.name}. Here's a snapshot of your running activity.
-        </p>
+      {/* Header - Keep theme color background */}
+      <div className={`${themeConfig.gradient} relative z-10`}>
+        <div className="max-w-6xl mx-auto py-6 px-6">
+          <h1 className={`text-3xl font-bold ${themeConfig.text} tracking-tight`}>Runner Dashboard</h1>
+          <p className={`mt-1 ${themeConfig.text} opacity-90`}>
+            Welcome back, {user.name}. Here's a snapshot of your running activity.
+          </p>
 
-        {/* Profile completion prompt */}
-        {!profile && (
-          <div className="mt-4 rounded-lg border border-yellow-300 bg-yellow-50 p-4">
-            <p className="text-sm text-yellow-800">
-              <strong>Complete your profile</strong> to get started with training plans.{' '}
-              <Link href="/runner/profile/edit" className="underline font-medium">
-                Set up profile →
-              </Link>
-            </p>
-          </div>
-        )}
+          {/* Profile completion prompt */}
+          {!profile && (
+            <div className="mt-4 rounded-lg border border-yellow-300 bg-yellow-50 p-4">
+              <p className="text-sm text-yellow-800">
+                <strong>Complete your profile</strong> to get started with training plans.{' '}
+                <Link href="/runner/profile/edit" className="underline font-medium">
+                  Set up profile →
+                </Link>
+              </p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Main Content - Two Column Layout */}
-      <div className="max-w-7xl mx-auto px-6 mb-12">
+      <div className="max-w-7xl mx-auto px-6 py-8 mb-12 relative z-10">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Left Column - Training Plan & Social Feed */}

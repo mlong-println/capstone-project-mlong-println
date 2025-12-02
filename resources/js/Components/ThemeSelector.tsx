@@ -12,13 +12,13 @@ import { useState, useEffect, createContext, useContext, ReactNode } from 'react
 const themes = {
   forest: {
     name: 'Forest',
-    // Main gradient: vibrant deep greens
-    gradient: 'bg-gradient-to-br from-emerald-400 via-green-500 to-teal-600',
-    // Navbar: reverse gradient (dark to light)
-    navGradient: 'bg-gradient-to-r from-teal-600 via-green-500 to-emerald-400',
-    accent: 'bg-green-600 hover:bg-green-700',
-    text: 'text-green-950',
-    textLight: 'text-white',
+    // Main gradient: dark forest greens (very dark to lighter)
+    gradient: 'bg-gradient-to-br from-green-950 via-green-800 to-green-600',
+    // Navbar: reverse gradient (lighter to darker)
+    navGradient: 'bg-gradient-to-r from-green-600 via-green-800 to-green-950',
+    accent: 'bg-green-700 hover:bg-green-800',
+    text: 'text-green-50',
+    textLight: 'text-green-50',
   },
   camo: {
     name: 'Camo',
