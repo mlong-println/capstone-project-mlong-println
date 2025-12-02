@@ -86,6 +86,8 @@ class RunController extends Controller
             'start_time' => 'required|date',
             'completion_time' => 'required|integer', // in seconds
             'notes' => 'nullable|string|max:250',
+            'is_public' => 'nullable|boolean',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120', // 5MB max
         ]);
 
         \Log::info('Validated data:', $validated);
@@ -103,6 +105,12 @@ class RunController extends Controller
             \Log::info('Elevation calculated: ' . ($elevationGain ?? 'null'));
         }
 
+        // Handle photo upload
+        $photoPath = null;
+        if ($request->hasFile('photo')) {
+            $photoPath = $request->file('photo')->store('run-photos', 'public');
+        }
+
         $run = Run::create([
             'user_id' => auth()->id(),
             'route_id' => $validated['route_id'],
@@ -112,6 +120,8 @@ class RunController extends Controller
             'completion_time' => $validated['completion_time'],
             'notes' => $validated['notes'] ?? null,
             'elevation_gain' => $elevationGain,
+            'is_public' => $validated['is_public'] ?? true,
+            'photo' => $photoPath,
         ]);
 
         // Update shoe distance if a shoe was selected
@@ -176,6 +186,62 @@ class RunController extends Controller
     }
 
     /**
+     * Show the form for editing a run
+     */
+    public function edit(Run $run)
+    {
+        // Ensure user owns this run
+        if ($run->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $run->load('route');
+        
+        $shoes = \App\Models\Shoe::where('user_id', auth()->id())
+            ->where('is_active', true)
+            ->get();
+
+        return Inertia::render('Runs/Edit', [
+            'run' => $run,
+            'shoes' => $shoes,
+        ]);
+    }
+
+    /**
+     * Update a run
+     */
+    public function update(Request $request, Run $run)
+    {
+        // Ensure user owns this run
+        if ($run->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'notes' => 'nullable|string|max:250',
+            'is_public' => 'nullable|boolean',
+            'photo' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
+        ]);
+
+        // Handle photo upload
+        if ($request->hasFile('photo')) {
+            // Delete old photo if exists
+            if ($run->photo) {
+                \Storage::disk('public')->delete($run->photo);
+            }
+            $validated['photo'] = $request->file('photo')->store('run-photos', 'public');
+        }
+
+        $run->update([
+            'notes' => $validated['notes'] ?? $run->notes,
+            'is_public' => $validated['is_public'] ?? $run->is_public,
+            'photo' => $validated['photo'] ?? $run->photo,
+        ]);
+
+        return Redirect::route('runs.show', $run)->with('success', 'Run updated successfully!');
+    }
+
+    /**
      * Remove a run
      */
     public function destroy(Run $run)
@@ -183,6 +249,11 @@ class RunController extends Controller
         // Ensure user owns this run
         if ($run->user_id !== auth()->id()) {
             abort(403);
+        }
+
+        // Delete photo if exists
+        if ($run->photo) {
+            \Storage::disk('public')->delete($run->photo);
         }
 
         $run->delete();

@@ -461,6 +461,12 @@ Route::middleware(['auth'])->prefix('runs')->group(function () {
     Route::get('/{run}', [App\Http\Controllers\RunController::class, 'show'])
         ->name('runs.show');
     
+    Route::get('/{run}/edit', [App\Http\Controllers\RunController::class, 'edit'])
+        ->name('runs.edit');
+    
+    Route::put('/{run}', [App\Http\Controllers\RunController::class, 'update'])
+        ->name('runs.update');
+    
     Route::delete('/{run}', [App\Http\Controllers\RunController::class, 'destroy'])
         ->name('runs.destroy');
 });
@@ -568,6 +574,31 @@ Route::middleware('auth')->group(function () {
     
     Route::get('/follows/pending', [App\Http\Controllers\FollowController::class, 'pendingRequests'])
         ->name('follows.pending');
+});
+
+/**
+ * Trail Alerts routes
+ * For reporting trail conditions, hazards, closures, etc.
+ * Protected by authentication middleware
+ */
+Route::middleware(['auth'])->prefix('trail-alerts')->name('trail-alerts.')->group(function () {
+    Route::get('/', [App\Http\Controllers\TrailAlertController::class, 'index'])
+        ->name('index');
+    
+    Route::get('/create', [App\Http\Controllers\TrailAlertController::class, 'create'])
+        ->name('create');
+    
+    Route::post('/', [App\Http\Controllers\TrailAlertController::class, 'store'])
+        ->name('store');
+    
+    Route::get('/{trailAlert}', [App\Http\Controllers\TrailAlertController::class, 'show'])
+        ->name('show');
+    
+    Route::put('/{trailAlert}', [App\Http\Controllers\TrailAlertController::class, 'update'])
+        ->name('update');
+    
+    Route::delete('/{trailAlert}', [App\Http\Controllers\TrailAlertController::class, 'destroy'])
+        ->name('destroy');
 });
 
 // Include Laravel's authentication routes (login, register, etc.)

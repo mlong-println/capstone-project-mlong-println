@@ -27,12 +27,15 @@ class Run extends Model
         'completion_time',
         'notes',
         'elevation_gain',
+        'is_public',
+        'photo',
     ];
 
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
         'completion_time' => 'integer',
+        'is_public' => 'boolean',
     ];
 
     /**
