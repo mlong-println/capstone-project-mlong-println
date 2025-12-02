@@ -139,14 +139,14 @@ Route::middleware(['auth'])->group(function () {
         
         // Recent events
         $recentEvents = \App\Models\Event::where('event_date', '>=', now())
-            ->with('creator')
+            ->with('organizer')
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get()
             ->map(fn($event) => [
                 'type' => 'event',
-                'user' => $event->creator->name,
-                'user_id' => $event->creator->id,
+                'user' => $event->organizer->name,
+                'user_id' => $event->organizer->id,
                 'message' => "created event: {$event->title}",
                 'time' => $event->created_at,
                 'data' => ['event_id' => $event->id, 'event_date' => $event->event_date],

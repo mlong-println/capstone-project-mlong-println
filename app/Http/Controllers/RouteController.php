@@ -17,63 +17,86 @@ class RouteController extends Controller
 {
     /**
      * Display a listing of all routes with search/filter
+     * Separated into My Routes (private) and RunConnect Routes (public)
      */
     public function index(Request $request): Response
     {
-        $query = Route::with(['creator', 'ratings'])
-            ->withCount('ratings');
+        $user = auth()->user();
 
-        // Search by name
-        if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
+        // My Routes (created by user, can be private or public)
+        $myRoutesQuery = Route::with(['creator', 'ratings'])
+            ->withCount('ratings')
+            ->where('created_by', $user->id);
 
-        // Filter by distance range
-        if ($request->filled('distance_range')) {
-            switch ($request->distance_range) {
-                case '1-5':
-                    $query->whereBetween('distance', [1, 5]);
-                    break;
-                case '5-10':
-                    $query->whereBetween('distance', [5, 10]);
-                    break;
-                case '10-21':
-                    $query->whereBetween('distance', [10, 21]);
-                    break;
-                case '21-30':
-                    $query->whereBetween('distance', [21, 30]);
-                    break;
-                case '30+':
-                    $query->where('distance', '>=', 30);
-                    break;
+        // Public Routes (created by others, marked as public)
+        $publicRoutesQuery = Route::with(['creator', 'ratings'])
+            ->withCount('ratings')
+            ->where('is_public', true)
+            ->where('created_by', '!=', $user->id);
+
+        // Apply filters to both queries
+        $applyFilters = function ($query) use ($request) {
+            // Search by name
+            if ($request->filled('search')) {
+                $query->where('name', 'like', '%' . $request->search . '%');
             }
-        }
 
-        // Filter by difficulty (terrain)
-        if ($request->filled('difficulty')) {
-            $query->where('difficulty', $request->difficulty);
-        }
+            // Filter by distance range
+            if ($request->filled('distance_range')) {
+                switch ($request->distance_range) {
+                    case '1-5':
+                        $query->whereBetween('distance', [1, 5]);
+                        break;
+                    case '5-10':
+                        $query->whereBetween('distance', [5, 10]);
+                        break;
+                    case '10-21':
+                        $query->whereBetween('distance', [10, 21]);
+                        break;
+                    case '21-30':
+                        $query->whereBetween('distance', [21, 30]);
+                        break;
+                    case '30+':
+                        $query->where('distance', '>=', 30);
+                        break;
+                }
+            }
 
-        $routes = $query->get()
-            ->map(function ($route) {
-                return [
-                    'id' => $route->id,
-                    'name' => $route->name,
-                    'description' => $route->description,
-                    'distance' => $route->distance,
-                    'difficulty' => $route->difficulty,
-                    'created_at' => $route->created_at->format('M d, Y'),
-                    'creator' => [
-                        'id' => $route->creator->id,
-                        'name' => $route->creator->name,
-                    ],
-                    'average_rating' => round($route->averageRating(), 1),
-                    'ratings_count' => $route->ratings_count,
-                ];
-            });
+            // Filter by difficulty (terrain)
+            if ($request->filled('difficulty')) {
+                $query->where('difficulty', $request->difficulty);
+            }
+
+            return $query;
+        };
+
+        $myRoutesQuery = $applyFilters($myRoutesQuery);
+        $publicRoutesQuery = $applyFilters($publicRoutesQuery);
+
+        $formatRoute = function ($route) {
+            return [
+                'id' => $route->id,
+                'name' => $route->name,
+                'description' => $route->description,
+                'distance' => $route->distance,
+                'difficulty' => $route->difficulty,
+                'is_public' => $route->is_public,
+                'created_at' => $route->created_at->format('M d, Y'),
+                'creator' => [
+                    'id' => $route->creator->id,
+                    'name' => $route->creator->name,
+                ],
+                'average_rating' => round($route->averageRating(), 1),
+                'ratings_count' => $route->ratings_count,
+            ];
+        };
+
+        $myRoutes = $myRoutesQuery->get()->map($formatRoute);
+        $publicRoutes = $publicRoutesQuery->get()->map($formatRoute);
 
         return Inertia::render('Routes/Index', [
-            'routes' => $routes,
+            'myRoutes' => $myRoutes,
+            'publicRoutes' => $publicRoutes,
             'filters' => [
                 'search' => $request->search,
                 'distance_range' => $request->distance_range,

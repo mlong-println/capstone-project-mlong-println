@@ -8,6 +8,7 @@ interface RunningRoute {
     description: string;
     distance: number;
     difficulty: 'easy' | 'moderate' | 'hard';
+    is_public: boolean;
     created_at: string;
     creator: {
         id: number;
@@ -18,7 +19,8 @@ interface RunningRoute {
 }
 
 interface IndexProps {
-    routes: RunningRoute[];
+    myRoutes: RunningRoute[];
+    publicRoutes: RunningRoute[];
     filters: {
         search?: string;
         distance_range?: string;
@@ -26,13 +28,16 @@ interface IndexProps {
     };
 }
 
-export default function Index({ routes, filters }: IndexProps) {
+export default function Index({ myRoutes, publicRoutes, filters }: IndexProps) {
     const page = usePage<any>();
     const flash = page.props.flash;
     
+    const [activeTab, setActiveTab] = useState<'my' | 'public'>('my');
     const [search, setSearch] = useState(filters.search || '');
     const [distanceRange, setDistanceRange] = useState(filters.distance_range || '');
     const [difficulty, setDifficulty] = useState(filters.difficulty || '');
+    
+    const routes = activeTab === 'my' ? myRoutes : publicRoutes;
 
     const handleFilter = () => {
         router.get('/routes', {
@@ -118,6 +123,34 @@ export default function Index({ routes, filters }: IndexProps) {
                             <p className="text-sm text-red-800">{flash.error}</p>
                         </div>
                     )}
+
+                    {/* Tab Navigation */}
+                    <div className="bg-white rounded-lg shadow mb-6">
+                        <div className="border-b border-gray-200">
+                            <nav className="-mb-px flex">
+                                <button
+                                    onClick={() => setActiveTab('my')}
+                                    className={`${
+                                        activeTab === 'my'
+                                            ? 'border-indigo-500 text-indigo-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    } whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition`}
+                                >
+                                    My Routes ({myRoutes.length})
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('public')}
+                                    className={`${
+                                        activeTab === 'public'
+                                            ? 'border-indigo-500 text-indigo-600'
+                                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                    } whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition`}
+                                >
+                                    RunConnect Routes ({publicRoutes.length})
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
 
                     {/* Search and Filter Section */}
                     <div className="bg-white rounded-lg shadow p-6 mb-6">

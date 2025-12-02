@@ -22,6 +22,7 @@ export default function Create() {
         distance: '',
         difficulty: 'moderate' as 'easy' | 'moderate' | 'hard',
         coordinates: [] as Coordinate[],
+        is_public: false,
     });
 
     // Auto-calculate distance when coordinates change
@@ -163,6 +164,23 @@ export default function Create() {
                                     <InputError message={errors.difficulty} className="mt-2" />
                                 </div>
                             </div>
+
+                            {/* Make Public Checkbox */}
+                            <div className="flex items-center">
+                                <input
+                                    id="is_public"
+                                    type="checkbox"
+                                    checked={data.is_public}
+                                    onChange={(e) => setData('is_public', e.target.checked)}
+                                    className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                />
+                                <label htmlFor="is_public" className="ml-2 block text-sm text-gray-900">
+                                    Make this route public (RunConnect Routes)
+                                </label>
+                            </div>
+                            <p className="text-xs text-gray-500 -mt-4 ml-6">
+                                Public routes can be run by other users and will appear on leaderboards
+                            </p>
 
                             {/* Interactive Map */}
                             <div>
