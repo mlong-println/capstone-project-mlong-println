@@ -14,6 +14,7 @@ class RouteSnapController extends Controller
     /**
      * Snap waypoints to walking/pedestrian paths including park trails
      * Uses Google Maps Directions API for best pedestrian path coverage
+     * Handles routes with more than 25 waypoints by splitting into segments
      */
     public function snap(Request $request)
     {
@@ -36,6 +37,12 @@ class RouteSnapController extends Controller
                 ]);
             }
             
+            // Google Maps has a 25 waypoint limit (plus origin/destination)
+            // If we have more than 25 waypoints, split into segments
+            if (count($waypoints) > 25) {
+                return $this->snapLongRoute($waypoints, $apiKey);
+            }
+            
             // Build Google Directions API request
             $origin = "{$waypoints[0]['lat']},{$waypoints[0]['lng']}";
             $destination = "{$waypoints[count($waypoints) - 1]['lat']},{$waypoints[count($waypoints) - 1]['lng']}";
@@ -56,7 +63,7 @@ class RouteSnapController extends Controller
                 . "&mode=walking"  // Walking mode includes park paths and trails
                 . "&key={$apiKey}";
             
-            \Log::info('Google Maps Directions API request', ['url' => $url]);
+            \Log::info('Google Maps Directions API request', ['waypoints' => count($waypoints)]);
             
             $response = Http::timeout(15)->get($url);
             
@@ -68,12 +75,20 @@ class RouteSnapController extends Controller
                     $polyline = $data['routes'][0]['overview_polyline']['points'];
                     $coordinates = $this->decodePolyline($polyline);
                     
+                    // Calculate total distance from all legs
+                    $totalDistance = 0;
+                    if (isset($data['routes'][0]['legs'])) {
+                        foreach ($data['routes'][0]['legs'] as $leg) {
+                            $totalDistance += $leg['distance']['value'] ?? 0;
+                        }
+                    }
+                    
                     \Log::info('Route snapped successfully', ['points' => count($coordinates)]);
                     
                     return response()->json([
                         'success' => true,
                         'coordinates' => $coordinates,
-                        'distance' => $data['routes'][0]['legs'][0]['distance']['value'] ?? null,
+                        'distance' => $totalDistance,
                     ]);
                 } else {
                     \Log::warning('Google Maps API returned error', ['status' => $data['status']]);
@@ -96,6 +111,93 @@ class RouteSnapController extends Controller
                 'message' => 'Route snapping failed: ' . $e->getMessage()
             ]);
         }
+    }
+    
+    /**
+     * Handle routes with more than 25 waypoints by splitting into segments
+     */
+    private function snapLongRoute($waypoints, $apiKey)
+    {
+        $allCoordinates = [];
+        $totalDistance = 0;
+        $chunkSize = 23; // Use 23 to be safe (leaves room for origin/destination)
+        
+        // Split waypoints into chunks
+        $chunks = array_chunk($waypoints, $chunkSize);
+        
+        \Log::info('Splitting long route into segments', ['total_waypoints' => count($waypoints), 'segments' => count($chunks)]);
+        
+        foreach ($chunks as $index => $chunk) {
+            // If not the first chunk, include the last point from previous chunk as origin
+            if ($index > 0 && count($allCoordinates) > 0) {
+                array_unshift($chunk, end($allCoordinates));
+            }
+            
+            $origin = "{$chunk[0]['lat']},{$chunk[0]['lng']}";
+            $destination = "{$chunk[count($chunk) - 1]['lat']},{$chunk[count($chunk) - 1]['lng']}";
+            
+            // Middle waypoints
+            $waypointStr = '';
+            if (count($chunk) > 2) {
+                $middlePoints = array_slice($chunk, 1, count($chunk) - 2);
+                $waypointStr = '&waypoints=' . collect($middlePoints)
+                    ->map(fn($w) => "{$w['lat']},{$w['lng']}")
+                    ->join('|');
+            }
+            
+            $url = "https://maps.googleapis.com/maps/api/directions/json"
+                . "?origin={$origin}"
+                . "&destination={$destination}"
+                . $waypointStr
+                . "&mode=walking"
+                . "&key={$apiKey}";
+            
+            $response = Http::timeout(15)->get($url);
+            
+            if ($response->successful()) {
+                $data = $response->json();
+                
+                if ($data['status'] === 'OK' && isset($data['routes'][0]['overview_polyline']['points'])) {
+                    $polyline = $data['routes'][0]['overview_polyline']['points'];
+                    $segmentCoords = $this->decodePolyline($polyline);
+                    
+                    // Merge coordinates (skip first point if not first segment to avoid duplicates)
+                    if ($index > 0 && count($allCoordinates) > 0) {
+                        array_shift($segmentCoords);
+                    }
+                    $allCoordinates = array_merge($allCoordinates, $segmentCoords);
+                    
+                    // Add distance
+                    if (isset($data['routes'][0]['legs'])) {
+                        foreach ($data['routes'][0]['legs'] as $leg) {
+                            $totalDistance += $leg['distance']['value'] ?? 0;
+                        }
+                    }
+                } else {
+                    \Log::warning('Segment snapping failed', ['segment' => $index, 'status' => $data['status']]);
+                    // If any segment fails, return straight lines
+                    return response()->json([
+                        'success' => false,
+                        'coordinates' => $waypoints,
+                        'message' => 'Route snapping failed for segment ' . ($index + 1)
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'coordinates' => $waypoints,
+                    'message' => 'API request failed for segment ' . ($index + 1)
+                ]);
+            }
+        }
+        
+        \Log::info('Long route snapped successfully', ['total_points' => count($allCoordinates), 'segments' => count($chunks)]);
+        
+        return response()->json([
+            'success' => true,
+            'coordinates' => $allCoordinates,
+            'distance' => $totalDistance,
+        ]);
     }
     
     /**

@@ -208,6 +208,14 @@ class User extends Authenticatable
     }
 
     /**
+     * Helper: Check if user is an admin (alias for isTrainer)
+     */
+    public function isAdmin(): bool
+    {
+        return $this->isTrainer();
+    }
+
+    /**
      * Helper: Check if user is a runner
      */
     public function isRunner(): bool

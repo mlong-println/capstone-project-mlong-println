@@ -11,20 +11,39 @@ interface Route {
     distance: number;
 }
 
+interface Shoe {
+    id: number;
+    brand: string;
+    model: string;
+    color: string | null;
+}
+
 interface Run {
     id: number;
     notes: string | null;
     is_public: boolean;
     photo: string | null;
+    completion_time: number;
+    shoe_id: number | null;
     route: Route;
 }
 
 interface EditRunProps {
     run: Run;
+    shoes: Shoe[];
 }
 
-export default function Edit({ run }: EditRunProps) {
+export default function Edit({ run, shoes }: EditRunProps) {
+    // Convert completion_time (seconds) to hours, minutes, seconds
+    const initialHours = Math.floor(run.completion_time / 3600);
+    const initialMinutes = Math.floor((run.completion_time % 3600) / 60);
+    const initialSeconds = run.completion_time % 60;
+
     const { data, setData, put, processing, errors } = useForm({
+        shoe_id: run.shoe_id?.toString() || '',
+        hours: initialHours.toString(),
+        minutes: initialMinutes.toString(),
+        seconds: initialSeconds.toString(),
         notes: run.notes || '',
         is_public: run.is_public,
         photo: null as File | null,
@@ -33,8 +52,29 @@ export default function Edit({ run }: EditRunProps) {
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
+        // Convert time to seconds
+        const hours = parseInt(data.hours || '0');
+        const minutes = parseInt(data.minutes || '0');
+        const seconds = parseInt(data.seconds || '0');
+        const totalSeconds = (hours * 3600) + (minutes * 60) + seconds;
+
+        // Validate time
+        if (totalSeconds < 1) {
+            alert('Please enter a valid run time (at least 1 second)');
+            return;
+        }
+
         // Use FormData for file upload
         const formData = new FormData();
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (csrfToken) {
+            formData.append('_token', csrfToken);
+        }
+        
+        if (data.shoe_id) formData.append('shoe_id', data.shoe_id);
+        formData.append('completion_time', totalSeconds.toString());
         if (data.notes) formData.append('notes', data.notes);
         formData.append('is_public', data.is_public ? '1' : '0');
         if (data.photo) formData.append('photo', data.photo);
@@ -62,6 +102,63 @@ export default function Edit({ run }: EditRunProps) {
                                 <h3 className="text-sm font-medium text-gray-700 mb-2">Route</h3>
                                 <p className="text-lg font-semibold text-gray-900">{run.route.name}</p>
                                 <p className="text-sm text-gray-600">{run.route.distance} km</p>
+                            </div>
+
+                            {/* Shoe Selection */}
+                            <div>
+                                <InputLabel value="Shoe (Optional)" />
+                                <select
+                                    value={data.shoe_id}
+                                    onChange={(e) => setData('shoe_id', e.target.value)}
+                                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+                                    <option value="">No shoe selected</option>
+                                    {shoes.map((shoe) => (
+                                        <option key={shoe.id} value={shoe.id}>
+                                            {shoe.brand} {shoe.model} {shoe.color ? `(${shoe.color})` : ''}
+                                        </option>
+                                    ))}
+                                </select>
+                                <InputError message={errors.shoe_id} className="mt-2" />
+                            </div>
+
+                            {/* Run Time */}
+                            <div>
+                                <InputLabel value="Run Time" />
+                                <div className="grid grid-cols-3 gap-3 mt-1">
+                                    <div>
+                                        <label className="block text-xs text-gray-600 mb-1">Hours</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            value={data.hours}
+                                            onChange={(e) => setData('hours', e.target.value)}
+                                            className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-600 mb-1">Minutes</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="59"
+                                            value={data.minutes}
+                                            onChange={(e) => setData('minutes', e.target.value)}
+                                            className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-600 mb-1">Seconds</label>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            max="59"
+                                            value={data.seconds}
+                                            onChange={(e) => setData('seconds', e.target.value)}
+                                            className="block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        />
+                                    </div>
+                                </div>
                             </div>
 
                             {/* Current Photo */}

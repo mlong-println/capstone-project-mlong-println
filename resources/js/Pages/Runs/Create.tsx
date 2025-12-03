@@ -62,6 +62,13 @@ export default function Create({ routes, shoes }: CreateRunProps) {
 
         // Submit with completion_time included and photo as FormData
         const formData = new FormData();
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+        if (csrfToken) {
+            formData.append('_token', csrfToken);
+        }
+        
         formData.append('route_id', data.route_id);
         if (data.shoe_id) formData.append('shoe_id', data.shoe_id);
         formData.append('start_time', data.start_time);
@@ -70,7 +77,11 @@ export default function Create({ routes, shoes }: CreateRunProps) {
         formData.append('is_public', data.is_public ? '1' : '0');
         if (data.photo) formData.append('photo', data.photo);
 
-        router.post('/runs', formData);
+        router.post('/runs', formData, {
+            forceFormData: true,
+            preserveState: true,
+            preserveScroll: true,
+        });
     };
 
     // Calculate estimated pace

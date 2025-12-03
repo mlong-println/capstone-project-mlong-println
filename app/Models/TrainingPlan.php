@@ -21,6 +21,7 @@ class TrainingPlan extends Model
      */
     protected $fillable = [
         'name',
+        'description',
         'distance_type',
         'experience_level',
         'duration_weeks',

@@ -72,7 +72,7 @@ export default function ThemedNavBar({ auth, themeTextClass }: ThemedNavBarProps
                                         <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
                                             <div className="py-1">
                                                 <Link
-                                                    href="/trainer/runners"
+                                                    href="/admin/runners"
                                                     onClick={closeDropdown}
                                                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                 >
@@ -86,7 +86,7 @@ export default function ThemedNavBar({ auth, themeTextClass }: ThemedNavBarProps
                                                     Find Athletes
                                                 </Link>
                                                 <Link
-                                                    href="/trainer/plans"
+                                                    href="/admin/plans"
                                                     onClick={closeDropdown}
                                                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                                 >

@@ -29,11 +29,16 @@ class RouteController extends Controller
             ->withCount('ratings')
             ->where('created_by', $user->id);
 
-        // Public Routes (created by others, marked as public)
+        // Public Routes (created by others)
+        // Admins can see all routes, regular users only see public routes
         $publicRoutesQuery = Route::with(['creator', 'ratings'])
             ->withCount('ratings')
-            ->where('is_public', true)
             ->where('created_by', '!=', $user->id);
+        
+        // Non-admin users can only see public routes
+        if (!$user->isAdmin()) {
+            $publicRoutesQuery->where('is_public', true);
+        }
 
         // Apply filters to both queries
         $applyFilters = function ($query) use ($request) {

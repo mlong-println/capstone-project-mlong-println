@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MapContainer, TileLayer, Polyline, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, Polyline, Marker, CircleMarker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -41,6 +41,20 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
     return null;
 }
 
+// Component to auto-fit map bounds to route
+function MapBoundsUpdater({ coordinates }: { coordinates: Coordinate[] }) {
+    const map = useMapEvents({});
+    
+    useEffect(() => {
+        if (coordinates.length > 0) {
+            const bounds = L.latLngBounds(coordinates.map(c => [c.lat, c.lng]));
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+        }
+    }, [coordinates, map]);
+    
+    return null;
+}
+
 /**
  * RouteMap Component
  * Interactive map for creating and viewing running routes
@@ -62,6 +76,7 @@ export default function RouteMap({
     const safeCoordinates = Array.isArray(coordinates) ? coordinates : [];
     
     const [localCoords, setLocalCoords] = useState<Coordinate[]>(safeCoordinates);
+    const [waypoints, setWaypoints] = useState<Coordinate[]>([]); // User-clicked waypoints only
     const [routePath, setRoutePath] = useState<Coordinate[]>([]); // Actual road-snapped path
     const [elevations, setElevations] = useState<number[]>([]);
     const [loadingElevation, setLoadingElevation] = useState(false);
@@ -74,40 +89,54 @@ export default function RouteMap({
     const defaultCenter: [number, number] = [43.2557, -79.8711]; // Hamilton, ON
     const defaultZoom = 13;
 
-    // Sync with parent coordinates
+    // Sync with parent coordinates - only on initial load, not when we update parent
+    const initialLoadRef = useRef(true);
     useEffect(() => {
-        setLocalCoords(safeCoordinates);
+        // Only sync on initial load or when coordinates are cleared
+        if (initialLoadRef.current || safeCoordinates.length === 0) {
+            initialLoadRef.current = false;
+            setLocalCoords(safeCoordinates);
+            // If loading existing route with many points, it's already snapped - don't re-snap
+            if (safeCoordinates.length > 20) {
+                setRoutePath(safeCoordinates);
+                setWaypoints([]); // No waypoints to show for existing routes
+            } else if (safeCoordinates.length > 0) {
+                setWaypoints(safeCoordinates);
+            }
+        }
     }, [coordinates]);
 
-    // Handle route snapping when localCoords changes
+    // Handle route snapping when waypoints change
     useEffect(() => {
         // Clear any pending fetch
         if (fetchTimeoutRef.current) {
             clearTimeout(fetchTimeoutRef.current);
         }
         
-        if (localCoords.length === 0) {
-            setRoutePath([]);
-            setElevations([]);
+        if (waypoints.length === 0) {
+            // If no waypoints but we have localCoords (existing route), use them
+            if (localCoords.length > 0) {
+                setRoutePath(localCoords);
+            } else {
+                setRoutePath([]);
+                setElevations([]);
+            }
             return;
         }
         
-        if (localCoords.length === 1) {
-            setRoutePath(localCoords);
+        if (waypoints.length === 1) {
+            setRoutePath(waypoints);
             return;
         }
         
         // For 2+ waypoints, fetch route path if road snapping is enabled AND editable
-        if (roadSnapping && editable) {
+        if (roadSnapping && editable && waypoints.length >= 2) {
             fetchTimeoutRef.current = setTimeout(() => {
-                fetchRoutePath(localCoords);
+                fetchRoutePath(waypoints);
             }, 300); // Small delay to batch rapid clicks
         } else {
-            // Use straight lines between waypoints (or when viewing non-editable routes)
-            setRoutePath(localCoords);
-            if (editable) {
-                fetchElevations(localCoords);
-            }
+            // Use straight lines between waypoints
+            setRoutePath(waypoints);
         }
         
         return () => {
@@ -115,9 +144,9 @@ export default function RouteMap({
                 clearTimeout(fetchTimeoutRef.current);
             }
         };
-    }, [localCoords, roadSnapping]);
+    }, [waypoints, roadSnapping, editable]);
 
-    // Fetch route snapping via Laravel backend
+    // Fetch route snapping via Laravel backend using axios (handles CSRF automatically)
     const fetchRoutePath = async (waypoints: Coordinate[]) => {
         if (waypoints.length < 2) return;
         
@@ -125,38 +154,31 @@ export default function RouteMap({
         try {
             console.log('🗺️ Snapping route with', waypoints.length, 'waypoints...');
             
-            const response = await fetch('/api/route-snap', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-                body: JSON.stringify({ waypoints }),
-            });
+            const response = await window.axios.post('/api/route-snap', { waypoints });
+            const data = response.data;
             
-            if (response.ok) {
-                const data = await response.json();
-                console.log('✅ Route snap response:', data);
+            console.log('✅ Route snap response:', data);
+            
+            if (data.success && data.coordinates && data.coordinates.length > 0) {
+                console.log('✅ Route snapped successfully with', data.coordinates.length, 'points');
+                const snappedCoords = data.coordinates;
+                setRoutePath(snappedCoords);
+                // Disable elevation fetching - API is unreliable and causes CORS spam
+                // fetchElevations(snappedCoords);
                 
-                if (data.success && data.coordinates && data.coordinates.length > 0) {
-                    console.log('✅ Route snapped successfully with', data.coordinates.length, 'points');
-                    setRoutePath(data.coordinates);
-                    fetchElevations(data.coordinates);
-                } else {
-                    console.warn('⚠️ Route snapping returned no coordinates, using waypoints');
-                    setRoutePath(waypoints);
-                    fetchElevations(waypoints);
+                // Update parent with snapped coordinates (not waypoints)
+                if (onCoordinatesChange) {
+                    onCoordinatesChange(snappedCoords);
                 }
             } else {
-                const errorText = await response.text();
-                console.error('❌ Route snapping API error:', response.status, errorText);
+                console.warn('⚠️ Route snapping returned no coordinates, using waypoints');
                 setRoutePath(waypoints);
-                fetchElevations(waypoints);
+                // fetchElevations(waypoints);
             }
-        } catch (error) {
-            console.error('❌ Failed to fetch route path:', error);
+        } catch (error: any) {
+            console.error('❌ Failed to fetch route path:', error.response?.status, error.message);
             setRoutePath(waypoints);
-            fetchElevations(waypoints);
+            // fetchElevations(waypoints);
         } finally {
             setLoadingRoute(false);
         }
@@ -190,30 +212,35 @@ export default function RouteMap({
     const handleMapClick = (lat: number, lng: number) => {
         if (!editable) return;
 
-        const newCoords = [...localCoords, { lat, lng }];
-        setLocalCoords(newCoords);
-        
-        // Immediately notify parent of user waypoints (not snapped path)
-        if (onCoordinatesChange) {
-            onCoordinatesChange(newCoords);
-        }
+        const newWaypoint = { lat, lng };
+        const newWaypoints = [...waypoints, newWaypoint];
+        setWaypoints(newWaypoints);
+        setLocalCoords(newWaypoints); // Trigger snapping
     };
 
     const handleClearRoute = () => {
+        setWaypoints([]);
         setLocalCoords([]);
+        setRoutePath([]);
+        
         if (onCoordinatesChange) {
             onCoordinatesChange([]);
         }
     };
 
     const handleUndoLast = () => {
-        if (localCoords.length === 0) return;
+        if (waypoints.length === 0) return;
         
-        const newCoords = localCoords.slice(0, -1);
-        setLocalCoords(newCoords);
+        const newWaypoints = waypoints.slice(0, -1);
+        setWaypoints(newWaypoints);
+        setLocalCoords(newWaypoints);
         
-        if (onCoordinatesChange) {
-            onCoordinatesChange(newCoords);
+        // If no waypoints left, clear everything
+        if (newWaypoints.length === 0) {
+            setRoutePath([]);
+            if (onCoordinatesChange) {
+                onCoordinatesChange([]);
+            }
         }
     };
 
@@ -265,9 +292,19 @@ export default function RouteMap({
         };
     };
 
-    // Use default center (Hamilton) - let users pan/zoom freely
-    // Don't auto-center on coordinates to allow exploring the map
-    const mapCenter: [number, number] = defaultCenter;
+    // Calculate map center based on route coordinates, or use default
+    const mapCenter: [number, number] = (() => {
+        const coordsToUse = routePath.length > 0 ? routePath : localCoords;
+        
+        if (coordsToUse.length > 0) {
+            // Calculate center of all coordinates
+            const latSum = coordsToUse.reduce((sum, coord) => sum + coord.lat, 0);
+            const lngSum = coordsToUse.reduce((sum, coord) => sum + coord.lng, 0);
+            return [latSum / coordsToUse.length, lngSum / coordsToUse.length];
+        }
+        
+        return defaultCenter; // Hamilton, ON
+    })();
 
     return (
         <div className="space-y-3">
@@ -291,15 +328,17 @@ export default function RouteMap({
                             >
                                 {roadSnapping ? '🛣️ Road Snap: ON' : '📍 Direct Lines'}
                             </button>
-                            {localCoords.length > 0 && (
+                            {(waypoints.length > 0 || routePath.length > 0) && (
                                 <>
-                                    <button
-                                        type="button"
-                                        onClick={handleUndoLast}
-                                        className="px-3 py-1 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700 transition"
-                                    >
-                                        Undo Last
-                                    </button>
+                                    {waypoints.length > 0 && (
+                                        <button
+                                            type="button"
+                                            onClick={handleUndoLast}
+                                            className="px-3 py-1 text-sm bg-yellow-600 text-white rounded hover:bg-yellow-700 transition"
+                                        >
+                                            Undo Last
+                                        </button>
+                                    )}
                                     <button
                                         type="button"
                                         onClick={handleClearRoute}
@@ -329,6 +368,9 @@ export default function RouteMap({
                     
                     {editable && <MapClickHandler onMapClick={handleMapClick} />}
                     
+                    {/* Auto-fit map to route bounds */}
+                    {!editable && routePath.length > 0 && <MapBoundsUpdater coordinates={routePath} />}
+                    
                     {/* Draw road-snapped route */}
                     {routePath.length > 1 && (
                         <Polyline
@@ -339,25 +381,22 @@ export default function RouteMap({
                         />
                     )}
                     
-                    {/* Show markers at each waypoint (user clicks) */}
-                    {localCoords.map((coord, index) => (
-                        <Marker
+                    {/* Show small dots at waypoints instead of big markers */}
+                    {waypoints.map((coord, index) => (
+                        <CircleMarker
                             key={index}
-                            position={[coord.lat, coord.lng]}
-                            title={`Waypoint ${index + 1}`}
+                            center={[coord.lat, coord.lng]}
+                            radius={5}
+                            pathOptions={{ color: '#dc2626', fillColor: '#dc2626', fillOpacity: 0.8 }}
                         />
                     ))}
                 </MapContainer>
             </div>
 
-            {editable && localCoords.length > 0 && (
+            {editable && (waypoints.length > 0 || routePath.length > 0) && (
                 <div className="bg-gray-50 rounded-lg p-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                        <div>
-                            <div className="text-gray-600">Waypoints</div>
-                            <div className="text-lg font-semibold text-gray-900">{localCoords.length}</div>
-                        </div>
-                        {localCoords.length > 1 && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        {routePath.length > 1 && (
                             <div>
                                 <div className="text-gray-600">Estimated Distance</div>
                                 <div className="text-lg font-semibold text-gray-900">{calculateDistance()} km</div>

@@ -154,4 +154,53 @@ class TrainerDashboardController extends Controller
             'assignments' => $plan->assignments,
         ]);
     }
+
+    /**
+     * Show the form for creating a new training plan
+     */
+    public function createPlan()
+    {
+        return Inertia::render('Trainer/CreatePlan');
+    }
+
+    /**
+     * Store a newly created training plan
+     */
+    public function storePlan(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'description' => 'required|string',
+            'distance_type' => 'required|in:5k,10k,half_marathon,full_marathon,ultra',
+            'experience_level' => 'required|in:beginner,intermediate,advanced',
+            'duration_weeks' => 'required|integer|min:1|max:52',
+            'weekly_mileage_peak' => 'nullable|numeric|min:0',
+            'prerequisites' => 'nullable|string',
+            'goals' => 'nullable|string',
+            'weekly_structure' => 'nullable|string', // JSON string from frontend
+        ]);
+
+        // Decode weekly_structure if provided
+        $weeklyStructure = [];
+        if (!empty($validated['weekly_structure'])) {
+            $weeklyStructure = json_decode($validated['weekly_structure'], true) ?? [];
+        }
+
+        $plan = TrainingPlan::create([
+            'name' => $validated['name'],
+            'description' => $validated['description'],
+            'distance_type' => $validated['distance_type'],
+            'experience_level' => $validated['experience_level'],
+            'duration_weeks' => $validated['duration_weeks'],
+            'weekly_mileage_peak' => $validated['weekly_mileage_peak'] ?? null,
+            'prerequisites' => $validated['prerequisites'] ?? null,
+            'goals' => $validated['goals'] ?? null,
+            'weekly_structure' => $weeklyStructure,
+            'created_by' => auth()->id(),
+            'is_template' => true, // Admin-created plans are templates
+        ]);
+
+        return redirect()->route('admin.plans.show', $plan->id)
+            ->with('success', 'Training plan created successfully!');
+    }
 }

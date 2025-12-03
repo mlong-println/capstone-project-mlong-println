@@ -239,6 +239,8 @@ class RunController extends Controller
         }
 
         $validated = $request->validate([
+            'shoe_id' => 'nullable|exists:shoes,id',
+            'completion_time' => 'nullable|integer|min:1',
             'notes' => 'nullable|string|max:250',
             'is_public' => 'nullable|boolean',
             'photo' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:5120',
@@ -253,11 +255,23 @@ class RunController extends Controller
             $validated['photo'] = $request->file('photo')->store('run-photos', 'public');
         }
 
-        $run->update([
+        // Update end_time if completion_time changed
+        $updateData = [
             'notes' => $validated['notes'] ?? $run->notes,
             'is_public' => $validated['is_public'] ?? $run->is_public,
             'photo' => $validated['photo'] ?? $run->photo,
-        ]);
+        ];
+
+        if (isset($validated['shoe_id'])) {
+            $updateData['shoe_id'] = $validated['shoe_id'];
+        }
+
+        if (isset($validated['completion_time'])) {
+            $updateData['completion_time'] = (int)$validated['completion_time'];
+            $updateData['end_time'] = Carbon::parse($run->start_time)->addSeconds((int)$validated['completion_time']);
+        }
+
+        $run->update($updateData);
 
         return Redirect::route('runs.show', $run)->with('success', 'Run updated successfully!');
     }

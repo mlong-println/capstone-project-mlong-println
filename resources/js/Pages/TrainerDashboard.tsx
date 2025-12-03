@@ -104,7 +104,7 @@ export default function TrainerDashboard({ auth, runners, trainingPlans, stats }
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">Assigned Athletes</h2>
                 <Link
-                  href="/trainer/runners"
+                  href="/admin/runners"
                   className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                 >
                   View All →
@@ -118,7 +118,7 @@ export default function TrainerDashboard({ auth, runners, trainingPlans, stats }
                   {runners.slice(0, 5).map((runner) => (
                     <Link
                       key={runner.id}
-                      href={`/trainer/runners/${runner.id}`}
+                      href={`/admin/runners/${runner.id}`}
                       className="block p-3 rounded border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition"
                     >
                       <div className="font-medium text-gray-900">{runner.name}</div>
@@ -147,7 +147,7 @@ export default function TrainerDashboard({ auth, runners, trainingPlans, stats }
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-lg font-semibold text-gray-900">Training Plans</h2>
                 <Link
-                  href="/trainer/plans"
+                  href="/admin/plans"
                   className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                 >
                   View All →
@@ -161,7 +161,7 @@ export default function TrainerDashboard({ auth, runners, trainingPlans, stats }
                   {trainingPlans.slice(0, 5).map((plan) => (
                     <Link
                       key={plan.id}
-                      href={`/trainer/plans/${plan.id}`}
+                      href={`/admin/plans/${plan.id}`}
                       className="block p-3 rounded border border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition"
                     >
                       <div className="font-medium text-gray-900">{plan.name}</div>

@@ -48,12 +48,20 @@ export default function ViewPlans({ plans }: ViewPlansProps) {
       <div className="max-w-6xl mx-auto py-10 px-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className={`text-3xl font-bold ${themeConfig.text}`}>All Training Plans</h1>
-          <Link
-            href="/trainer/dashboard"
-            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-          >
-            ← Back to Dashboard
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/admin/plans/create"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+            >
+              + Create Plan
+            </Link>
+            <Link
+              href="/admin/dashboard"
+              className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+            >
+              ← Back to Dashboard
+            </Link>
+          </div>
         </div>
 
         {plans.length === 0 ? (
@@ -71,7 +79,7 @@ export default function ViewPlans({ plans }: ViewPlansProps) {
                   {distancePlans.map((plan) => (
                     <Link
                       key={plan.id}
-                      href={`/trainer/plans/${plan.id}`}
+                      href={`/admin/plans/${plan.id}`}
                       className="block rounded-lg border border-white/30 bg-white/90 backdrop-blur-sm p-5 shadow-lg hover:shadow-xl transition"
                     >
                       <h3 className="text-lg font-semibold text-gray-900">{plan.name}</h3>

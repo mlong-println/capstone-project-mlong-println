@@ -233,6 +233,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/plans', [TrainerDashboardController::class, 'viewPlans'])
             ->name('plans');
         
+        // Create training plan
+        Route::get('/plans/create', [TrainerDashboardController::class, 'createPlan'])
+            ->name('plans.create');
+        Route::post('/plans', [TrainerDashboardController::class, 'storePlan'])
+            ->name('plans.store');
+        
         // View specific plan detail
         Route::get('/plans/{plan}', [TrainerDashboardController::class, 'viewPlan'])
             ->name('plans.show');

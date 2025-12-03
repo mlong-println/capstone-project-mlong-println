@@ -79,13 +79,21 @@ export default function Show({ run }: ShowRunProps) {
                                 <h3 className="text-2xl font-bold text-gray-900">{run.route.name}</h3>
                                 <p className="text-sm text-gray-600 mt-1">{formatDate(run.start_time)}</p>
                             </div>
-                            <button
-                                onClick={handleDelete}
-                                disabled={deleting}
-                                className="text-red-600 hover:text-red-900 text-sm font-medium"
-                            >
-                                {deleting ? 'Deleting...' : 'Delete Run'}
-                            </button>
+                            <div className="flex items-center gap-3">
+                                <Link
+                                    href={`/runs/${run.id}/edit`}
+                                    className="text-indigo-600 hover:text-indigo-900 text-sm font-medium"
+                                >
+                                    Edit Run
+                                </Link>
+                                <button
+                                    onClick={handleDelete}
+                                    disabled={deleting}
+                                    className="text-red-600 hover:text-red-900 text-sm font-medium"
+                                >
+                                    {deleting ? 'Deleting...' : 'Delete Run'}
+                                </button>
+                            </div>
                         </div>
 
                         {/* Stats Grid */}
