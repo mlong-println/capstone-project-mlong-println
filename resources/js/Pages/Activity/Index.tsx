@@ -38,28 +38,33 @@ interface ActivityIndexProps {
 export default function Index({ pendingFollowRequests, socialNotifications, unreadCount }: ActivityIndexProps) {
     const [localRequests, setLocalRequests] = useState(pendingFollowRequests);
 
-    const handleApprove = (followId: number) => {
-        router.post(`/follows/${followId}/approve`, {}, {
-            preserveScroll: true,
-            onSuccess: () => {
-                setLocalRequests(prev => prev.filter(r => r.id !== followId));
-            },
-        });
+    const handleApprove = async (followId: number) => {
+        try {
+            await window.axios.post(`/follows/${followId}/approve`);
+            setLocalRequests(prev => prev.filter(r => r.id !== followId));
+            router.reload({ only: ['socialNotifications', 'unreadCount'] });
+        } catch (error) {
+            console.error('Failed to approve follow request:', error);
+        }
     };
 
-    const handleReject = (followId: number) => {
-        router.post(`/follows/${followId}/reject`, {}, {
-            preserveScroll: true,
-            onSuccess: () => {
-                setLocalRequests(prev => prev.filter(r => r.id !== followId));
-            },
-        });
+    const handleReject = async (followId: number) => {
+        try {
+            await window.axios.post(`/follows/${followId}/reject`);
+            setLocalRequests(prev => prev.filter(r => r.id !== followId));
+            router.reload({ only: ['socialNotifications', 'unreadCount'] });
+        } catch (error) {
+            console.error('Failed to reject follow request:', error);
+        }
     };
 
-    const markAllAsRead = () => {
-        router.post('/activity/mark-all-read', {}, {
-            preserveScroll: true,
-        });
+    const markAllAsRead = async () => {
+        try {
+            await window.axios.post('/activity/mark-all-read');
+            router.reload({ only: ['socialNotifications', 'unreadCount'] });
+        } catch (error) {
+            console.error('Failed to mark all as read:', error);
+        }
     };
 
     return (

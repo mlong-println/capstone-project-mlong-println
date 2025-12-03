@@ -125,7 +125,7 @@ class RunController extends Controller
         ]);
 
         // Update shoe distance if a shoe was selected
-        if ($validated['shoe_id'] && $route) {
+        if (isset($validated['shoe_id']) && $validated['shoe_id'] && $route) {
             $shoe = \App\Models\Shoe::find($validated['shoe_id']);
             if ($shoe && $shoe->user_id === auth()->id()) {
                 $shoe->increment('distance', $route->distance);
