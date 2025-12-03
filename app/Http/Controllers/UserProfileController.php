@@ -12,6 +12,48 @@ use Inertia\Response;
 class UserProfileController extends Controller
 {
     /**
+     * Display a list of users for finding/following
+     */
+    public function index(Request $request): Response
+    {
+        $search = $request->input('search', '');
+        
+        $users = User::query()
+            ->where('id', '!=', auth()->id()) // Exclude current user
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                });
+            })
+            ->with('profile')
+            ->orderBy('name')
+            ->paginate(20);
+        
+        // Add follow status for each user
+        $usersWithFollowStatus = $users->map(function ($user) {
+            $follow = Follow::where('follower_id', auth()->id())
+                ->where('following_id', $user->id)
+                ->first();
+            
+            return [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+                'location' => $user->profile?->location,
+                'follow_status' => $follow?->status,
+                'follow_id' => $follow?->id,
+            ];
+        });
+        
+        return Inertia::render('Users/Index', [
+            'users' => $usersWithFollowStatus,
+            'search' => $search,
+        ]);
+    }
+    
+    /**
      * Display a user's public profile
      */
     public function show(User $user): Response

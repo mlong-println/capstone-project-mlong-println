@@ -178,7 +178,7 @@ class RunController extends Controller
             abort(403);
         }
 
-        $run->load('route', 'user');
+        $run->load('route', 'user', 'comments.user', 'likes');
 
         return Inertia::render('Runs/Show', [
             'run' => [
@@ -190,6 +190,8 @@ class RunController extends Controller
                 'formatted_pace' => $run->formatted_pace,
                 'elevation_gain' => $run->elevation_gain,
                 'notes' => $run->notes,
+                'photo' => $run->photo,
+                'is_public' => $run->is_public,
                 'route' => [
                     'id' => $run->route->id,
                     'name' => $run->route->name,
@@ -202,6 +204,19 @@ class RunController extends Controller
                     'id' => $run->user->id,
                     'name' => $run->user->name,
                 ],
+                'comments' => $run->comments->map(function ($comment) {
+                    return [
+                        'id' => $comment->id,
+                        'comment' => $comment->comment,
+                        'created_at' => $comment->created_at,
+                        'user' => [
+                            'id' => $comment->user->id,
+                            'name' => $comment->user->name,
+                        ],
+                    ];
+                }),
+                'likes_count' => $run->likes->count(),
+                'user_has_liked' => $run->likes->contains('id', auth()->id()),
             ],
         ]);
     }

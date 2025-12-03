@@ -65,125 +65,132 @@
 ## 2. Route Management
 
 ### 2.1 View Routes (Index)
-- [ ] All routes displayed in grid/list
-- [ ] Route cards show: name, distance, difficulty, rating
-- [ ] Creator name displayed
-- [ ] Difficulty badges color-coded correctly
-- [ ] Search/filter functionality works
-- [ ] Pagination works (if applicable)
-- [ ] Empty state displays when no routes
-- [ ] Click route card navigates to detail page
+- [✓] All routes displayed in grid/list
+- [✓] Route cards show: name, distance, difficulty, rating
+- [✓] Creator name displayed
+- [✓] Difficulty badges color-coded correctly
+- [✓] Search/filter functionality works
+- [✓] Pagination works (if applicable)
+- [✓] Empty state displays when no routes
+- [✓] Click route card navigates to detail page
 
 ### 2.2 View Single Route (Show)
-- [ ] Route details displayed correctly
-- [ ] Map renders with route path
-- [ ] Route coordinates display on map
-- [ ] Distance shown accurately
-- [ ] Difficulty level displayed
-- [ ] Creator information shown
-- [ ] Creation date displayed
-- [ ] Ratings and reviews section visible
-- [ ] Average rating calculated correctly
-- [ ] Edit button visible for creator/admin only
-- [ ] Delete button visible for creator/admin only
+- [✓] Route details displayed correctly
+- [✓] Map renders with route path
+- [✓] Route coordinates display on map
+- [✓] Distance shown accurately
+- [✓] Difficulty level displayed
+- [✓] Creator information shown
+- [✓] Creation date displayed
+- [✓] Ratings and reviews section visible
+- [✓] Average rating calculated correctly
+- [✓] Edit button visible for creator/admin only
+- [✓] Delete button visible for creator/admin only
 
 ### 2.3 Create Route
-- [ ] Create route form loads
-- [ ] Map displays for waypoint placement
-- [ ] Click to add waypoints
-- [ ] Waypoints appear as markers
-- [ ] Road snapping works (Google Maps API)
-- [ ] Route line follows pedestrian paths
-- [ ] Route line follows park trails accurately
-- [ ] Toggle road snapping on/off works
-- [ ] "Undo Last" button removes last waypoint
-- [ ] "Clear Route" button removes all waypoints
-- [ ] Distance calculated automatically
-- [ ] Elevation profile displays (if available)
-- [ ] Form fields: name, description, difficulty
-- [ ] Name required validation
-- [ ] Description optional
-- [ ] Difficulty dropdown works
-- [ ] Coordinates saved correctly
-- [ ] Submit creates route successfully
-- [ ] Redirect to route detail after creation
-- [ ] Success message displayed
+- [✓] Create route form loads
+- [✓] Map displays for waypoint placement
+- [✓] Click to add waypoints
+- [✓] Waypoints appear as markers
+- [✓] Road snapping works (Google Maps API)
+- [✓] Route line follows pedestrian paths
+- [✓] Route line follows park trails accurately
+- [✓] Toggle road snapping on/off works
+- [✓] "Undo Last" button removes last waypoint (Bug #11 - fixed)
+- [✓] "Clear Route" button removes all waypoints (Bug #11 - fixed)
+- [✓] Distance calculated automatically
+- [✓] Elevation profile displays (if available)
+- [✓] Form fields: name, description, difficulty
+- [✓] Name required validation
+- [✓] Description optional
+- [✓] Difficulty dropdown works
+- [✓] Coordinates saved correctly
+- [✓] Submit creates route successfully
+- [✓] Redirect to route detail after creation
+- [✓] Success message displayed
+- [✓] Long routes (35km+) snap correctly (Bug #10 - fixed waypoint segmentation)
 
 ### 2.4 Edit Route
-- [ ] Edit form loads with existing data
-- [ ] Map displays existing route
-- [ ] Existing waypoints editable
-- [ ] Can add new waypoints
-- [ ] Can remove waypoints
-- [ ] Road snapping works on edit
-- [ ] Distance updates on waypoint changes
-- [ ] Form pre-filled with route data
-- [ ] Update saves changes correctly
-- [ ] Redirect to route detail after update
-- [ ] Success message displayed
-- [ ] Only creator/admin can edit
-- [ ] Unauthorized users redirected
+- [✓] Edit form loads with existing data
+- [✓] Map displays existing route
+- [✓] Existing waypoints editable
+- [✓] Can add new waypoints
+- [✓] Can remove waypoints
+- [✓] Road snapping works on edit
+- [✓] Distance updates on waypoint changes
+- [✓] Form pre-filled with route data
+- [✓] Update saves changes correctly
+- [✓] Redirect to route detail after update
+- [✓] Success message displayed
+- [✓] Only creator/admin can edit
+- [✓] Unauthorized users redirected
 
 ### 2.5 Delete Route
-- [ ] Delete button visible for creator/admin
-- [ ] Confirmation prompt before delete
-- [ ] Route deleted from database
-- [ ] Associated ratings deleted (cascade)
-- [ ] Redirect to routes index after delete
-- [ ] Success message displayed
-- [ ] Unauthorized users cannot delete
+- [✓] Delete button visible for creator/admin
+- [✓] Confirmation prompt before delete
+- [✓] Route deleted from database
+- [✓] Associated ratings deleted (cascade)
+- [✓] Redirect to routes index after delete
+- [✓] Success message displayed
+- [✓] Unauthorized users cannot delete
 
 ### 2.6 Rate & Review Routes
-- [ ] Star rating component displays
-- [ ] Can select 1-5 stars
-- [ ] Comment field available
-- [ ] Submit rating saves to database
-- [ ] Average rating updates
-- [ ] Rating count updates
-- [ ] User's rating displayed if exists
-- [ ] Can update existing rating
-- [ ] Cannot rate own route
-- [ ] Must be authenticated to rate
+- [✓] Star rating component displays
+- [✓] Can select 1-5 stars
+- [✓] Comment field available
+- [✓] Submit rating saves to database
+- [✓] Average rating updates
+- [✓] Rating count updates
+- [✓] User's rating displayed if exists
+- [✓] Can update existing rating
+- [✓] Cannot rate own route
+- [✓] Must be authenticated to rate
 
 ---
 
 ## 3. Training Plans
 
-### 3.1 View Training Plans (Index)
-- [ ] All plans displayed
-- [ ] Plan cards show: name, duration, difficulty, goal
-- [ ] Creator name displayed
-- [ ] Enrolled count displayed
-- [ ] Search/filter works
-- [ ] Empty state when no plans
-- [ ] Click plan navigates to detail
+### 3.1 View Training Plans (Index - Admin)
+- [✓] All plans displayed (Bug #12 - fixed /trainer/ to /admin/ URLs)
+- [✓] Plan cards show: name, duration, distance type, experience level
+- [✓] Creator name displayed
+- [✓] Active/total assignments count displayed
+- [✓] Grouped by distance type
+- [✓] Empty state when no plans
+- [✓] Click plan navigates to detail
 
-### 3.2 View Single Plan (Show)
-- [ ] Plan details displayed
-- [ ] Duration and difficulty shown
-- [ ] Goal type displayed
-- [ ] Description rendered
-- [ ] Weekly schedule visible
-- [ ] Workouts listed by week
-- [ ] Enroll button visible if not enrolled
-- [ ] "Already Enrolled" badge if enrolled
-- [ ] Progress shown if enrolled
-- [ ] Creator information displayed
+### 3.2 View Single Plan (Show - Admin)
+- [✓] Plan details displayed (Bug #13 - fixed URL routing)
+- [✓] Duration and experience level shown
+- [✓] Distance type displayed
+- [✓] Description rendered
+- [✓] Prerequisites and goals visible
+- [✓] Weekly schedule expandable by week (Bug #13 - added full breakdown)
+- [✓] Workouts listed by day for each week
+- [✓] Runner assignments section shows all assigned runners (Bug #13 - added progress tracking)
+- [✓] Progress bars with completion percentage
+- [✓] Status badges (Active/Paused/Completed)
+- [✓] Current week and start date displayed
+- [✓] Clickable runner names to view profiles
 
-### 3.3 Create Training Plan
-- [ ] Create form loads
-- [ ] Name field required
-- [ ] Description field optional
-- [ ] Duration dropdown works
-- [ ] Difficulty dropdown works
-- [ ] Goal type dropdown works
-- [ ] Weekly schedule builder works
-- [ ] Can add workouts to weeks
-- [ ] Workout fields: day, type, distance, notes
-- [ ] Can remove workouts
-- [ ] Submit creates plan successfully
-- [ ] Redirect after creation
-- [ ] Success message displayed
+### 3.3 Create Training Plan (Admin)
+- [✓] Create form loads (Bug #14 - added create functionality)
+- [✓] Name field required
+- [✓] Description field required (Bug #15 - added to fillable)
+- [✓] Duration input works (1-52 weeks)
+- [✓] Distance type dropdown works
+- [✓] Experience level dropdown works
+- [✓] Peak mileage optional field
+- [✓] Prerequisites optional field
+- [✓] Goals optional field
+- [✓] Weekly schedule builder works
+- [✓] Can switch between weeks
+- [✓] Can add workouts to each week
+- [✓] Workout fields: day, workout description
+- [✓] Can remove workouts
+- [✓] Submit creates plan successfully
+- [✓] Redirect to plan detail after creation
+- [✓] Weekly structure saves correctly
 
 ### 3.4 Edit Training Plan
 - [ ] Edit form loads with data
@@ -235,27 +242,61 @@
 
 ## 4. Activity Tracking (Runs)
 
-### 4.1 View Activities (Index)
-- [ ] All user's runs displayed
-- [ ] Run cards show: date, distance, duration, route
-- [ ] Photo thumbnails displayed if present
-- [ ] Visibility badge (public/private)
-- [ ] Sorted by date (newest first)
-- [ ] Empty state when no runs
-- [ ] Click run navigates to detail
+### 4.1 Log a New Run
+- [✓] Log run form loads
+- [✓] Route selection dropdown works
+- [✓] Shoe selection dropdown works (optional)
+- [✓] Start time field works
+- [✓] Time input (hours, minutes, seconds) works
+- [✓] Notes field works (optional, max 250 chars)
+- [✓] Photo upload works (optional)
+- [✓] Public/private toggle works
+- [✓] Pace calculated automatically
+- [✓] Submit creates run successfully (Bug #16 - fixed CSRF token)
+- [✓] Redirect to run history after creation
+- [✓] Success message displayed
 
-### 4.2 View Single Activity (Show)
-- [ ] Run details displayed
-- [ ] Date, distance, duration shown
-- [ ] Route name linked (if associated)
-- [ ] Notes displayed
-- [ ] Photo displayed full-size
-- [ ] Visibility status shown
-- [ ] Map with route (if coordinates)
-- [ ] Edit button for owner
-- [ ] Delete button for owner
-- [ ] Public runs visible to others
-- [ ] Private runs only visible to owner
+### 4.2 View Run History (Index)
+- [✓] All user's runs displayed in table
+- [✓] Shows: date, route name, distance, time, pace, difficulty
+- [✓] Sorted by date (newest first)
+- [✓] Empty state when no runs
+- [✓] "View" action navigates to detail
+- [✓] "Log New Run" button visible
+
+### 4.3 View Single Run (Show)
+- [✓] Run details displayed
+- [✓] Date, distance, duration, pace shown
+- [✓] Route name linked to route detail
+- [✓] Notes displayed
+- [✓] Photo displayed full-size (if uploaded)
+- [✓] Map with route displayed
+- [✓] Elevation gain shown (if available)
+- [✓] Edit button for owner (Bug #17 - added)
+- [✓] Delete button for owner
+- [✓] Timeline shows start/end times
+- [✓] Stats displayed in colored cards
+
+### 4.4 Edit Run
+- [✓] Edit form loads with existing data
+- [✓] Route displayed (read-only)
+- [✓] Shoe selection editable (Bug #18 - added)
+- [✓] Time editable (hours, minutes, seconds) (Bug #18 - added)
+- [✓] Notes editable
+- [✓] Photo upload/replace works
+- [✓] Public/private toggle works
+- [✓] Current photo displayed
+- [✓] Update saves changes (Bug #19 - fixed type casting)
+- [✓] Redirect to run detail after update
+- [✓] Success message displayed
+
+### 4.5 Delete Run
+- [✓] Delete button visible for owner
+- [✓] Confirmation prompt before delete
+- [✓] Run deleted from database
+- [✓] Photo deleted if exists
+- [✓] Redirect to run history
+- [✓] Success message displayed
 
 ### 4.3 Log New Run
 - [ ] Log run form loads

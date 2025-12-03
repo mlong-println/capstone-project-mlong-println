@@ -30,11 +30,11 @@ class RunInteractionController extends Controller
                     'user_id' => $run->user_id,
                     'type' => 'like',
                     'title' => 'Run Liked',
+                    'message' => "{$user->name} liked your run",
                     'data' => [
                         'user_name' => $user->name,
                         'user_id' => $user->id,
                         'run_id' => $run->id,
-                        'message' => "{$user->name} liked your run",
                     ],
                 ]);
             }
@@ -64,11 +64,12 @@ class RunInteractionController extends Controller
                 'user_id' => $run->user_id,
                 'type' => 'comment',
                 'title' => 'New Comment',
+                'message' => auth()->user()->name . " commented on your run",
                 'data' => [
                     'user_name' => auth()->user()->name,
                     'user_id' => auth()->id(),
                     'run_id' => $run->id,
-                    'message' => auth()->user()->name . " commented on your run",
+                    'comment' => $validated['comment'],
                 ],
             ]);
         }

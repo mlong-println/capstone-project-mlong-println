@@ -569,8 +569,13 @@ Route::middleware(['auth'])->prefix('runs')->group(function () {
 });
 
 // User Profile Routes
-Route::get('/users/{user}', [App\Http\Controllers\UserProfileController::class, 'show'])
-    ->name('users.show');
+Route::middleware('auth')->group(function () {
+    Route::get('/users', [App\Http\Controllers\UserProfileController::class, 'index'])
+        ->name('users.index');
+    
+    Route::get('/users/{user}', [App\Http\Controllers\UserProfileController::class, 'show'])
+        ->name('users.show');
+});
 
 // Activity Routes (social interactions)
 Route::middleware('auth')->group(function () {

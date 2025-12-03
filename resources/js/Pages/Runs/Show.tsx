@@ -3,6 +3,16 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import RouteMap from '@/Components/RouteMap';
 import { useState } from 'react';
 
+interface Comment {
+    id: number;
+    comment: string;
+    created_at: string;
+    user: {
+        id: number;
+        name: string;
+    };
+}
+
 interface Run {
     id: number;
     start_time: string;
@@ -12,6 +22,8 @@ interface Run {
     formatted_pace: string;
     elevation_gain: number | null;
     notes: string | null;
+    photo: string | null;
+    is_public: boolean;
     route: {
         id: number;
         name: string;
@@ -24,14 +36,24 @@ interface Run {
         id: number;
         name: string;
     };
+    comments: Comment[];
+    likes_count: number;
+    user_has_liked: boolean;
 }
 
 interface ShowRunProps {
     run: Run;
+    auth: {
+        user: {
+            id: number;
+        };
+    };
 }
 
-export default function Show({ run }: ShowRunProps) {
+export default function Show({ run, auth }: ShowRunProps) {
     const [deleting, setDeleting] = useState(false);
+    const [comment, setComment] = useState('');
+    const [submitting, setSubmitting] = useState(false);
 
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
@@ -49,6 +71,40 @@ export default function Show({ run }: ShowRunProps) {
         if (confirm('Are you sure you want to delete this run?')) {
             setDeleting(true);
             router.delete(`/runs/${run.id}`);
+        }
+    };
+
+    const handleLike = () => {
+        router.post(`/runs/${run.id}/like`, {}, {
+            preserveScroll: true,
+        });
+    };
+
+    const handleComment = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!comment.trim()) return;
+
+        setSubmitting(true);
+        router.post(`/runs/${run.id}/comment`, 
+            { comment },
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setComment('');
+                    setSubmitting(false);
+                },
+                onError: () => {
+                    setSubmitting(false);
+                },
+            }
+        );
+    };
+
+    const handleDeleteComment = (commentId: number) => {
+        if (confirm('Are you sure you want to delete this comment?')) {
+            router.delete(`/runs/comments/${commentId}`, {
+                preserveScroll: true,
+            });
         }
     };
 
@@ -169,6 +225,87 @@ export default function Show({ run }: ShowRunProps) {
                             <div className="flex items-center">
                                 <div className="flex-shrink-0 w-24 text-sm font-medium text-gray-600">Duration:</div>
                                 <div className="text-sm text-gray-900">{run.formatted_time}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Likes and Comments */}
+                    <div className="bg-white rounded-lg shadow p-6">
+                        {/* Like Button */}
+                        <div className="flex items-center gap-4 mb-6 pb-6 border-b">
+                            <button
+                                onClick={handleLike}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition ${
+                                    run.user_has_liked
+                                        ? 'bg-red-50 text-red-600 hover:bg-red-100'
+                                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                            >
+                                <svg className="w-5 h-5" fill={run.user_has_liked ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                                <span className="font-medium">{run.likes_count}</span>
+                            </button>
+                        </div>
+
+                        {/* Comments Section */}
+                        <div>
+                            <h4 className="text-lg font-semibold text-gray-900 mb-4">Comments ({run.comments.length})</h4>
+                            
+                            {/* Comment Form */}
+                            <form onSubmit={handleComment} className="mb-6">
+                                <textarea
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    placeholder="Add a comment..."
+                                    rows={3}
+                                    maxLength={500}
+                                    className="w-full border-gray-300 rounded-lg shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                />
+                                <div className="flex justify-between items-center mt-2">
+                                    <span className="text-xs text-gray-500">{comment.length}/500</span>
+                                    <button
+                                        type="submit"
+                                        disabled={submitting || !comment.trim()}
+                                        className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {submitting ? 'Posting...' : 'Post Comment'}
+                                    </button>
+                                </div>
+                            </form>
+
+                            {/* Comments List */}
+                            <div className="space-y-4">
+                                {run.comments.length === 0 ? (
+                                    <p className="text-gray-500 text-center py-4">No comments yet. Be the first to comment!</p>
+                                ) : (
+                                    run.comments.map((c) => (
+                                        <div key={c.id} className="bg-gray-50 rounded-lg p-4">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="flex-1">
+                                                    <span className="font-semibold text-gray-900">{c.user.name}</span>
+                                                    <span className="text-xs text-gray-500 ml-2">
+                                                        {new Date(c.created_at).toLocaleDateString('en-US', {
+                                                            month: 'short',
+                                                            day: 'numeric',
+                                                            hour: '2-digit',
+                                                            minute: '2-digit',
+                                                        })}
+                                                    </span>
+                                                </div>
+                                                {c.user.id === auth.user.id && (
+                                                    <button
+                                                        onClick={() => handleDeleteComment(c.id)}
+                                                        className="text-red-600 hover:text-red-800 text-sm"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                )}
+                                            </div>
+                                            <p className="text-gray-700">{c.comment}</p>
+                                        </div>
+                                    ))
+                                )}
                             </div>
                         </div>
                     </div>
