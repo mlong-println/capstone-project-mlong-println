@@ -20,6 +20,25 @@
     font-weight: 700;
     letter-spacing: -0.025em;
   }
+
+  /* Mobile responsive fixes */
+  @media (max-width: 640px) {
+    body {
+      overflow-x: hidden;
+    }
+    
+    /* Ensure full width on mobile */
+    .max-w-7xl,
+    .max-w-6xl,
+    .max-w-5xl,
+    .max-w-4xl,
+    .max-w-3xl,
+    .max-w-2xl {
+      max-width: 100% !important;
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
+    }
+  }
 }
 
 /**

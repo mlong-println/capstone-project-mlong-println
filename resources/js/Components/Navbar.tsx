@@ -49,7 +49,7 @@ export default function Navbar({ auth, canLogin = true, canRegister = true, them
 
   return (
     // Container positioned top-right (no background, uses parent's themed background)
-    <div className="flex items-center justify-end gap-4">
+    <div className="flex items-center justify-end gap-4 relative z-50">
           {/* Notification Bell - only show for authenticated users */}
           {auth.user && <NotificationBell />}
           
@@ -77,7 +77,7 @@ export default function Navbar({ auth, canLogin = true, canRegister = true, them
             {/* Dropdown panel */}
             {open && (
               <div
-                className="absolute right-0 mt-2 w-52 rounded-md border border-white/30 bg-white shadow-lg z-50"
+                className="absolute right-0 mt-2 w-52 rounded-md border border-white/30 bg-white shadow-lg z-[100]"
                 role="menu"
                 aria-label="User menu"
               >

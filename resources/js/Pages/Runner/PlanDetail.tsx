@@ -1,8 +1,8 @@
 // resources/js/Pages/Runner/PlanDetail.tsx
 
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useTheme } from '@/Components/ThemeSelector';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
 interface PlanDetailProps {
   plan: {
@@ -27,12 +27,20 @@ interface PlanDetailProps {
  */
 export default function PlanDetail({ plan, userProfile, activePlan, canSelect }: PlanDetailProps) {
   const { themeConfig } = useTheme();
+  const [processing, setProcessing] = useState(false);
 
-  const { post, processing } = useForm();
-
-  const handleSelect: FormEventHandler = (e) => {
+  const handleSelect: FormEventHandler = async (e) => {
     e.preventDefault();
-    post(`/runner/plans/${plan.id}/assign`);
+    setProcessing(true);
+    
+    try {
+      await window.axios.post(`/runner/plans/${plan.id}/assign`);
+      router.reload({ only: ['activePlan', 'canSelect'] });
+    } catch (error) {
+      console.error('Failed to assign plan:', error);
+    } finally {
+      setProcessing(false);
+    }
   };
 
   return (
