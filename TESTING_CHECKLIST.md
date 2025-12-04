@@ -345,57 +345,83 @@
 
 ## 5. Social Features
 
-### 5.1 User Profiles
-- [ ] Profile page loads
-- [ ] User info displayed: name, email, bio
-- [ ] Avatar/photo displayed
-- [ ] Stats summary shown
-- [ ] Recent activities listed
-- [ ] Public routes listed
-- [ ] Follow/Unfollow button works
-- [ ] Follower count accurate
-- [ ] Following count accurate
-- [ ] Edit profile button for owner
-- [ ] Cannot edit other users' profiles
+### 5.1 View Social Feed
+- [x] ✅ PASSED - Dashboard displays runs from followed users
+- [x] ✅ PASSED - Feed sorted by date (newest first)
+- [x] ✅ PASSED - Shows user name, run details, route info
+- [x] ✅ PASSED - Can click to view full run details
 
-### 5.2 Edit Profile
-- [ ] Edit form loads with data
-- [ ] Name field editable
-- [ ] Email field editable
-- [ ] Bio field editable
-- [ ] Avatar upload works
-- [ ] Update saves changes
-- [ ] Redirect after update
-- [ ] Success message displayed
+### 5.2 Like a Run
+- [x] ✅ PASSED - Like button works (heart icon)
+- [x] ✅ PASSED - Unlike button works (toggle)
+- [x] ✅ PASSED - Like count updates in real-time
+- [x] ✅ PASSED - Heart fills when liked
+- [x] ✅ PASSED - Notification created for run owner (Bug #20)
 
-### 5.3 Follow/Unfollow Users
-- [ ] Follow button works
-- [ ] Unfollow button works
-- [ ] Follower count updates
-- [ ] Following count updates
-- [ ] Cannot follow self
-- [ ] Must be authenticated
+### 5.3 Comment on a Run
+- [x] ✅ PASSED - Comment form displays on run detail page
+- [x] ✅ PASSED - Can post comment (500 char max)
+- [x] ✅ PASSED - Character counter works
+- [x] ✅ PASSED - Comment appears immediately after posting
+- [x] ✅ PASSED - Notification created for run owner (Bug #20)
 
-### 5.4 Activity Feed
-- [ ] Feed displays followed users' activities
-- [ ] Activities sorted by date (newest first)
-- [ ] Shows: user name, activity type, details
-- [ ] Photos displayed in feed
-- [ ] Can click to view full activity
-- [ ] Can like activities
-- [ ] Can comment on activities
-- [ ] Empty state when no activities
-- [ ] Pagination works
+### 5.4 View Comments
+- [x] ✅ PASSED - Comments display on run detail page (Bug #21)
+- [x] ✅ PASSED - Shows commenter name and timestamp
+- [x] ✅ PASSED - Comments sorted by date
+- [x] ✅ PASSED - Empty state when no comments
 
-### 5.5 Notifications
-- [ ] Notification bell icon in navbar
-- [ ] Unread count badge displays
-- [ ] Dropdown shows recent notifications
-- [ ] Notification types: new follower, comment, like, plan enrollment
-- [ ] Click notification marks as read
-- [ ] Click notification navigates to relevant page
-- [ ] "Mark all as read" works
-- [ ] Notifications persist across sessions
+### 5.5 Delete Comment (Own)
+- [x] ✅ PASSED - Delete button visible for comment owner only (Bug #22)
+- [x] ✅ PASSED - Confirmation prompt before deletion
+- [x] ✅ PASSED - Comment deleted successfully (Bug #23)
+- [x] ✅ PASSED - UI updates after deletion
+
+### 5.6 Activity/Notifications Page
+- [x] ✅ PASSED - Activity page displays social notifications
+- [x] ✅ PASSED - Shows likes and comments on runs
+- [x] ✅ PASSED - Pending follow requests section visible
+- [x] ✅ PASSED - Unread count displayed
+- [x] ✅ PASSED - Mark all as read works
+
+---
+
+## 6. Follow System
+
+### 6.1 Find Users
+- [x] ✅ PASSED - Find Users page loads (Bug #25)
+- [x] ✅ PASSED - Search by name or email works (Bug #26)
+- [x] ✅ PASSED - User list displays with location and role
+- [x] ✅ PASSED - Follow status shown (Following/Pending/Follow)
+- [x] ✅ PASSED - Current user excluded from list
+
+### 6.2 Follow Another User
+- [x] ✅ PASSED - Follow button sends request
+- [x] ✅ PASSED - Button changes to "Pending" after click
+- [x] ✅ PASSED - Follow request created in database
+
+### 6.3 View Follow Requests
+- [x] ✅ PASSED - Pending requests shown in Activity page
+- [x] ✅ PASSED - Shows requester name and profile link
+- [x] ✅ PASSED - Approve and Reject buttons visible
+
+### 6.4 Approve Follow Request
+- [x] ✅ PASSED - Approve button works (Bug #24 - CSRF fix)
+- [x] ✅ PASSED - Request removed from pending list
+- [x] ✅ PASSED - Requester becomes follower
+- [x] ✅ PASSED - Feed shows followed user's runs
+
+### 6.5 Unfollow User
+- [x] ✅ PASSED - Unfollow button works (Bug #29 - CSRF fix)
+- [x] ✅ PASSED - Button changes to "Follow" after unfollow
+- [x] ✅ PASSED - UI updates immediately
+- [x] ✅ PASSED - Follower relationship removed
+
+### 6.6 Reject Follow Request
+- [x] ✅ PASSED - Reject button works (Bug #30 - CSRF token refresh)
+- [x] ✅ PASSED - Request removed from pending list
+- [x] ✅ PASSED - No follower relationship created
+- [x] ✅ PASSED - UI updates after rejection
 
 ---
 

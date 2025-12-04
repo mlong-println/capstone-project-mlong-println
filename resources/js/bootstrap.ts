@@ -12,6 +12,7 @@ const updateCsrfToken = () => {
         const csrfToken = token.getAttribute('content');
         if (csrfToken) {
             window.axios.defaults.headers.common['X-CSRF-TOKEN'] = csrfToken;
+            console.log('CSRF token updated:', csrfToken.substring(0, 10) + '...');
         }
     } else {
         console.error('CSRF token not found');
@@ -21,8 +22,13 @@ const updateCsrfToken = () => {
 // Set initial CSRF token
 updateCsrfToken();
 
-// Update CSRF token after each Inertia navigation
-router.on('navigate', () => {
+// Update CSRF token after each Inertia page visit (success event)
+router.on('success', () => {
+    updateCsrfToken();
+});
+
+// Also update on finish (covers all navigation types)
+router.on('finish', () => {
     updateCsrfToken();
 });
 

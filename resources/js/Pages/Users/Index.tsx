@@ -25,16 +25,22 @@ export default function Index({ users, search: initialSearch }: IndexProps) {
         router.get('/users', { search }, { preserveState: true });
     };
 
-    const handleFollow = (userId: number) => {
-        router.post(`/users/${userId}/follow`, {}, {
-            preserveScroll: true,
-        });
+    const handleFollow = async (userId: number) => {
+        try {
+            await window.axios.post(`/users/${userId}/follow`);
+            router.reload({ only: ['users'] });
+        } catch (error) {
+            console.error('Failed to follow user:', error);
+        }
     };
 
-    const handleUnfollow = (userId: number) => {
-        router.delete(`/users/${userId}/unfollow`, {
-            preserveScroll: true,
-        });
+    const handleUnfollow = async (userId: number) => {
+        try {
+            await window.axios.delete(`/users/${userId}/unfollow`);
+            router.reload({ only: ['users'] });
+        } catch (error) {
+            console.error('Failed to unfollow user:', error);
+        }
     };
 
     return (
