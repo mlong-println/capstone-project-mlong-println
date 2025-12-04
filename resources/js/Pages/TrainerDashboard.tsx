@@ -64,7 +64,7 @@ export default function TrainerDashboard({ auth, runners, trainingPlans, stats }
       {/* Header */}
       <div className={`${themeConfig.gradient} relative z-10`}>
         <div className="max-w-6xl mx-auto py-6 px-6">
-          <h1 className={`text-3xl font-bold ${themeConfig.text} tracking-tight`}>Trainer Dashboard</h1>
+          <h1 className={`text-3xl font-bold ${themeConfig.text} tracking-tight`}>Admin / Trainer Dashboard</h1>
           <p className={`mt-1 ${themeConfig.text} opacity-90`}>
             Manage your athletes and their training plans.
           </p>

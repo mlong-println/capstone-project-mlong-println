@@ -72,13 +72,6 @@ export default function ThemedNavBar({ auth, themeTextClass }: ThemedNavBarProps
                                         <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50">
                                             <div className="py-1">
                                                 <Link
-                                                    href="/admin/runners"
-                                                    onClick={closeDropdown}
-                                                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                >
-                                                    View All Athletes
-                                                </Link>
-                                                <Link
                                                     href="/users"
                                                     onClick={closeDropdown}
                                                     className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -354,6 +347,13 @@ export default function ThemedNavBar({ auth, themeTextClass }: ThemedNavBarProps
                                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                                         >
                                             Find Users
+                                        </Link>
+                                        <Link
+                                            href="/safety-alerts"
+                                            onClick={closeDropdown}
+                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                        >
+                                            Safety Alerts
                                         </Link>
                                     </div>
                                 </div>

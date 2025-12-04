@@ -99,6 +99,16 @@ export default function Authenticated({
                                 >
                                     Achievements
                                 </Link>
+                                <Link
+                                    href={route('safety-alerts.index')}
+                                    className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium transition ${
+                                        route().current('safety-alerts.*')
+                                            ? 'border-white text-white'
+                                            : 'border-transparent text-white/70 hover:text-white hover:border-white/50'
+                                    }`}
+                                >
+                                    Safety Alerts
+                                </Link>
                             </div>
                         </div>
 
