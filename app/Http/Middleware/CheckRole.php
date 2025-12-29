@@ -4,27 +4,13 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use App\Services\DatabaseService;
 
 /**
  * CheckRole Middleware
  * Verifies that authenticated users can only access routes matching their role
- * Uses raw SQL through DatabaseService for role verification
  */
 class CheckRole
 {
-    /** @var DatabaseService|null */
-    protected $db;
-
-    /**
-     * Initialize middleware with DatabaseService for raw SQL queries
-     * DatabaseService is optional to allow tests to work
-     */
-    public function __construct(?DatabaseService $db = null)
-    {
-        $this->db = $db;
-    }
-
     /**
      * Handle an incoming request.
      * Verifies user role matches required role for route
@@ -42,17 +28,8 @@ class CheckRole
             return redirect()->route('login');
         }
 
-        // Get user's role - use DatabaseService if available, otherwise use Eloquent (for tests)
-        if ($this->db) {
-            $user = $this->db->fetch(
-                "SELECT role FROM users WHERE id = ?",
-                [$request->user()->id]
-            );
-            $userRole = $user['role'];
-        } else {
-            // Fallback for testing environment
-            $userRole = $request->user()->role;
-        }
+        // Get user's role using Eloquent
+        $userRole = $request->user()->role;
 
         // If role doesn't match, return 403 forbidden
         if ($userRole !== $role) {
