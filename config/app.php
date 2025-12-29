@@ -154,7 +154,7 @@ return [
         App\Providers\RouteServiceProvider::class,
 
         // Our custom database service provider
-        App\Providers\DatabaseServiceProvider::class
+        // App\Providers\DatabaseServiceProvider::class
     ]
 
 ];
