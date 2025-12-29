@@ -152,9 +152,6 @@ return [
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-
-        // Our custom database service provider
-        // App\Providers\DatabaseServiceProvider::class
     ]
 
 ];
