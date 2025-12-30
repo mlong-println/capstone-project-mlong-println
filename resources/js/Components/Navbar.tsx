@@ -44,7 +44,12 @@ export default function Navbar({ auth, canLogin = true, canRegister = true, them
     e.preventDefault();
     e.stopPropagation();
     setOpen(false);
-    router.post('/logout');
+    router.post('/logout', {}, {
+      onError: () => {
+        // If CSRF token expired (419), just redirect to home
+        window.location.href = '/';
+      }
+    });
   };
 
   return (
