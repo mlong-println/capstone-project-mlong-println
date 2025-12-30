@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             TrainingPlanSeeder::class,   // Then create training plan templates
             TestRunnerSeeder::class,     // Create test runner accounts
             TestDataSeeder::class,       // Existing test data
+            AchievementSeeder::class,    // Seed achievements
         ]);
     }
 }
