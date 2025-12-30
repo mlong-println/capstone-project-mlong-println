@@ -105,6 +105,14 @@ export default function Navbar({ auth, canLogin = true, canRegister = true, them
                     >
                       Dashboard
                     </Link>
+                    <Link
+                      href="/achievements"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition cursor-pointer"
+                      role="menuitem"
+                      onClick={() => setOpen(false)}
+                    >
+                      Achievements
+                    </Link>
 
                     {/* Separator for clarity */}
                     <div className="my-1 border-t border-gray-100" />
