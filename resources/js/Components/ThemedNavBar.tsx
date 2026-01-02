@@ -394,8 +394,13 @@ export default function ThemedNavBar({ auth, themeTextClass }: ThemedNavBarProps
                                 <Dropdown.Link href="/achievements">
                                     Achievements
                                 </Dropdown.Link>
+                                {auth.user.role === 'runner' && (
+                                    <Dropdown.Link href="/runner/profile/edit">
+                                        Runner Profile
+                                    </Dropdown.Link>
+                                )}
                                 <Dropdown.Link href={route('profile.edit')}>
-                                    Profile
+                                    Account Settings
                                 </Dropdown.Link>
                                 <Dropdown.Link
                                     href={route('logout')}
