@@ -43,21 +43,29 @@ export default function Show({
 }: UserProfileProps) {
     
     const handleFollow = () => {
-        router.post(`/users/${profileUser.id}/follow`);
+        router.post(`/users/${profileUser.id}/follow`, {}, {
+            preserveScroll: true,
+        });
     };
 
     const handleUnfollow = () => {
         if (confirm('Are you sure you want to unfollow this user?')) {
-            router.delete(`/users/${profileUser.id}/unfollow`);
+            router.delete(`/users/${profileUser.id}/unfollow`, {
+                preserveScroll: true,
+            });
         }
     };
 
     const handleApprove = (followId: number) => {
-        router.post(`/follows/${followId}/approve`);
+        router.post(`/follows/${followId}/approve`, {}, {
+            preserveScroll: true,
+        });
     };
 
     const handleReject = (followId: number) => {
-        router.post(`/follows/${followId}/reject`);
+        router.post(`/follows/${followId}/reject`, {}, {
+            preserveScroll: true,
+        });
     };
 
     return (
