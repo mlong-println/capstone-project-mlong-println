@@ -29,18 +29,20 @@ export default function PlanDetail({ plan, userProfile, activePlan, canSelect }:
   const { themeConfig } = useTheme();
   const [processing, setProcessing] = useState(false);
 
-  const handleSelect: FormEventHandler = async (e) => {
+  const handleSelect: FormEventHandler = (e) => {
     e.preventDefault();
     setProcessing(true);
     
-    try {
-      await window.axios.post(`/runner/plans/${plan.id}/assign`);
-      router.reload({ only: ['activePlan', 'canSelect'] });
-    } catch (error) {
-      console.error('Failed to assign plan:', error);
-    } finally {
-      setProcessing(false);
-    }
+    router.post(`/runner/plans/${plan.id}/assign`, {}, {
+      onSuccess: () => {
+        // Redirect to dashboard after successful assignment
+        router.visit('/runner/dashboard');
+      },
+      onError: (errors) => {
+        console.error('Failed to assign plan:', errors);
+        setProcessing(false);
+      },
+    });
   };
 
   return (
