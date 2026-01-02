@@ -277,7 +277,7 @@ class AchievementService
 
             if ($achievement->type === 'distance') {
                 $distance = \App\Models\Run::where('user_id', $userId)
-                    ->where('is_public', true)
+                    ->where('runs.is_public', true)
                     ->whereYear('start_time', $year)
                     ->whereMonth('start_time', $month)
                     ->join('routes', 'runs.route_id', '=', 'routes.id')
@@ -291,7 +291,7 @@ class AchievementService
                 ];
             } elseif ($achievement->type === 'elevation') {
                 $elevation = \App\Models\Run::where('user_id', $userId)
-                    ->where('is_public', true)
+                    ->where('runs.is_public', true)
                     ->whereYear('start_time', $year)
                     ->whereMonth('start_time', $month)
                     ->sum('elevation_gain');
