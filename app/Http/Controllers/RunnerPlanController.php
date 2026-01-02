@@ -239,6 +239,6 @@ class RunnerPlanController extends Controller
             'actual_end_date' => now(),
         ]);
 
-        return Redirect::route('runner.dashboard')->with('success', 'Training plan abandoned. You can select a new plan anytime.');
+        return Redirect::route('runner.plans.index')->with('success', 'Training plan abandoned. You can select a new plan now.');
     }
 }
