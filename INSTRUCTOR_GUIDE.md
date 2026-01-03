@@ -117,24 +117,6 @@ If you prefer to use pre-existing accounts:
 
 ---
 
-## Admin/Trainer Features
-
-If you want to test admin features, I can promote your account to admin role.
-
-### Admin Dashboard
-- View all users
-- Manage training plans
-- View system statistics
-- Access all routes and runs
-
-### Trainer Features
-- Create training plans
-- Assign plans to runners
-- Track athlete progress
-- View assigned athletes
-
----
-
 ## Testing Recommendations
 
 ### Basic Flow (15 minutes)
