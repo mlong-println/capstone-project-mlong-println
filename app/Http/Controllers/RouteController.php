@@ -139,6 +139,7 @@ class RouteController extends Controller
             'difficulty' => $validated['difficulty'],
             'coordinates' => $validated['coordinates'] ?? null,
             'created_by' => auth()->id(),
+            'is_public' => true, // Default to public
         ]);
 
         return redirect()->route('routes.index')
