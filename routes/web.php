@@ -208,7 +208,26 @@ Route::middleware(['auth'])->group(function () {
                 ],
             ]);
         
-        $feedActivities = $recentRuns->concat($recentEvents)->concat($recentChallenges)->concat($recentSafetyAlerts)->concat($recentForumPosts)
+        // Recent achievements from followed users
+        $recentUserAchievements = \App\Models\UserAchievement::whereIn('user_id', $allUserIds)
+            ->with(['user', 'achievement'])
+            ->orderBy('achieved_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(fn($userAchievement) => [
+                'type' => 'user_achievement',
+                'user' => $userAchievement->user->name,
+                'user_id' => $userAchievement->user->id,
+                'message' => "earned the '{$userAchievement->achievement->name}' achievement! 🏆",
+                'time' => $userAchievement->achieved_at,
+                'data' => [
+                    'achievement_id' => $userAchievement->achievement->id,
+                    'achievement_name' => $userAchievement->achievement->name,
+                    'value_achieved' => $userAchievement->value_achieved,
+                ],
+            ]);
+        
+        $feedActivities = $recentRuns->concat($recentEvents)->concat($recentChallenges)->concat($recentSafetyAlerts)->concat($recentForumPosts)->concat($recentUserAchievements)
             ->sortByDesc('time')
             ->take(15)
             ->values();

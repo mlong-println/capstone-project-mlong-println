@@ -21,7 +21,7 @@ interface RunComment {
 }
 
 interface FeedActivity {
-  type: 'run' | 'event' | 'challenge' | 'safety_alert' | 'forum_post';
+  type: 'run' | 'event' | 'challenge' | 'safety_alert' | 'forum_post' | 'user_achievement';
   run_id?: number;
   user: string;
   user_id: number | null;
@@ -48,6 +48,8 @@ interface FeedActivity {
     alert_type_icon?: string;
     post_id?: number;
     category?: string;
+    achievement_name?: string;
+    value_achieved?: number;
   };
 }
 
@@ -354,6 +356,8 @@ export default function RunnerDashboard({ auth, user, profile, activePlan, stats
                                   <Link href={`/forum/${activity.data.post_id}`} className="text-gray-600 hover:text-indigo-600 hover:underline">
                                     {activity.message}
                                   </Link>
+                                ) : activity.type === 'user_achievement' ? (
+                                  <span className="text-gray-600 font-semibold">{activity.message}</span>
                                 ) : (
                                   <span className="text-gray-600">{activity.message}</span>
                                 )}
