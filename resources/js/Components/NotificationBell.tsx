@@ -31,7 +31,7 @@ export default function NotificationBell({ initialCount = 0 }: NotificationBellP
 
     return (
         <Link
-            href="/activity"
+            href="/notifications"
             className="relative inline-flex items-center justify-center p-2 rounded-full bg-white/10 backdrop-blur-sm hover:bg-white/20 transition border border-white/20"
         >
             {/* Bell Icon SVG */}
