@@ -68,6 +68,7 @@ If you prefer to use pre-existing accounts:
 - ✅ **Notifications:** Bell icon shows likes, comments, follow requests
 
 ### Training Plans (Runner)
+- ✅ **Complete Profile First:** Must fill out runner profile (experience level, weekly mileage, goals) before accessing training plans
 - ✅ **Browse Plans:** Click "Training Plans" → "Browse Plans"
 - ✅ **View Plan Details:** Click any plan to see weekly schedule
 - ✅ **Assign Plan:** Click "Assign to Me" on plan detail page
@@ -89,6 +90,25 @@ If you prefer to use pre-existing accounts:
 - ✅ **Create Event:** Organize group runs
 - ✅ **Join/Leave Events:** RSVP to events
 - ✅ **View Participants:** See who's attending
+
+### Forum
+- ✅ **Browse Posts:** Click "Forum" in navigation
+- ✅ **Create Post:** Share tips, ask questions, discuss running topics
+- ✅ **Comment:** Reply to existing posts
+- ✅ **Like Posts/Comments:** Show appreciation for content
+- ✅ **Categories:** Training Tips, Gear Reviews, Race Reports, General Discussion
+
+### Challenges (Monthly Achievements)
+- ✅ **View Challenges:** Click "Achievements" → "Challenges" tab
+- ✅ **Join Challenge:** Click "Join Challenge" on any active challenge
+- ✅ **Track Progress:** See your progress toward monthly distance/elevation goals
+- ✅ **Leaderboards:** View challenge leaderboards showing top performers
+- ✅ **Earn Badges:** Complete challenges to earn achievement badges
+
+### Route Leaderboards
+- ✅ **View Leaderboard:** Click any route → scroll to "Route Leaderboard"
+- ✅ **See Rankings:** All runners who completed the route, ranked by fastest time
+- ✅ **Compare Times:** See your personal best vs others
 
 ### Gear Tracking
 - ✅ **Add Shoes:** Dashboard → "Gear" → "Add Shoe"
@@ -133,11 +153,20 @@ If you want to test admin features, I can promote your account to admin role.
 5. Check notifications (bell icon)
 
 ### Training Flow (10 minutes)
-1. Browse training plans
-2. View a plan's weekly schedule
-3. Assign a plan to yourself
-4. View "My Active Plan"
-5. Mark a workout as complete
+1. Complete your runner profile (Dashboard → "Runner Profile")
+2. Browse training plans
+3. View a plan's weekly schedule
+4. Assign a plan to yourself
+5. View "My Active Plan"
+6. Mark a workout as complete
+
+### Community Flow (10 minutes)
+1. Browse forum posts (click "Forum")
+2. Read and like existing posts
+3. Create your own forum post
+4. Browse events (click "Events")
+5. Join an upcoming event
+6. View route leaderboards (click any route → scroll down)
 
 ---
 
