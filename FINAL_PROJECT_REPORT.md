@@ -151,30 +151,32 @@ Throughout the semester, the project scope evolved significantly based on:
 
 ### Milestone 5: Deployment & Documentation (Weeks 14-15)
 **Accomplishments:**
-- Deployed application to Azure App Service
-- Connected Azure MySQL database
-- Configured environment variables and SSL
+- Initially deployed application to Azure App Service
+- Migrated to Laravel Forge on DigitalOcean for production deployment
+- Configured MySQL database and environment variables
 - Created comprehensive documentation
 - Added author attribution to all files
 - Completed security audit and testing checklist
 
 **Challenges:**
-- **Azure Deployment:** Multiple failures due to Composer autoload issues
+- **Azure Deployment:** Multiple failures due to Composer autoload issues, nginx routing, and SSL configuration
 - **Database Connection:** SSL requirements and firewall configuration
-- **Nginx Routing:** Document root configuration persisting incorrectly
-- **Environment Variables:** Configuration not loading properly
+- **Platform Limitations:** Azure nginx routing persisted incorrectly despite custom startup scripts
+- **Migration Decision:** Evaluated alternative hosting solutions for reliability
 
 **Resolution:**
-- Used Azure CLI for direct Git deployment, bypassing GitHub Actions caching
-- Configured MySQL SSL mode and firewall rules
-- Created custom startup scripts for nginx configuration
-- Set up proper environment variables in Azure configuration
+- Attempted Azure deployment with CLI, custom scripts, and SSL configuration
+- Recognized persistent platform-level issues with Azure App Service
+- Migrated to Laravel Forge (DigitalOcean) for streamlined Laravel deployment
+- Configured automated Git deployment from GitHub
+- Set up MySQL database with proper migrations and seeders
 
 **Current Status:**
-- Application fully deployed to Azure
-- Database connected and migrations completed
-- Minor nginx routing configuration pending (platform-level issue)
-- All core functionality operational
+- Application fully deployed to Laravel Forge
+- Live at: https://capstone-project-mlong-println-oaknvtyo.on-forge.com
+- Database connected and fully operational
+- All core functionality working in production
+- Automated deployment pipeline configured
 
 ---
 
@@ -197,10 +199,11 @@ Throughout the semester, the project scope evolved significantly based on:
 - Google Maps JavaScript API
 
 **Infrastructure:**
-- Azure App Service (Linux, PHP 8.2)
-- Azure Database for MySQL
-- Git-based deployment
+- Laravel Forge (DigitalOcean, PHP 8.2)
+- MySQL database
+- Automated Git deployment from GitHub
 - Environment-based configuration
+- SSL certificate with automatic renewal
 
 ### Key Technical Decisions
 
@@ -236,11 +239,11 @@ Throughout the semester, the project scope evolved significantly based on:
    - **Solution:** Switched to Axios with proper CSRF configuration
    - **Learning:** Understanding Laravel's CSRF protection deeply
 
-2. **Azure Deployment Issues**
-   - **Problem:** Composer autoload errors, nginx routing, database SSL
-   - **Impact:** Hours of troubleshooting, multiple deployment attempts
-   - **Solution:** Azure CLI deployment, custom startup scripts, SSL configuration
-   - **Learning:** Cloud platform complexities, deployment strategies
+2. **Deployment Platform Challenges**
+   - **Problem:** Azure App Service had persistent Composer autoload errors, nginx routing issues, and database SSL complications
+   - **Impact:** Multiple failed deployment attempts, hours of troubleshooting
+   - **Solution:** Migrated to Laravel Forge (DigitalOcean) for Laravel-optimized hosting with automated deployment
+   - **Learning:** Evaluating hosting platforms, recognizing when to pivot strategies, Laravel Forge deployment best practices
 
 3. **Complex Relationships**
    - **Problem:** Many-to-many relationships with pivot data
@@ -299,9 +302,7 @@ Throughout the semester, the project scope evolved significantly based on:
 ### Known Issues and Future Improvements
 
 **Current Limitations:**
-- Azure nginx routing requires platform-level configuration
 - No automated testing suite (time constraints)
-- Limited mobile optimization (desktop-first approach)
 - No real-time chat (uses polling for messages)
 
 **Planned Enhancements:**
@@ -358,10 +359,10 @@ The late nights debugging CSRF issues, the frustration of Azure deployment failu
 I'm committed to continuing RunConnect's development after graduation:
 
 **Short-term Goals (3-6 months):**
-- Resolve Azure routing configuration
 - Implement automated testing suite
 - Add mobile-responsive improvements
 - Launch beta version to local running community
+- Gather user feedback and iterate on features
 
 **Long-term Vision (1-2 years):**
 - Develop mobile apps (iOS/Android)
@@ -399,7 +400,7 @@ Thank you for the opportunity to work on this project. It has been an incredible
 ---
 
 **Project Repository:** https://github.com/mlong-println/capstone-project-mlong-println  
-**Live Demo:** Available on localhost (Azure deployment pending final configuration)  
+**Live Demo:** https://capstone-project-mlong-println-oaknvtyo.on-forge.com  
 **Demo Video:** Included with submission
 
 ---
