@@ -45,6 +45,16 @@ interface UserRun {
     rank: number;
 }
 
+interface LeaderboardEntry {
+    user_id: number;
+    user_name: string;
+    completion_time: number;
+    formatted_time: string;
+    formatted_pace: string;
+    start_time: string;
+    rank: number;
+}
+
 interface ShowProps {
     route: RunningRoute;
     userRating: {
@@ -53,11 +63,12 @@ interface ShowProps {
         comment: string | null;
     } | null;
     userRuns: UserRun[];
+    leaderboard: LeaderboardEntry[];
     canEdit: boolean;
     isAdmin: boolean;
 }
 
-export default function Show({ route: runningRoute, userRating, userRuns, canEdit, isAdmin }: ShowProps) {
+export default function Show({ route: runningRoute, userRating, userRuns, leaderboard, canEdit, isAdmin }: ShowProps) {
     const page = usePage<any>();
     const flash = page.props.flash;
     const [showRatingForm, setShowRatingForm] = useState(false);
@@ -392,6 +403,77 @@ export default function Show({ route: runningRoute, userRating, userRuns, canEdi
                             )}
                         </div>
                     </div>
+
+                    {/* Route Leaderboard */}
+                    {leaderboard && leaderboard.length > 0 && (
+                        <div className="bg-white rounded-lg shadow p-6">
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                                Route Leaderboard
+                            </h3>
+                            <div className="overflow-x-auto">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Rank
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Runner
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Best Time
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Pace
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Date
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {leaderboard.map((entry) => (
+                                            <tr key={entry.user_id} className="hover:bg-gray-50">
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div className="flex items-center">
+                                                        {entry.rank === 1 && <span className="text-2xl mr-2">🥇</span>}
+                                                        {entry.rank === 2 && <span className="text-2xl mr-2">🥈</span>}
+                                                        {entry.rank === 3 && <span className="text-2xl mr-2">🥉</span>}
+                                                        <span className="text-sm font-medium text-gray-900">
+                                                            #{entry.rank}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <Link 
+                                                        href={`/users/${entry.user_id}`}
+                                                        className="text-sm font-medium text-indigo-600 hover:text-indigo-800"
+                                                    >
+                                                        {entry.user_name}
+                                                    </Link>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`text-sm font-semibold ${entry.rank <= 3 ? 'text-indigo-700' : 'text-gray-900'}`}>
+                                                        {entry.formatted_time}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {entry.formatted_pace}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                                                    {new Date(entry.start_time).toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        year: 'numeric'
+                                                    })}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Personal Run History */}
                     {userRuns && userRuns.length > 0 && (

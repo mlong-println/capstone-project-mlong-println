@@ -184,6 +184,31 @@ class RouteController extends Controller
             }
         }
 
+        // Get leaderboard - all public runs on this route, grouped by user, showing their best time
+        $leaderboard = \App\Models\Run::where('route_id', $route->id)
+            ->where('is_public', true)
+            ->with('user')
+            ->get()
+            ->groupBy('user_id')
+            ->map(function($userRuns) {
+                $bestRun = $userRuns->sortBy('completion_time')->first();
+                return [
+                    'user_id' => $bestRun->user->id,
+                    'user_name' => $bestRun->user->name,
+                    'completion_time' => $bestRun->completion_time,
+                    'formatted_time' => $bestRun->formatted_time,
+                    'formatted_pace' => $bestRun->formatted_pace,
+                    'start_time' => $bestRun->start_time,
+                ];
+            })
+            ->sortBy('completion_time')
+            ->values()
+            ->map(function($entry, $index) {
+                $entry['rank'] = $index + 1;
+                return $entry;
+            })
+            ->toArray();
+
         return Inertia::render('Routes/Show', [
             'route' => [
                 'id' => $route->id,
@@ -219,6 +244,7 @@ class RouteController extends Controller
                 'comment' => $userRating->comment,
             ] : null,
             'userRuns' => $userRuns,
+            'leaderboard' => $leaderboard,
             'canEdit' => auth()->check() && auth()->id() === $route->created_by,
             'isAdmin' => auth()->check() && auth()->user()->role === 'admin',
         ]);
