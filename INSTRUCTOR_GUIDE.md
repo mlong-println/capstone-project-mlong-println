@@ -192,7 +192,7 @@ If you prefer to use pre-existing accounts:
 
 1. **Email Verification:** Email verification is configured but requires SMTP setup for production use.
 
-2. **Mobile App:** This is a web application only (no native mobile apps).
+2. **Mobile Access:** Fully responsive web design - works on mobile browsers. No native mobile apps.
 
 ---
 
@@ -201,7 +201,7 @@ If you prefer to use pre-existing accounts:
 If you encounter any issues during testing:
 - Check the browser console for errors (F12)
 - Try refreshing the page
-- Contact me: michael.long@runconnect.com
+- Contact me: michael.long7@mohawkcollege.ca
 
 ---
 
