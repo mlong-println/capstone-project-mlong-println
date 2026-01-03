@@ -21,7 +21,7 @@ interface RunComment {
 }
 
 interface FeedActivity {
-  type: 'run' | 'event' | 'challenge' | 'safety_alert';
+  type: 'run' | 'event' | 'challenge' | 'safety_alert' | 'forum_post';
   run_id?: number;
   user: string;
   user_id: number | null;
@@ -46,6 +46,8 @@ interface FeedActivity {
     location?: string;
     severity_color?: string;
     alert_type_icon?: string;
+    post_id?: number;
+    category?: string;
   };
 }
 
@@ -346,6 +348,10 @@ export default function RunnerDashboard({ auth, user, profile, activePlan, stats
                                   </Link>
                                 ) : activity.type === 'safety_alert' && activity.data.alert_id ? (
                                   <Link href={`/safety-alerts/${activity.data.alert_id}`} className="text-gray-600 hover:text-indigo-600 hover:underline">
+                                    {activity.message}
+                                  </Link>
+                                ) : activity.type === 'forum_post' && activity.data.post_id ? (
+                                  <Link href={`/forum/${activity.data.post_id}`} className="text-gray-600 hover:text-indigo-600 hover:underline">
                                     {activity.message}
                                   </Link>
                                 ) : (

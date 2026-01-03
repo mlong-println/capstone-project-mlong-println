@@ -189,7 +189,26 @@ Route::middleware(['auth'])->group(function () {
                 ],
             ]);
         
-        $feedActivities = $recentRuns->concat($recentEvents)->concat($recentChallenges)->concat($recentSafetyAlerts)
+        // Recent forum posts from followed users
+        $recentForumPosts = \App\Models\ForumPost::whereIn('user_id', $allUserIds)
+            ->with(['user', 'comments'])
+            ->orderBy('created_at', 'desc')
+            ->limit(5)
+            ->get()
+            ->map(fn($post) => [
+                'type' => 'forum_post',
+                'user' => $post->user->name,
+                'user_id' => $post->user->id,
+                'message' => "posted in forum: {$post->title}",
+                'time' => $post->created_at,
+                'data' => [
+                    'post_id' => $post->id,
+                    'category' => $post->category,
+                    'comments_count' => $post->comments->count(),
+                ],
+            ]);
+        
+        $feedActivities = $recentRuns->concat($recentEvents)->concat($recentChallenges)->concat($recentSafetyAlerts)->concat($recentForumPosts)
             ->sortByDesc('time')
             ->take(15)
             ->values();
